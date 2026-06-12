@@ -1,0 +1,62 @@
+{
+  "@@locale": "uz",
+
+  "appName": "Davomat",
+
+  "loginTitle": "Tizimga kirish",
+  "loginSubtitle": "Davomatni qayd etish uchun hisobingizga kiring.",
+  "loginLoginLabel": "Kirish",
+  "loginFullNameHint": "Ism sharif",
+  "loginPasswordLabel": "Parol",
+  "loginButton": "Kirish",
+
+  "themeLight": "Yorug‘",
+  "themeDark": "Qorong‘i",
+
+  "langUzbekLatin": "Uzbek",
+  "langUzbekCyrillic": "Узбек",
+  "langRussian": "Русский",
+
+  "loginInvalidCredentials": "Login yoki parol noto‘g‘ri.",
+  "loginAttemptsRemaining": "Yana {count} marta urinish mumkin.",
+  "@loginAttemptsRemaining": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "loginBlockedTitle": "Hisob vaqtincha bloklandi",
+  "loginBlockedBody": "{attempts} marta noto‘g‘ri urinish aniqlandi. Xavfsizlik uchun hisobingiz {minutes} daqiqaga bloklandi.",
+  "@loginBlockedBody": {
+    "placeholders": {
+      "attempts": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "loginBlockedRetryIn": "Qayta urinish: {time}",
+  "@loginBlockedRetryIn": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "loginBlockedRetryLabel": "Qayta urinish:",
+
+  "faceHintDefault": "Yuzingizni doira ichida joylashtiring",
+  "faceHintScanning": "Yuz tekshirilmoqda…",
+  "faceHintSuccess": "Tasdiqlandi",
+  "faceHintNoFace": "Yuz aniqlanmadi. Doira ichiga qarang.",
+  "faceVerifyFailed": "Tasdiqlash amalga oshmadi. Qayta urinib ko‘ring.",
+  "faceRetry": "Qayta urinish",
+  "facePermissionTitle": "Kameraga ruxsat kerak",
+  "facePermissionBody": "Yuz orqali tasdiqlash uchun kameraga ruxsat bering.",
+  "facePermissionOpenSettings": "Sozlamalarni ochish",
+  "faceCameraError": "Kamera ishga tushmadi.",
+
+  "homeLogout": "Chiqish",
+
+  "profilePhotoPromptTitle": "Iltimos, skanerlashdan o‘tish uchun profilingiz uchun shaxsiy rasmingizni o‘rnating!",
+  "profilePhotoUploadLabel": "Rasm yuklash",
+  "profilePhotoUploadButton": "Yuklash",
+  "profileUsernameFallback": "Username",
+  "profileUploadFailed": "Rasm yuklanmadi. Qayta urinib ko‘ring.",
+  "profilePickFailed": "Rasmni tanlab bo‘lmadi.",
+
+  "commonCancel": "Bekor qilish",
+  "commonError": "Nimadir xato ketdi. Birozdan so‘ng qayta urinib ko‘ring.",
+  "networkError": "Internet aloqasi yo‘q. Ulanishni tekshiring."
+}

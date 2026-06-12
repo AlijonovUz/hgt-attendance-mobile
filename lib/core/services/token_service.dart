@@ -17,4 +17,23 @@ class TokenService {
   Future<void> clearToken() {
     return _storageService.remove(StorageKeys.authToken);
   }
+
+  // ── Refresh token ───────────────────────────────────────────────────
+  Future<void> saveRefreshToken(String token) {
+    return _storageService.setString(StorageKeys.refreshToken, token);
+  }
+
+  String? getRefreshToken() {
+    return _storageService.getString(StorageKeys.refreshToken);
+  }
+
+  Future<void> clearRefreshToken() {
+    return _storageService.remove(StorageKeys.refreshToken);
+  }
+
+  /// Barcha token ma'lumotlarini tozalash (chiqish / sessiya tugashi).
+  Future<void> clearAll() async {
+    await clearToken();
+    await clearRefreshToken();
+  }
 }

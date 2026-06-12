@@ -6,16 +6,20 @@ class Routes implements Coordinate {
     required this.path,
   });
 
+  @override
   final String name;
+  @override
   final String path;
 
   /// Auth
-  static const authIntro = Routes._(name: 'auth_intro_page', path: '/auth_intro');
   static const splash = Routes._(name: 'splash', path: '/splash');
   static const login = Routes._(name: 'login', path: '/login');
+
+  /// Login’dan keyingi majburiy yuz tasdig‘i.
+  static const faceVerify = Routes._(name: 'face_verify', path: '/face_verify');
+
+  /// Davomat (guard zanjirida emas — mosligi uchun saqlanadi).
   static const checkCode = Routes._(name: 'check_code_page', path: '/check_code');
-  static const confirmCode = Routes._(name: "confirm_code", path: "/confirm_code");
-  static const pinCode = Routes._(name: "pin_code", path: "/pin_code");
 
   static const root = Routes._(name: 'root', path: '/');
   static const home = Routes._(name: 'home_page', path: '/home_page');

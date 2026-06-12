@@ -1,0 +1,52 @@
+part of 'session_bloc.dart';
+
+sealed class SessionEvent extends Equatable {
+  const SessionEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// Ilova ishga tushganda saqlangan sessiyani aniqlash (bootstrap).
+class SessionStarted extends SessionEvent {
+  const SessionStarted();
+}
+
+/// Login API muvaffaqiyatli tugadi. Tokenlar HALI saqlanmaydi — yuz tasdiqigacha
+/// RAM’da turadi (yuz so‘rovi shu access token bilan Bearer qiladi).
+class SessionLoginSucceeded extends SessionEvent {
+  const SessionLoginSucceeded({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.fullName,
+    this.faceImage,
+  });
+
+  final String accessToken;
+  final String refreshToken;
+
+  /// Login’da kiritilgan ism — face ekranidagi karta uchun (profil kelguncha).
+  final String fullName;
+
+  /// Login javobidagi profil rasmi (`data.user.face_image`) — `null` bo‘lsa
+  /// yuz tasdig‘idan oldin rasm so‘rovi ko‘rsatiladi.
+  final String? faceImage;
+
+  @override
+  List<Object?> get props => [accessToken, refreshToken, fullName, faceImage];
+}
+
+/// Yuz muvaffaqiyatli tasdiqlandi → RAM’dagi tokenlar diskka saqlanadi.
+class SessionFaceVerified extends SessionEvent {
+  const SessionFaceVerified();
+}
+
+/// Sessiya majburan tugadi (401 interceptor, refresh muvaffaqiyatsiz) → login.
+class SessionExpired extends SessionEvent {
+  const SessionExpired();
+}
+
+/// Foydalanuvchi o‘zi chiqdi — hamma narsa tozalanadi.
+class SessionLogoutRequested extends SessionEvent {
+  const SessionLogoutRequested();
+}

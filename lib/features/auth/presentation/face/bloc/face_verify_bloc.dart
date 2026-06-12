@@ -1,0 +1,314 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:camera/camera.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../../../../../core/error/failures.dart';
+import '../../../domain/usecases/verify_face_usecase.dart';
+
+part 'face_verify_event.dart';
+part 'face_verify_state.dart';
+
+/// Yuz tasdig‘ini boshqaradi: kamera oqimi + ML Kit yuz aniqlash + verify-face.
+///
+/// Tirik oqimda yuz barqaror aniqlansa, selfie avtomatik olinadi va RAM’dagi
+/// (hali saqlanmagan) access token bilan yuboriladi. 2xx → success → sahifa
+/// `SessionFaceVerified` yuboradi (tokenlar shunda saqlanadi).
+class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
+  FaceVerifyBloc({required VerifyFaceUseCase verifyFaceUseCase})
+      : _verifyFace = verifyFaceUseCase,
+        super(const FaceVerifyState()) {
+    on<FaceStarted>(_onStarted);
+    on<FaceDetectionUpdated>(_onDetectionUpdated);
+    on<FaceCaptureRequested>(_onCaptureRequested);
+    on<FaceRetryRequested>(_onRetryRequested);
+  }
+
+  final VerifyFaceUseCase _verifyFace;
+
+  CameraController? _controller;
+  FaceDetector? _detector;
+  String _accessToken = '';
+
+  bool _detectorBusy = false;
+  DateTime _lastDetect = DateTime.fromMillisecondsSinceEpoch(0);
+  int _positiveStreak = 0;
+
+  /// Preview widgeti uchun — tirik kamera kontrolleri (yoki null).
+  CameraController? get cameraController => _controller;
+
+  static const _detectThrottle = Duration(milliseconds: 250);
+  static const _captureStreak = 6;
+
+  static const Map<DeviceOrientation, int> _orientations = {
+    DeviceOrientation.portraitUp: 0,
+    DeviceOrientation.landscapeLeft: 90,
+    DeviceOrientation.portraitDown: 180,
+    DeviceOrientation.landscapeRight: 270,
+  };
+
+  Future<void> _onStarted(
+    FaceStarted event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    _accessToken = event.accessToken;
+    emit(state.copyWith(
+      status: FaceStatus.initializing,
+      fullName: event.fullName,
+      failureKind: FaceFailureKind.none,
+    ));
+
+    final granted = await _ensurePermission();
+    if (!granted) {
+      emit(state.copyWith(status: FaceStatus.permissionDenied));
+      return;
+    }
+
+    final ok = await _initCamera();
+    if (!ok) {
+      emit(state.copyWith(status: FaceStatus.cameraError));
+      return;
+    }
+
+    _detector ??= FaceDetector(
+      options: FaceDetectorOptions(
+        performanceMode: FaceDetectorMode.fast,
+        minFaceSize: 0.15,
+      ),
+    );
+
+    await _startStream();
+    if (emit.isDone) return;
+    emit(state.copyWith(status: FaceStatus.scanning));
+  }
+
+  Future<bool> _ensurePermission() async {
+    final status = await Permission.camera.request();
+    return status.isGranted || status.isLimited;
+  }
+
+  Future<bool> _initCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) return false;
+      final front = cameras.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.front,
+        orElse: () => cameras.first,
+      );
+      final controller = CameraController(
+        front,
+        ResolutionPreset.medium,
+        enableAudio: false,
+        imageFormatGroup:
+            Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888,
+      );
+      await controller.initialize();
+      _controller = controller;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _startStream() async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    if (controller.value.isStreamingImages) return;
+    _positiveStreak = 0;
+    await controller.startImageStream(_onCameraImage);
+  }
+
+  Future<void> _stopStream() async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    if (!controller.value.isStreamingImages) return;
+    await controller.stopImageStream();
+  }
+
+  void _onCameraImage(CameraImage image) {
+    if (isClosed || _detectorBusy) return;
+    final now = DateTime.now();
+    if (now.difference(_lastDetect) < _detectThrottle) return;
+    _lastDetect = now;
+
+    final inputImage = _toInputImage(image);
+    if (inputImage == null) return;
+
+    _detectorBusy = true;
+    _detector?.processImage(inputImage).then((faces) {
+      if (!isClosed) {
+        add(FaceDetectionUpdated(facePresent: faces.isNotEmpty));
+      }
+    }).catchError((_) {
+      // Kadr xatosi — keyingi kadrda qayta uriniladi.
+    }).whenComplete(() => _detectorBusy = false);
+  }
+
+  void _onDetectionUpdated(
+    FaceDetectionUpdated event,
+    Emitter<FaceVerifyState> emit,
+  ) {
+    // Faqat tirik skan paytida hisoblaymiz.
+    if (state.status != FaceStatus.scanning &&
+        state.status != FaceStatus.detecting) {
+      return;
+    }
+
+    if (!event.facePresent) {
+      _positiveStreak = 0;
+      if (state.status != FaceStatus.scanning) {
+        emit(state.copyWith(status: FaceStatus.scanning));
+      }
+      return;
+    }
+
+    _positiveStreak++;
+    if (state.status != FaceStatus.detecting) {
+      emit(state.copyWith(status: FaceStatus.detecting));
+    }
+    if (_positiveStreak >= _captureStreak) {
+      _positiveStreak = 0;
+      add(const FaceCaptureRequested());
+    }
+  }
+
+  Future<void> _onCaptureRequested(
+    FaceCaptureRequested event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    if (state.status == FaceStatus.verifying) return;
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    emit(state.copyWith(status: FaceStatus.verifying));
+    try {
+      await _stopStream();
+      final XFile shot = await controller.takePicture();
+      await _verifyFace(
+        VerifyFaceParams(imagePath: shot.path, accessToken: _accessToken),
+      );
+      if (emit.isDone) return;
+      emit(state.copyWith(
+        status: FaceStatus.success,
+        failureKind: FaceFailureKind.none,
+      ));
+    } on Failure catch (failure) {
+      if (emit.isDone) return;
+      emit(state.copyWith(
+        status: FaceStatus.failure,
+        failureKind: failure is NetworkFailure
+            ? FaceFailureKind.network
+            : FaceFailureKind.verifyFailed,
+      ));
+      // Xato → kamerani to‘liq bo‘shatamiz (resurs/performans). Qayta urinishda
+      // qaytadan ishga tushadi.
+      await _disposeCamera();
+    } catch (_) {
+      if (emit.isDone) return;
+      emit(state.copyWith(
+        status: FaceStatus.failure,
+        failureKind: FaceFailureKind.verifyFailed,
+      ));
+      await _disposeCamera();
+    }
+  }
+
+  Future<void> _onRetryRequested(
+    FaceRetryRequested event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    // Xatoda kamera bo‘shatilgan — qaytadan ishga tushiramiz.
+    emit(state.copyWith(
+      status: FaceStatus.initializing,
+      failureKind: FaceFailureKind.none,
+    ));
+
+    final ok = await _initCamera();
+    if (emit.isDone) return;
+    if (!ok) {
+      emit(state.copyWith(status: FaceStatus.cameraError));
+      return;
+    }
+    _detector ??= FaceDetector(
+      options: FaceDetectorOptions(
+        performanceMode: FaceDetectorMode.fast,
+        minFaceSize: 0.15,
+      ),
+    );
+    await _startStream();
+    if (emit.isDone) return;
+    emit(state.copyWith(status: FaceStatus.scanning));
+  }
+
+  /// Kamerani to‘liq bo‘shatadi (stream + controller). Detektor saqlanadi —
+  /// qayta urinish tezroq bo‘lishi uchun.
+  Future<void> _disposeCamera() async {
+    final controller = _controller;
+    _controller = null;
+    if (controller == null) return;
+    try {
+      if (controller.value.isStreamingImages) {
+        await controller.stopImageStream();
+      }
+      await controller.dispose();
+    } catch (_) {}
+  }
+
+  /// `CameraImage`ni ML Kit `InputImage`ga o‘giradi (NV21/BGRA, rotatsiya bilan).
+  InputImage? _toInputImage(CameraImage image) {
+    final controller = _controller;
+    if (controller == null) return null;
+    final camera = controller.description;
+    final sensorOrientation = camera.sensorOrientation;
+
+    InputImageRotation? rotation;
+    if (Platform.isIOS) {
+      rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+    } else {
+      final compensation = _orientations[controller.value.deviceOrientation];
+      if (compensation == null) return null;
+      final rotationDegrees = camera.lensDirection == CameraLensDirection.front
+          ? (sensorOrientation + compensation) % 360
+          : (sensorOrientation - compensation + 360) % 360;
+      rotation = InputImageRotationValue.fromRawValue(rotationDegrees);
+    }
+    if (rotation == null) return null;
+
+    final format = InputImageFormatValue.fromRawValue(image.format.raw);
+    if (format == null) return null;
+    if (image.planes.isEmpty) return null;
+
+    final plane = image.planes.first;
+    return InputImage.fromBytes(
+      bytes: plane.bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation,
+        format: format,
+        bytesPerRow: plane.bytesPerRow,
+      ),
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    final controller = _controller;
+    _controller = null;
+    try {
+      if (controller != null) {
+        if (controller.value.isStreamingImages) {
+          await controller.stopImageStream();
+        }
+        await controller.dispose();
+      }
+    } catch (_) {}
+    await _detector?.close();
+    _detector = null;
+    return super.close();
+  }
+}

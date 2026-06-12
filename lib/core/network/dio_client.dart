@@ -5,6 +5,9 @@ class DioClient {
 
   final Dio _dio;
 
+  /// Asosiy `Dio` (interceptorlar bilan) — debug kuzatuvi (Thunder) uchun ochiq.
+  Dio get dio => _dio;
+
   Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -16,7 +19,27 @@ class DioClient {
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) {
-    return _dio.post(path, data: data, queryParameters: queryParameters);
+    return _dio.post(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
+  Future<Response<dynamic>> patch(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) {
+    return _dio.patch(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
   }
 }

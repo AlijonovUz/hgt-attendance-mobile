@@ -1,0 +1,50 @@
+{
+  "@@locale": "ru",
+
+  "appName": "Давомат",
+
+  "loginTitle": "Вход в систему",
+  "loginSubtitle": "Войдите в аккаунт, чтобы отметить посещаемость.",
+  "loginLoginLabel": "Вход",
+  "loginFullNameHint": "Ф.И.О.",
+  "loginPasswordLabel": "Пароль",
+  "loginButton": "Войти",
+
+  "themeLight": "Светлая",
+  "themeDark": "Тёмная",
+
+  "langUzbekLatin": "Uzbek",
+  "langUzbekCyrillic": "Узбек",
+  "langRussian": "Русский",
+
+  "loginInvalidCredentials": "Неверный логин или пароль.",
+  "loginAttemptsRemaining": "Осталось попыток: {count}.",
+  "loginBlockedTitle": "Аккаунт временно заблокирован",
+  "loginBlockedBody": "Обнаружено {attempts} неверных попыток. В целях безопасности аккаунт заблокирован на {minutes} минут.",
+  "loginBlockedRetryIn": "Повторить через: {time}",
+  "loginBlockedRetryLabel": "Повторить через:",
+
+  "faceHintDefault": "Поместите лицо в круг",
+  "faceHintScanning": "Проверка лица…",
+  "faceHintSuccess": "Подтверждено",
+  "faceHintNoFace": "Лицо не обнаружено. Смотрите в круг.",
+  "faceVerifyFailed": "Не удалось подтвердить. Попробуйте ещё раз.",
+  "faceRetry": "Повторить",
+  "facePermissionTitle": "Нужен доступ к камере",
+  "facePermissionBody": "Разрешите доступ к камере для подтверждения по лицу.",
+  "facePermissionOpenSettings": "Открыть настройки",
+  "faceCameraError": "Не удалось запустить камеру.",
+
+  "homeLogout": "Выйти",
+
+  "profilePhotoPromptTitle": "Пожалуйста, установите личное фото профиля, чтобы пройти сканирование!",
+  "profilePhotoUploadLabel": "Загрузить фото",
+  "profilePhotoUploadButton": "Загрузить",
+  "profileUsernameFallback": "Username",
+  "profileUploadFailed": "Не удалось загрузить фото. Попробуйте ещё раз.",
+  "profilePickFailed": "Не удалось выбрать фото.",
+
+  "commonCancel": "Отмена",
+  "commonError": "Что-то пошло не так. Повторите попытку позже.",
+  "networkError": "Нет подключения к интернету. Проверьте соединение."
+}
