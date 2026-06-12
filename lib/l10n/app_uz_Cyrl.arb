@@ -1,0 +1,50 @@
+{
+  "@@locale": "uz_Cyrl",
+
+  "appName": "Давомат",
+
+  "loginTitle": "Тизимга кириш",
+  "loginSubtitle": "Давоматни қайд этиш учун ҳисобингизга киринг.",
+  "loginLoginLabel": "Кириш",
+  "loginFullNameHint": "Исм шариф",
+  "loginPasswordLabel": "Парол",
+  "loginButton": "Кириш",
+
+  "themeLight": "Ёруғ",
+  "themeDark": "Қоронғи",
+
+  "langUzbekLatin": "Uzbek",
+  "langUzbekCyrillic": "Узбек",
+  "langRussian": "Русский",
+
+  "loginInvalidCredentials": "Логин ёки парол нотўғри.",
+  "loginAttemptsRemaining": "Яна {count} марта уриниш мумкин.",
+  "loginBlockedTitle": "Ҳисоб вақтинча блокланди",
+  "loginBlockedBody": "{attempts} марта нотўғри уриниш аниқланди. Хавфсизлик учун ҳисобингиз {minutes} дақиқага блокланди.",
+  "loginBlockedRetryIn": "Қайта уриниш: {time}",
+  "loginBlockedRetryLabel": "Қайта уриниш:",
+
+  "faceHintDefault": "Юзингизни доира ичида жойлаштиринг",
+  "faceHintScanning": "Юз текширилмоқда…",
+  "faceHintSuccess": "Тасдиқланди",
+  "faceHintNoFace": "Юз аниқланмади. Доира ичига қаранг.",
+  "faceVerifyFailed": "Тасдиқлаш амалга ошмади. Қайта уриниб кўринг.",
+  "faceRetry": "Қайта уриниш",
+  "facePermissionTitle": "Камерага рухсат керак",
+  "facePermissionBody": "Юз орқали тасдиқлаш учун камерага рухсат беринг.",
+  "facePermissionOpenSettings": "Созламаларни очиш",
+  "faceCameraError": "Камера ишга тушмади.",
+
+  "homeLogout": "Чиқиш",
+
+  "profilePhotoPromptTitle": "Илтимос, сканерлашдан ўтиш учун профилингиз учун шахсий расмингизни ўрнатинг!",
+  "profilePhotoUploadLabel": "Расм юклаш",
+  "profilePhotoUploadButton": "Юклаш",
+  "profileUsernameFallback": "Username",
+  "profileUploadFailed": "Расм юкланмади. Қайта уриниб кўринг.",
+  "profilePickFailed": "Расмни танлаб бўлмади.",
+
+  "commonCancel": "Бекор қилиш",
+  "commonError": "Нимадир хато кетди. Бироздан сўнг қайта уриниб кўринг.",
+  "networkError": "Интернет алоқаси йўқ. Уланишни текширинг."
+}

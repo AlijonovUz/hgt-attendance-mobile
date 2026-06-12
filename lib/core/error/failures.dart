@@ -24,3 +24,7 @@ class NetworkFailure extends Failure {
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure([super.message = 'Unauthorized']);
 }
+
+class ThrottleFailure extends Failure {
+  const ThrottleFailure([super.message = 'Too many requests']);
+}

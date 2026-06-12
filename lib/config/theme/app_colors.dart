@@ -69,6 +69,16 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Xarajat kartasi va shunga o‘xshash bosh harf avatarlari uchun fon.
   final Color avatarPlaceholder;
 
+  // ── Control (input / button komponent tokenlari) ──────────────────────
+  /// Input placeholder / ikkilamchi yozuv (Figma: components/control/text/secondary).
+  final Color controlTextSecondary;
+
+  /// O‘chirilgan tugma yozuvi (Figma: components/control/text/disabled).
+  final Color controlTextDisabled;
+
+  /// O‘chirilgan tugma foni (Figma: components/control/bg/disabled).
+  final Color controlBgDisabled;
+
   const AppColors({
     required this.white,
     required this.black,
@@ -118,109 +128,169 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.successSoft,
     required this.successDisabled,
     required this.avatarPlaceholder,
+    required this.controlTextSecondary,
+    required this.controlTextDisabled,
+    required this.controlBgDisabled,
   });
 
+  // Figma «HGT» design system (shadcn neutral) — Light.
+  // background #fff · foreground #0a0a0a · muted #737373 · border #e5e5e5 ·
+  // secondary #f5f5f5 · primary(blue) #0d74ce · destructive #dc2626 ·
+  // success(green) #2b9a66 · warning(orange) #ef5f00.
   factory AppColors.light() => const AppColors(
     white: Color(0xFFFFFFFF),
     black: Color(0xFF000000),
-    shadow: Color(0x1F000000), // alpha 0.12
+    shadow: Color(0x1A000000), // shadow-xs
     backgroundBase: Color(0xFFFFFFFF),
     backgroundBase2: Color(0xFFFFFFFF),
-    backgroundElevation1: Color(0xFFF8F9FC),
-    backgroundElevation1Alt: Color(0xFFF1F3F9),
-    backgroundElevation2: Color(0xFFE9ECF5),
-    backgroundElevation2Alt: Color(0xFFE2E6F2),
-    backgroundElevation3: Color(0xFFDADFF0),
-    backgroundElevation3Alt: Color(0xFFD2D8EC),
-    accentStrong: Color(0xFF3F57B3),
-    accentSub: Color(0xFF526ED3),
-    accentSoft: Color(0xFF7F95E6),
-    accentDisabled: Color(0xFFE9EEFF),
+    backgroundElevation1: Color(0xFFFFFFFF),
+    backgroundElevation1Alt: Color(0xFFF5F5F5),
+    backgroundElevation2: Color(0xFFF5F5F5),
+    backgroundElevation2Alt: Color(0xFFF5F5F5),
+    backgroundElevation3: Color(0xFFE5E5E5),
+    backgroundElevation3Alt: Color(0xFFE5E5E5),
+    accentStrong: Color(0xFF0D74CE),
+    accentSub: Color(0xFF0D74CE),
+    accentSoft: Color(0xFF3B9EFF),
+    accentDisabled: Color(0xFFE5E5E5),
     accentWhite: Color(0xFFFFFFFF),
-    textStrong: Color(0xFF1A1D2E),
-    textSub: Color(0xFF5B6078),
-    textSoft: Color(0xFF8F95A8),
-    textDisabled: Color(0xFFB6BCCB),
+    textStrong: Color(0xFF0A0A0A),
+    textSub: Color(0xFF737373),
+    textSoft: Color(0xFF737373),
+    textDisabled: Color(0xFFA3A3A3),
     textWhite: Color(0xFFFFFFFF),
-    textAccent: Color(0xFF526ED3),
+    textAccent: Color(0xFF0D74CE),
     textInWhite: Color(0xFFFFFFFF),
-    textInDark: Color(0xFF000000),
-    strokeStrong: Color(0xFFD0D5E2),
-    strokeSub: Color(0xFFE2E6F2),
-    strokeSoft: Color(0xFFEEF1F7),
-    strokeAccent: Color(0xFF526ED3),
+    textInDark: Color(0xFF0A0A0A),
+    strokeStrong: Color(0xFFD4D4D4),
+    strokeSub: Color(0xFFE5E5E5),
+    strokeSoft: Color(0xFFE5E5E5),
+    strokeAccent: Color(0xFF0D74CE),
     strokeWhite: Color(0xFFFFFFFF),
-    iconStrong: Color(0xFF1A1D2E),
-    iconSub: Color(0xFF5B6078),
-    iconSoft: Color(0xFF9AA1B5),
-    iconDisabled: Color(0xFFC5CAD8),
+    iconStrong: Color(0xFF0A0A0A),
+    iconSub: Color(0xFF737373),
+    iconSoft: Color(0xFF737373),
+    iconDisabled: Color(0xFFA3A3A3),
     iconWhite: Color(0xFFFFFFFF),
-    iconAccent: Color(0xFF526ED3),
+    iconAccent: Color(0xFF0D74CE),
     iconInWhite: Color(0xFFFFFFFF),
     iconInBlack: Color(0xFF000000),
-    iconNotify: Color(0xFF000000),
-    errorStrong: Color(0xFFE02D2D),
-    errorSub: Color(0xFFFA5252),
-    errorSoft: Color(0xFF2E1A1A),
-    errorDisabled: Color(0xFFF8D7DA),
-    successStrong: Color(0xFF22C55E),
-    successPrimary: Color(0xFF02D15C),
-    successSub: Color(0xFF4ADE80),
+    iconNotify: Color(0xFF0A0A0A),
+    errorStrong: Color(0xFFDC2626),
+    errorSub: Color(0xFFEF4444),
+    errorSoft: Color(0xFFFEF2F2),
+    errorDisabled: Color(0xFFFECACA),
+    successStrong: Color(0xFF2B9A66),
+    successPrimary: Color(0xFF2B9A66),
+    successSub: Color(0xFF30A46C),
     successSoft: Color(0xFFDCFCE7),
     successDisabled: Color(0xFFF0FDF4),
-    avatarPlaceholder: Color(0xFFDADFF0),
+    avatarPlaceholder: Color(0xFFE5E5E5),
+    controlTextSecondary: Color(0xFF737373),
+    controlTextDisabled: Color(0xFFA3A3A3),
+    controlBgDisabled: Color(0xFFF5F5F5),
   );
 
+  // Figma «HGT» design system (shadcn neutral) — Dark.
+  // background #0a0a0a · foreground #fafafa · muted #a3a3a3 · border #404040 ·
+  // secondary #262626 · primary(blue) #0d74ce.
   factory AppColors.dark() => const AppColors(
     white: Color(0xFFFFFFFF),
     black: Color(0xFF000000),
-    shadow: Color(0x3D000000), // alpha 0.24
-    backgroundBase: Color(0xFF000000),
-    backgroundBase2: Color(0xFF111111),
-    backgroundElevation1: Color(0xFF191A1A),
-    backgroundElevation1Alt: Color(0xFF222323),
-    backgroundElevation2: Color(0xFFE9ECF5),
-    backgroundElevation2Alt: Color(0xFF303131),
-    backgroundElevation3: Color(0xFF3A3B3B),
-    backgroundElevation3Alt: Color(0xFF474848),
-    accentStrong: Color(0xFF3F57B3),
-    accentSub: Color(0xFF526ED3),
-    accentSoft: Color(0xFF7F95E6),
+    shadow: Color(0x3D000000),
+    backgroundBase: Color(0xFF0A0A0A),
+    backgroundBase2: Color(0xFF0A0A0A),
+    backgroundElevation1: Color(0xFF171717),
+    backgroundElevation1Alt: Color(0xFF262626),
+    backgroundElevation2: Color(0xFF262626),
+    backgroundElevation2Alt: Color(0xFF404040),
+    backgroundElevation3: Color(0xFF404040),
+    backgroundElevation3Alt: Color(0xFF525252),
+    accentStrong: Color(0xFF0D74CE),
+    accentSub: Color(0xFF0D74CE),
+    accentSoft: Color(0xFF3B9EFF),
     accentDisabled: Color(0xFF1E2B5C),
     accentWhite: Color(0xFFFFFFFF),
-    textStrong: Color(0xFFFFFFFF),
-    textSub: Color(0xFFC2C8E0),
-    textSoft: Color(0xFF8E95B5),
-    textDisabled: Color(0xFF5C627D),
+    textStrong: Color(0xFFFAFAFA),
+    textSub: Color(0xFFA3A3A3),
+    textSoft: Color(0xFFA3A3A3),
+    textDisabled: Color(0xFF737373),
     textWhite: Color(0xFFFFFFFF),
-    textAccent: Color(0xFF7F95E6),
+    textAccent: Color(0xFF3B9EFF),
     textInWhite: Color(0xFFFFFFFF),
     textInDark: Color(0xFF000000),
-    strokeStrong: Color(0xFF191A1A),
-    strokeSub: Color(0xFF292A2A),
-    strokeSoft: Color(0xFF474848),
-    strokeAccent: Color(0xFF7F95E6),
+    strokeStrong: Color(0xFF525252),
+    strokeSub: Color(0xFF404040),
+    strokeSoft: Color(0xFF404040),
+    strokeAccent: Color(0xFF0D74CE),
     strokeWhite: Color(0xFFFFFFFF),
-    iconStrong: Color(0xFFFFFFFF),
-    iconSub: Color(0xFFC2C8E0),
-    iconSoft: Color(0xFF8E95B5),
-    iconDisabled: Color(0xFF5C627D),
+    iconStrong: Color(0xFFFAFAFA),
+    iconSub: Color(0xFFA3A3A3),
+    iconSoft: Color(0xFFA3A3A3),
+    iconDisabled: Color(0xFF737373),
     iconWhite: Color(0xFFFFFFFF),
-    iconAccent: Color(0xFF7F95E6),
+    iconAccent: Color(0xFF3B9EFF),
     iconInWhite: Color(0xFFFFFFFF),
     iconInBlack: Color(0xFF000000),
     iconNotify: Color(0xFFFFFFFF),
-    errorStrong: Color(0xFFE02D2D),
-    errorSub: Color(0xFFFA5252),
-    errorSoft: Color(0xFFFFF2F2),
+    errorStrong: Color(0xFFDC2626),
+    errorSub: Color(0xFFF87171),
+    errorSoft: Color(0xFF2E1A1A),
     errorDisabled: Color(0xFF402323),
-    successStrong: Color(0xFF22C55E),
-    successPrimary: Color(0xFF02D15C),
-    successSub: Color(0xFF4ADE80),
+    successStrong: Color(0xFF2B9A66),
+    successPrimary: Color(0xFF2B9A66),
+    successSub: Color(0xFF30A46C),
     successSoft: Color(0xFF142E1B),
     successDisabled: Color(0xFF1B3D24),
-    avatarPlaceholder: Color(0xFF3A3B3B),
+    avatarPlaceholder: Color(0xFF404040),
+    controlTextSecondary: Color(0xFFA3A3A3),
+    controlTextDisabled: Color(0xFF737373),
+    controlBgDisabled: Color(0xFF262626),
   );
+
+  /// Ogohlantirish / blok sanagichi (orange) — login bloklangan holatidagi
+  /// «Qayta urinish: MM:SS» vaqti (Figma `orange/10`). Har ikkala rejimda bir xil.
+  static const Color warningStrong = Color(0xFFEF5F00);
+
+  /// Brend logotipi foni (Figma `chart-5` to‘q-ko‘k) — har ikkala rejimda bir xil.
+  static const Color brandNavy = Color(0xFF113264);
+
+  /// Auth gradienti ustidagi matn rangi (sarlavha + tavsif).
+  static const Color authForeground = Color(0xFF0A0A0A);
+
+  /// Auth/login fon gradienti (Figma: 95.84°, oqish-binafsha → ko‘k).
+  /// Brend gradienti — har ikkala rejimda ham bir xil.
+  static const Gradient authBackgroundGradient = LinearGradient(
+    begin: Alignment(-1.0, -0.1),
+    end: Alignment(1.0, 0.1),
+    colors: [
+      Color(0xFFE6ECFF),
+      Color(0xFFA5B4FC),
+      Color(0xFF6E86E1),
+    ],
+    stops: [0.0025, 0.3575, 1.0],
+  );
+
+  /// Login sahifasi tepa gradienti (vertikal, ko‘k → fonga so‘ladi). Yangi
+  /// «Davomat» dizayniga mos: yorug‘da och-ko‘k, qorong‘ida to‘q-ko‘k.
+  static const Gradient loginHeaderGradientLight = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFBBD5F3), Color(0x00FFFFFF)],
+    stops: [0.0, 1.0],
+  );
+
+  static const Gradient loginHeaderGradientDark = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF0B2A63), Color(0x000A0A0A)],
+    stops: [0.0, 1.0],
+  );
+
+  static Gradient loginHeaderGradient(Brightness brightness) =>
+      brightness == Brightness.dark
+          ? loginHeaderGradientDark
+          : loginHeaderGradientLight;
 
   /// Access from anywhere: `Theme.of(context).extension<AppColors>()!`
   static AppColors of(BuildContext context) =>
@@ -282,6 +352,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? successSoft,
     Color? successDisabled,
     Color? avatarPlaceholder,
+    Color? controlTextSecondary,
+    Color? controlTextDisabled,
+    Color? controlBgDisabled,
   }) => AppColors(
     white: white ?? this.white,
     black: black ?? this.black,
@@ -334,6 +407,9 @@ class AppColors extends ThemeExtension<AppColors> {
     successSoft: successSoft ?? this.successSoft,
     successDisabled: successDisabled ?? this.successDisabled,
     avatarPlaceholder: avatarPlaceholder ?? this.avatarPlaceholder,
+    controlTextSecondary: controlTextSecondary ?? this.controlTextSecondary,
+    controlTextDisabled: controlTextDisabled ?? this.controlTextDisabled,
+    controlBgDisabled: controlBgDisabled ?? this.controlBgDisabled,
   );
 
   @override
@@ -414,6 +490,21 @@ class AppColors extends ThemeExtension<AppColors> {
       avatarPlaceholder: Color.lerp(
         avatarPlaceholder,
         other.avatarPlaceholder,
+        t,
+      )!,
+      controlTextSecondary: Color.lerp(
+        controlTextSecondary,
+        other.controlTextSecondary,
+        t,
+      )!,
+      controlTextDisabled: Color.lerp(
+        controlTextDisabled,
+        other.controlTextDisabled,
+        t,
+      )!,
+      controlBgDisabled: Color.lerp(
+        controlBgDisabled,
+        other.controlBgDisabled,
         t,
       )!,
     );

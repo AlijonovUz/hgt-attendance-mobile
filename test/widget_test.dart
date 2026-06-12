@@ -1,30 +1,56 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:hgt_attendance_mobile/main.dart';
+import 'package:hgt_attendance_mobile/app/bloc/locale/locale_bloc.dart';
+import 'package:hgt_attendance_mobile/app/bloc/session_bloc.dart';
+import 'package:hgt_attendance_mobile/features/auth/presentation/bloc/login_bloc.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('SessionState', () {
+    test('unknown is unresolved; others resolved', () {
+      expect(const SessionState.unknown().isResolved, isFalse);
+      expect(const SessionState.unauthenticated().isResolved, isTrue);
+      expect(
+        const SessionState.faceVerificationRequired().isFaceVerificationRequired,
+        isTrue,
+      );
+      expect(const SessionState.authenticated().isAuthenticated, isTrue);
+    });
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  group('LoginState', () {
+    test('canSubmit requires both fields and not loading/blocked', () {
+      const empty = LoginState();
+      expect(empty.canSubmit, isFalse);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      const filled = LoginState(fullName: 'user', password: '1234');
+      expect(filled.canSubmit, isTrue);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      const loading =
+          LoginState(fullName: 'user', password: '1234', status: LoginStatus.loading);
+      expect(loading.canSubmit, isFalse);
+
+      const blocked = LoginState(
+        fullName: 'user',
+        password: '1234',
+        errorKind: LoginErrorKind.blocked,
+        blockedSeconds: 30,
+      );
+      expect(blocked.canSubmit, isFalse);
+      expect(blocked.isBlocked, isTrue);
+    });
+
+    test('blockedClock formats MM:SS', () {
+      expect(const LoginState(blockedSeconds: 885).blockedClock, '14:45');
+      expect(const LoginState(blockedSeconds: 5).blockedClock, '00:05');
+    });
+  });
+
+  group('AppLanguage', () {
+    test('fromTag round-trips known tags and defaults to uzLatin', () {
+      expect(AppLanguage.fromTag('ru'), AppLanguage.russian);
+      expect(AppLanguage.fromTag('uz_Cyrl'), AppLanguage.uzCyrillic);
+      expect(AppLanguage.fromTag('uz'), AppLanguage.uzLatin);
+      expect(AppLanguage.fromTag(null), AppLanguage.uzLatin);
+      expect(AppLanguage.fromTag('xx'), AppLanguage.uzLatin);
+    });
   });
 }

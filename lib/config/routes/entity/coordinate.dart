@@ -1,9 +1,6 @@
-abstract class Coordinate {
-  const Coordinate._(this._name, this._path);
-
-  final String _name;
-  final String _path;
-
-  @override
-  String toString() => 'name=$_name, path=$_path';
+/// Contract every route descriptor must satisfy. Keeps route definitions
+/// uniform (a [name] for named navigation, a [path] for location-based).
+abstract interface class Coordinate {
+  String get name;
+  String get path;
 }
