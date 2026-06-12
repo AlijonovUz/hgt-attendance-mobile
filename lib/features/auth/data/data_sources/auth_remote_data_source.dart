@@ -42,9 +42,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       final body = (response.data as Map?)?.cast<String, dynamic>() ?? {};
-      // Konvert (success=false) — xatoni o‘qiymiz.
+      // Konvert (success=false) — tipik xatoni (`errorId` bo‘yicha) o‘qiymiz.
       if (body['success'] == false) {
-        throw ServerException(_messageFromBody(body));
+        throw _exceptionFromBody(body);
       }
       final model = AuthTokensModel.fromJson(body);
       if (model.access.isEmpty) {
@@ -76,7 +76,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // 200 — bo‘sh tana (swagger). Konvert success=false bo‘lsa — xato.
       final body = (response.data as Map?)?.cast<String, dynamic>();
       if (body != null && body['success'] == false) {
-        throw ServerException(_messageFromBody(body));
+        throw _exceptionFromBody(body);
       }
     } on DioException catch (e) {
       throw _mapDioException(e);
@@ -93,6 +93,40 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return 'Server xatosi';
   }
 
+  /// Konvertdagi `error.details` xaritasi (`attempts_left`, `retry_after_seconds`).
+  Map<String, dynamic> _detailsFromBody(Map<String, dynamic> body) {
+    final error = body['error'];
+    if (error is Map && error['details'] is Map) {
+      return (error['details'] as Map).cast<String, dynamic>();
+    }
+    return const {};
+  }
+
+  int? _asInt(Object? v) => switch (v) {
+        int() => v,
+        num() => v.toInt(),
+        String() => int.tryParse(v),
+        _ => null,
+      };
+
+  /// Konvert tanasidan (`{ error: { errorId, errorMsg, details } }`) tipik
+  /// `Exception` quradi. [httpStatus] — `errorId` yo‘q bo‘lsa zaxira sifatida.
+  Exception _exceptionFromBody(Map<String, dynamic> body, {int? httpStatus}) {
+    final error = body['error'];
+    final errorId = error is Map ? _asInt(error['errorId']) : null;
+    final status = errorId ?? httpStatus;
+    final message = _messageFromBody(body);
+    final details = _detailsFromBody(body);
+    final attemptsLeft = _asInt(details['attempts_left']);
+    final retryAfter = _asInt(details['retry_after_seconds']);
+
+    if (status == 401) return UnauthorizedException(message, attemptsLeft);
+    if (status == 429) {
+      return ThrottleException(message, retryAfter, attemptsLeft);
+    }
+    return ServerException(message);
+  }
+
   Exception _mapDioException(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionError:
@@ -106,14 +140,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     final status = e.response?.statusCode;
     final body = (e.response?.data as Map?)?.cast<String, dynamic>();
-    final message = body == null ? null : _messageFromBody(body);
+    if (body != null) return _exceptionFromBody(body, httpStatus: status);
 
-    if (status == 401) {
-      return UnauthorizedException(message ?? 'Unauthorized');
-    }
-    if (status == 429) {
-      return ThrottleException(message ?? 'Too many requests');
-    }
-    return ServerException(message ?? 'Server xatosi');
+    if (status == 401) return const UnauthorizedException();
+    if (status == 429) return const ThrottleException();
+    return const ServerException();
   }
 }

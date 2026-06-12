@@ -29,9 +29,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final model = await _remote.login(fullName: fullName, password: password);
       return model.toEntity();
     } on UnauthorizedException catch (e) {
-      throw UnauthorizedFailure(e.message);
+      throw UnauthorizedFailure(e.message, e.attemptsLeft);
     } on ThrottleException catch (e) {
-      throw ThrottleFailure(e.message);
+      throw ThrottleFailure(e.message, e.retryAfterSeconds, e.attemptsLeft);
     } on NetworkException catch (e) {
       throw NetworkFailure(e.message);
     } on ServerException catch (e) {
@@ -47,9 +47,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remote.verifyFace(imagePath: imagePath, accessToken: accessToken);
     } on UnauthorizedException catch (e) {
-      throw UnauthorizedFailure(e.message);
+      throw UnauthorizedFailure(e.message, e.attemptsLeft);
     } on ThrottleException catch (e) {
-      throw ThrottleFailure(e.message);
+      throw ThrottleFailure(e.message, e.retryAfterSeconds, e.attemptsLeft);
     } on NetworkException catch (e) {
       throw NetworkFailure(e.message);
     } on ServerException catch (e) {

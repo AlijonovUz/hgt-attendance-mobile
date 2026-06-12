@@ -15,7 +15,7 @@ class LoginState extends Equatable {
     this.errorText,
     this.blockedSeconds = 0,
     this.blockedTotalSeconds = 0,
-    this.failedAttempts = 0,
+    this.attemptsLeft = maxAttempts,
     this.accessToken,
     this.refreshToken,
     this.faceImage,
@@ -39,15 +39,14 @@ class LoginState extends Equatable {
   /// Blokning to‘liq davomiyligi (soniya) — «N daqiqaga bloklandi» matni uchun.
   final int blockedTotalSeconds;
 
-  /// Server rad etgan (401) urinishlar soni — har xato kiritishda oshadi.
-  final int failedAttempts;
+  /// Qolgan urinishlar (backend `attempts_left`). Boshlanishi — `maxAttempts`.
+  final int attemptsLeft;
 
   final String? accessToken;
   final String? refreshToken;
 
   /// Qolgan urinishlar (5 → 0). «Yana N marta urinish mumkin» uchun.
-  int get remainingAttempts =>
-      (maxAttempts - failedAttempts).clamp(0, maxAttempts);
+  int get remainingAttempts => attemptsLeft.clamp(0, maxAttempts);
 
   /// Blok davomiyligi daqiqada (yuqoriga yaxlitlangan, kamida 1).
   int get blockedMinutes =>
@@ -85,7 +84,7 @@ class LoginState extends Equatable {
     bool clearError = false,
     int? blockedSeconds,
     int? blockedTotalSeconds,
-    int? failedAttempts,
+    int? attemptsLeft,
     String? accessToken,
     String? refreshToken,
     String? faceImage,
@@ -99,7 +98,7 @@ class LoginState extends Equatable {
       errorText: clearError ? null : (errorText ?? this.errorText),
       blockedSeconds: blockedSeconds ?? this.blockedSeconds,
       blockedTotalSeconds: blockedTotalSeconds ?? this.blockedTotalSeconds,
-      failedAttempts: failedAttempts ?? this.failedAttempts,
+      attemptsLeft: attemptsLeft ?? this.attemptsLeft,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
       faceImage: faceImage ?? this.faceImage,
@@ -116,7 +115,7 @@ class LoginState extends Equatable {
         errorText,
         blockedSeconds,
         blockedTotalSeconds,
-        failedAttempts,
+        attemptsLeft,
         accessToken,
         refreshToken,
         faceImage,

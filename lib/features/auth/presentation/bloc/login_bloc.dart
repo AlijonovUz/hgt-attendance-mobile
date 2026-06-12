@@ -93,26 +93,30 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           status: LoginStatus.failure,
           errorKind: LoginErrorKind.network,
         ));
-      case ThrottleFailure():
-        // 5-urinishdan keyin backend bloklaydi va qolgan vaqtni yuboradi —
-        // faqat shu vaqtni olamiz, ko‘rinadigan matn mobil l10n’dan.
-        final seconds = _parseBlockSeconds(failure.message);
+      case ThrottleFailure(
+          :final retryAfterSeconds,
+          :final attemptsLeft,
+          :final message,
+        ):
+        // Backend bloklaydi va `retry_after_seconds` yuboradi — shu vaqtni
+        // olib ortga sanaymiz; ko‘rinadigan matn mobil l10n’dan.
+        final seconds = retryAfterSeconds ?? _parseBlockSeconds(message);
         emit(state.copyWith(
           status: LoginStatus.failure,
           errorKind: LoginErrorKind.blocked,
           blockedSeconds: seconds,
           blockedTotalSeconds: seconds,
-          failedAttempts: LoginState.maxAttempts,
+          attemptsLeft: attemptsLeft ?? 0,
           clearError: true,
         ));
         _startBlockTimer(seconds);
-      case UnauthorizedFailure():
-        // Har noto‘g‘ri urinish hisoblanadi — qolgan urinishlar matni mobil
-        // tomonda hosil qilinadi (backend matni ishlatilmaydi).
+      case UnauthorizedFailure(:final attemptsLeft):
+        // Qolgan urinishlar backend `attempts_left`dan olinadi (yo‘q bo‘lsa
+        // joriy qiymatdan bittaga kamaytiriladi). Matn mobil l10n’dan.
         emit(state.copyWith(
           status: LoginStatus.failure,
           errorKind: LoginErrorKind.invalid,
-          failedAttempts: state.failedAttempts + 1,
+          attemptsLeft: attemptsLeft ?? (state.attemptsLeft - 1),
           clearError: true,
         ));
       default:
@@ -128,13 +132,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     final next = state.blockedSeconds - 1;
     if (next <= 0) {
       _blockTimer?.cancel();
-      // Blok tugadi → urinishlar yangidan 5  taga tiklanadi.
+      // Blok tugadi → urinishlar yangidan to‘liq (maxAttempts) tiklanadi.
       emit(state.copyWith(
         status: LoginStatus.initial,
         errorKind: LoginErrorKind.none,
         blockedSeconds: 0,
         blockedTotalSeconds: 0,
-        failedAttempts: 0,
+        attemptsLeft: LoginState.maxAttempts,
         clearError: true,
       ));
       return;
