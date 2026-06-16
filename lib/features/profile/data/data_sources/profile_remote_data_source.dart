@@ -10,8 +10,9 @@ import '../models/profile_model.dart';
 /// `AuthInterceptor` Bearer’ni avtomatik biriktiradi (saqlangan token). Xatolar
 /// tegishli `Exception`larga aylantiriladi; repo ularni `Failure`ga o‘giradi.
 abstract interface class ProfileRemoteDataSource {
-  /// GET — joriy profil.
-  Future<ProfileModel> getProfile();
+  /// GET — joriy profil. [accessToken] berilsa manual Bearer + refresh siklini
+  /// chetlab o‘tish (token hali saqlanmagan onboarding bosqichi).
+  Future<ProfileModel> getProfile({String? accessToken});
 
   /// PATCH — faqat `face_image` faylini multipart bilan yangilaydi.
   /// [accessToken] berilsa manual Bearer + refresh siklini chetlab o‘tish
@@ -25,9 +26,18 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final DioClient _client;
 
   @override
-  Future<ProfileModel> getProfile() async {
+  Future<ProfileModel> getProfile({String? accessToken}) async {
     try {
-      final response = await _client.get(ApiConstants.profile);
+      final hasManualToken = accessToken != null && accessToken.isNotEmpty;
+      final response = await _client.get(
+        ApiConstants.profile,
+        options: hasManualToken
+            ? Options(
+                headers: {'Authorization': 'Bearer $accessToken'},
+                extra: const {'skipRefresh': true},
+              )
+            : null,
+      );
       final body = (response.data as Map?)?.cast<String, dynamic>() ?? {};
       if (body['success'] == false) {
         throw ServerException(_messageFromBody(body));

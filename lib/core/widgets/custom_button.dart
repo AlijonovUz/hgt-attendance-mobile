@@ -33,6 +33,7 @@ class CustomButton extends StatelessWidget {
     this.leading,
     this.trailing,
     this.height,
+    this.gradient,
   });
 
   final String label;
@@ -40,6 +41,11 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final bool enabled;
   final CustomButtonVariant variant;
+
+  /// Ixtiyoriy gradient fon — berilsa (va tugma faol/`primary` bo‘lsa) bir rang
+  /// o‘rniga ishlatiladi (onboarding «Davom etish» tugmasi). O‘chirilgan holatda
+  /// e’tiborga olinmaydi.
+  final Gradient? gradient;
 
   /// To‘liq enga cho‘zilsinmi.
   final bool expand;
@@ -57,6 +63,11 @@ class CustomButton extends StatelessWidget {
     final (Color background, Color foreground, BorderSide side) = _resolveStyle(
       colors,
     );
+
+    // Gradient faqat faol primary tugmada (o‘chirilganda bir rang fon qoladi).
+    final useGradient = gradient != null &&
+        _isInteractive &&
+        variant == CustomButtonVariant.primary;
 
     final content = isLoading
         ? SizedBox(
@@ -91,7 +102,8 @@ class CustomButton extends StatelessWidget {
       height: height ?? 52.h,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: background,
+          color: useGradient ? null : background,
+          gradient: useGradient ? gradient : null,
           borderRadius: radius,
           border: side == BorderSide.none ? null : Border.fromBorderSide(side),
         ),

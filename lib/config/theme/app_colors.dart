@@ -6,6 +6,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color black;
   final Color shadow;
 
+  // ── Foreground ────────────────────────────────────────────────────────
+  final Color foregroundPrimary;
+
   // ── Background ────────────────────────────────────────────────────────
   final Color backgroundBase;
   final Color backgroundBase2;
@@ -131,6 +134,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.controlTextSecondary,
     required this.controlTextDisabled,
     required this.controlBgDisabled,
+    required this.foregroundPrimary,
   });
 
   // Figma «HGT» design system (shadcn neutral) — Light.
@@ -140,7 +144,8 @@ class AppColors extends ThemeExtension<AppColors> {
   factory AppColors.light() => const AppColors(
     white: Color(0xFFFFFFFF),
     black: Color(0xFF000000),
-    shadow: Color(0x1A000000), // shadow-xs
+    shadow: Color(0x1A000000),
+    // shadow-xs
     backgroundBase: Color(0xFFFFFFFF),
     backgroundBase2: Color(0xFFFFFFFF),
     backgroundElevation1: Color(0xFFFFFFFF),
@@ -149,6 +154,7 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundElevation2Alt: Color(0xFFF5F5F5),
     backgroundElevation3: Color(0xFFE5E5E5),
     backgroundElevation3Alt: Color(0xFFE5E5E5),
+    foregroundPrimary: Color(0xFFFAFAFA),
     accentStrong: Color(0xFF0D74CE),
     accentSub: Color(0xFF0D74CE),
     accentSoft: Color(0xFF3B9EFF),
@@ -206,6 +212,7 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundElevation2Alt: Color(0xFF404040),
     backgroundElevation3: Color(0xFF404040),
     backgroundElevation3Alt: Color(0xFF525252),
+    foregroundPrimary: Color(0xFF171717),
     accentStrong: Color(0xFF0D74CE),
     accentSub: Color(0xFF0D74CE),
     accentSoft: Color(0xFF3B9EFF),
@@ -263,11 +270,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static const Gradient authBackgroundGradient = LinearGradient(
     begin: Alignment(-1.0, -0.1),
     end: Alignment(1.0, 0.1),
-    colors: [
-      Color(0xFFE6ECFF),
-      Color(0xFFA5B4FC),
-      Color(0xFF6E86E1),
-    ],
+    colors: [Color(0xFFE6ECFF), Color(0xFFA5B4FC), Color(0xFF6E86E1)],
     stops: [0.0025, 0.3575, 1.0],
   );
 
@@ -287,20 +290,78 @@ class AppColors extends ThemeExtension<AppColors> {
     stops: [0.0, 1.0],
   );
 
-  static Gradient loginHeaderGradient(Brightness brightness) =>
-      brightness == Brightness.dark
-          ? loginHeaderGradientDark
-          : loginHeaderGradientLight;
+  static Gradient loginHeaderGradient(Brightness brightness) => brightness == Brightness.dark ? loginHeaderGradientDark : loginHeaderGradientLight;
+
+  /// Onboarding fon gradienti — Figma (vertikal, tepada ko‘k, pastga so‘ladi).
+  static const Gradient onboardingBackgroundGradientLight = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFA8C5F2), Color(0xFFC9DBF6), Color(0xFFFFFFFF)],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  static const Gradient onboardingBackgroundGradientDark = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF10316E), Color(0xFF0C1C40), Color(0xFF0A0A0A)],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  static Gradient onboardingBackgroundGradient(Brightness brightness) =>
+      brightness == Brightness.dark ? onboardingBackgroundGradientDark : onboardingBackgroundGradientLight;
+
+  /// Onboarding asosiy tugma gradienti (gorizontal ko‘k) — har ikki rejimda bir xil.
+  static const Gradient onboardingActionGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFF0B6FCC), Color(0xFF3B9EFF)],
+  );
+
+  // ── Swipe (surish) tugmasi tokenlari ────────────────────────────────────
+  // Surilganda ochiladigan fon gradientlari (chapda yorqinroq rang @50% →
+  // o‘ngda to‘q asos), yo‘lak foni esa har ikki rejimda ham och qoladi
+  // (Figma: dark mode’da ham `blue/3`). Dasta rangi = gradient oxirgi rangi.
+  // `SwipeActionButton` orqali istalgan boshqa gradient ham berilishi mumkin.
+
+  /// «Ishga keldim» (ko‘k). Figma: rgba(12,96,254,.5) → #0090ff.
+  static const Gradient swipeArriveGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0x800C60FE), Color(0xFF0090FF)],
+  );
+
+  /// «Tushlikka chiqdim» va «Tushlikdan qaytdim» (to‘q-sariq, bir xil).
+  /// Figma: #ffc182 → #ef5f00.
+  static const Gradient swipeLunchGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFFFC182), Color(0xFFEF5F00)],
+  );
+
+  /// «Ishdan ketdim» (yashil). Figma: #adddc0 → #2b9a66.
+  static const Gradient swipeLeaveGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFADDDC0), Color(0xFF2B9A66)],
+  );
+
+  /// Swipe yo‘lagi fonlari (Figma: har ikki rejimda ham och) — bosqichga mos.
+  static const Color swipeTrackBlue = Color(0xFFE6F4FE); // blue/3
+  static const Color swipeTrackOrange = Color(0xFFFFEFD6); // orange/3
+  static const Color swipeTrackGreen = Color(0xFFE3F5EA);
+
+  /// Surilmagan holatdagi yozuv rangi (Figma `black-in-de`) — yo‘lak och
+  /// bo‘lgani uchun har ikki rejimda ham bir xil to‘q.
+  static const Color swipeIdleText = Color(0xFF444444);
+
+  /// Swipe yo‘lagi ramkasi (Figma `secondary` #f5f5f5).
+  static const Color swipeTrackBorder = Color(0xFFF0F0F0);
 
   /// Access from anywhere: `Theme.of(context).extension<AppColors>()!`
-  static AppColors of(BuildContext context) =>
-      Theme.of(context).extension<AppColors>()!;
+  static AppColors of(BuildContext context) => Theme.of(context).extension<AppColors>()!;
 
   /// Xarajatlar AppBar filtr/bildirishnoma tugmasi foni (light: `backgroundElevation2`, dark: `strokeSub`).
-  Color get expenseAppBarFilterSurface =>
-      backgroundBase.computeLuminance() < 0.5
-      ? strokeSub
-      : backgroundElevation2;
+  Color get expenseAppBarFilterSurface => backgroundBase.computeLuminance() < 0.5 ? strokeSub : backgroundElevation2;
 
   @override
   AppColors copyWith({
@@ -315,6 +376,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? backgroundElevation2Alt,
     Color? backgroundElevation3,
     Color? backgroundElevation3Alt,
+    Color? foregroundPrimary,
     Color? accentStrong,
     Color? accentSub,
     Color? accentSoft,
@@ -362,14 +424,12 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundBase: backgroundBase ?? this.backgroundBase,
     backgroundBase2: backgroundBase2 ?? this.backgroundBase2,
     backgroundElevation1: backgroundElevation1 ?? this.backgroundElevation1,
-    backgroundElevation1Alt:
-        backgroundElevation1Alt ?? this.backgroundElevation1Alt,
+    backgroundElevation1Alt: backgroundElevation1Alt ?? this.backgroundElevation1Alt,
     backgroundElevation2: backgroundElevation2 ?? this.backgroundElevation2,
-    backgroundElevation2Alt:
-        backgroundElevation2Alt ?? this.backgroundElevation2Alt,
+    backgroundElevation2Alt: backgroundElevation2Alt ?? this.backgroundElevation2Alt,
     backgroundElevation3: backgroundElevation3 ?? this.backgroundElevation3,
-    backgroundElevation3Alt:
-        backgroundElevation3Alt ?? this.backgroundElevation3Alt,
+    backgroundElevation3Alt: backgroundElevation3Alt ?? this.backgroundElevation3Alt,
+    foregroundPrimary: foregroundPrimary ?? this.foregroundPrimary,
     accentStrong: accentStrong ?? this.accentStrong,
     accentSub: accentSub ?? this.accentSub,
     accentSoft: accentSoft ?? this.accentSoft,
@@ -421,36 +481,13 @@ class AppColors extends ThemeExtension<AppColors> {
       shadow: Color.lerp(shadow, other.shadow, t)!,
       backgroundBase: Color.lerp(backgroundBase, other.backgroundBase, t)!,
       backgroundBase2: Color.lerp(backgroundBase2, other.backgroundBase2, t)!,
-      backgroundElevation1: Color.lerp(
-        backgroundElevation1,
-        other.backgroundElevation1,
-        t,
-      )!,
-      backgroundElevation1Alt: Color.lerp(
-        backgroundElevation1Alt,
-        other.backgroundElevation1Alt,
-        t,
-      )!,
-      backgroundElevation2: Color.lerp(
-        backgroundElevation2,
-        other.backgroundElevation2,
-        t,
-      )!,
-      backgroundElevation2Alt: Color.lerp(
-        backgroundElevation2Alt,
-        other.backgroundElevation2Alt,
-        t,
-      )!,
-      backgroundElevation3: Color.lerp(
-        backgroundElevation3,
-        other.backgroundElevation3,
-        t,
-      )!,
-      backgroundElevation3Alt: Color.lerp(
-        backgroundElevation3Alt,
-        other.backgroundElevation3Alt,
-        t,
-      )!,
+      backgroundElevation1: Color.lerp(backgroundElevation1, other.backgroundElevation1, t)!,
+      backgroundElevation1Alt: Color.lerp(backgroundElevation1Alt, other.backgroundElevation1Alt, t)!,
+      backgroundElevation2: Color.lerp(backgroundElevation2, other.backgroundElevation2, t)!,
+      backgroundElevation2Alt: Color.lerp(backgroundElevation2Alt, other.backgroundElevation2Alt, t)!,
+      backgroundElevation3: Color.lerp(backgroundElevation3, other.backgroundElevation3, t)!,
+      backgroundElevation3Alt: Color.lerp(backgroundElevation3Alt, other.backgroundElevation3Alt, t)!,
+      foregroundPrimary: Color.lerp(foregroundPrimary, other.foregroundPrimary, t)!,
       accentStrong: Color.lerp(accentStrong, other.accentStrong, t)!,
       accentSub: Color.lerp(accentSub, other.accentSub, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
@@ -487,26 +524,10 @@ class AppColors extends ThemeExtension<AppColors> {
       successSub: Color.lerp(successSub, other.successSub, t)!,
       successSoft: Color.lerp(successSoft, other.successSoft, t)!,
       successDisabled: Color.lerp(successDisabled, other.successDisabled, t)!,
-      avatarPlaceholder: Color.lerp(
-        avatarPlaceholder,
-        other.avatarPlaceholder,
-        t,
-      )!,
-      controlTextSecondary: Color.lerp(
-        controlTextSecondary,
-        other.controlTextSecondary,
-        t,
-      )!,
-      controlTextDisabled: Color.lerp(
-        controlTextDisabled,
-        other.controlTextDisabled,
-        t,
-      )!,
-      controlBgDisabled: Color.lerp(
-        controlBgDisabled,
-        other.controlBgDisabled,
-        t,
-      )!,
+      avatarPlaceholder: Color.lerp(avatarPlaceholder, other.avatarPlaceholder, t)!,
+      controlTextSecondary: Color.lerp(controlTextSecondary, other.controlTextSecondary, t)!,
+      controlTextDisabled: Color.lerp(controlTextDisabled, other.controlTextDisabled, t)!,
+      controlBgDisabled: Color.lerp(controlBgDisabled, other.controlBgDisabled, t)!,
     );
   }
 }

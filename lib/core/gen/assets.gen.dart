@@ -29,6 +29,10 @@ class $AssetsIconsGen {
   SvgGenImage get icArrowLeftLarge =>
       const SvgGenImage('assets/icons/ic_arrow_left_large.svg');
 
+  /// File path: assets/icons/ic_arrow_left_round.svg
+  SvgGenImage get icArrowLeftRound =>
+      const SvgGenImage('assets/icons/ic_arrow_left_round.svg');
+
   /// File path: assets/icons/ic_breifcase.svg
   SvgGenImage get icBreifcase =>
       const SvgGenImage('assets/icons/ic_breifcase.svg');
@@ -40,6 +44,14 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_databese.svg
   SvgGenImage get icDatabese =>
       const SvgGenImage('assets/icons/ic_databese.svg');
+
+  /// File path: assets/icons/ic_dot_active.svg
+  SvgGenImage get icDotActive =>
+      const SvgGenImage('assets/icons/ic_dot_active.svg');
+
+  /// File path: assets/icons/ic_dot_no_active.svg
+  SvgGenImage get icDotNoActive =>
+      const SvgGenImage('assets/icons/ic_dot_no_active.svg');
 
   /// File path: assets/icons/ic_ellipse.svg
   SvgGenImage get icEllipse => const SvgGenImage('assets/icons/ic_ellipse.svg');
@@ -58,9 +70,70 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_globe.svg
   SvgGenImage get icGlobe => const SvgGenImage('assets/icons/ic_globe.svg');
 
+  /// File path: assets/icons/ic_hugeicons_arrow_right_double_round.svg
+  SvgGenImage get icHugeiconsArrowRightDoubleRound => const SvgGenImage(
+    'assets/icons/ic_hugeicons_arrow_right_double_round.svg',
+  );
+
+  /// File path: assets/icons/ic_hugeicons_camera_add.svg
+  SvgGenImage get icHugeiconsCameraAdd =>
+      const SvgGenImage('assets/icons/ic_hugeicons_camera_add.svg');
+
+  /// File path: assets/icons/ic_hugeicons_checkmark_badge.svg
+  SvgGenImage get icHugeiconsCheckmarkBadge =>
+      const SvgGenImage('assets/icons/ic_hugeicons_checkmark_badge.svg');
+
+  /// File path: assets/icons/ic_hugeicons_clock.svg
+  SvgGenImage get icHugeiconsClock =>
+      const SvgGenImage('assets/icons/ic_hugeicons_clock.svg');
+
+  /// File path: assets/icons/ic_hugeicons_data_time.svg
+  SvgGenImage get icHugeiconsDataTime =>
+      const SvgGenImage('assets/icons/ic_hugeicons_data_time.svg');
+
+  /// File path: assets/icons/ic_hugeicons_loading.svg
+  SvgGenImage get icHugeiconsLoading =>
+      const SvgGenImage('assets/icons/ic_hugeicons_loading.svg');
+
+  /// File path: assets/icons/ic_hugeicons_location_share.svg
+  SvgGenImage get icHugeiconsLocationShare =>
+      const SvgGenImage('assets/icons/ic_hugeicons_location_share.svg');
+
+  /// File path: assets/icons/ic_hugeicons_login.svg
+  SvgGenImage get icHugeiconsLogin =>
+      const SvgGenImage('assets/icons/ic_hugeicons_login.svg');
+
+  /// File path: assets/icons/ic_hugeicons_logout.svg
+  SvgGenImage get icHugeiconsLogout =>
+      const SvgGenImage('assets/icons/ic_hugeicons_logout.svg');
+
+  /// File path: assets/icons/ic_hugeicons_male.svg
+  SvgGenImage get icHugeiconsMale =>
+      const SvgGenImage('assets/icons/ic_hugeicons_male.svg');
+
+  /// File path: assets/icons/ic_hugeicons_menu_square.svg
+  SvgGenImage get icHugeiconsMenuSquare =>
+      const SvgGenImage('assets/icons/ic_hugeicons_menu_square.svg');
+
+  /// File path: assets/icons/ic_hugeicons_money_receive_flow.svg
+  SvgGenImage get icHugeiconsMoneyReceiveFlow =>
+      const SvgGenImage('assets/icons/ic_hugeicons_money_receive_flow.svg');
+
   /// File path: assets/icons/ic_hugeicons_moon.svg
   SvgGenImage get icHugeiconsMoon =>
       const SvgGenImage('assets/icons/ic_hugeicons_moon.svg');
+
+  /// File path: assets/icons/ic_hugeicons_notification.svg
+  SvgGenImage get icHugeiconsNotification =>
+      const SvgGenImage('assets/icons/ic_hugeicons_notification.svg');
+
+  /// File path: assets/icons/ic_hugeicons_party.svg
+  SvgGenImage get icHugeiconsParty =>
+      const SvgGenImage('assets/icons/ic_hugeicons_party.svg');
+
+  /// File path: assets/icons/ic_hugeicons_pizza.svg
+  SvgGenImage get icHugeiconsPizza =>
+      const SvgGenImage('assets/icons/ic_hugeicons_pizza.svg');
 
   /// File path: assets/icons/ic_hugeicons_security_check.svg
   SvgGenImage get icHugeiconsSecurityCheck =>
@@ -89,15 +162,33 @@ class $AssetsIconsGen {
     cTuilconLoginLarge,
     icArrowDown,
     icArrowLeftLarge,
+    icArrowLeftRound,
     icBreifcase,
     icBuildings,
     icDatabese,
+    icDotActive,
+    icDotNoActive,
     icEllipse,
     icExclude,
     icEyeClose,
     icEyeOpen,
     icGlobe,
+    icHugeiconsArrowRightDoubleRound,
+    icHugeiconsCameraAdd,
+    icHugeiconsCheckmarkBadge,
+    icHugeiconsClock,
+    icHugeiconsDataTime,
+    icHugeiconsLoading,
+    icHugeiconsLocationShare,
+    icHugeiconsLogin,
+    icHugeiconsLogout,
+    icHugeiconsMale,
+    icHugeiconsMenuSquare,
+    icHugeiconsMoneyReceiveFlow,
     icHugeiconsMoon,
+    icHugeiconsNotification,
+    icHugeiconsParty,
+    icHugeiconsPizza,
     icHugeiconsSecurityCheck,
     icHugeiconsSun,
     icLucideScanFace,
@@ -114,8 +205,20 @@ class $AssetsImagesGen {
   AssetGenImage get cardboardTexture =>
       const AssetGenImage('assets/images/cardboard_texture.jpg');
 
+  /// File path: assets/images/splash_background_image.png
+  AssetGenImage get splashBackgroundImage =>
+      const AssetGenImage('assets/images/splash_background_image.png');
+
+  /// File path: assets/images/splash_logo.png
+  AssetGenImage get splashLogo =>
+      const AssetGenImage('assets/images/splash_logo.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [cardboardTexture];
+  List<AssetGenImage> get values => [
+    cardboardTexture,
+    splashBackgroundImage,
+    splashLogo,
+  ];
 }
 
 class Assets {

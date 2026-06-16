@@ -9,7 +9,6 @@ import '../../../../core/gen/assets.gen.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/language_picker.dart';
-import '../../../../core/widgets/theme_mode_toggle.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/login_bloc.dart';
@@ -65,12 +64,17 @@ class _LoginViewState extends State<_LoginView> {
         listener: (context, state) {
           if (state.status == LoginStatus.success &&
               state.accessToken != null) {
+            final responseName = state.responseFullName?.trim() ?? '';
             context.read<SessionBloc>().add(
                   SessionLoginSucceeded(
                     accessToken: state.accessToken!,
                     refreshToken: state.refreshToken ?? '',
-                    fullName: state.fullName.trim(),
+                    fullName: responseName.isNotEmpty
+                        ? responseName
+                        : state.fullName.trim(),
+                    loginPassword: state.password,
                     faceImage: state.faceImage,
+                    isPasswordChanged: state.isPasswordChanged,
                   ),
                 );
           }
@@ -89,29 +93,50 @@ class _LoginViewState extends State<_LoginView> {
               ),
             ),
             SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: 8.h),
-                    const _Brand(),
-                    SizedBox(height: 16.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [LanguagePicker(), ThemeModeToggle()],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 20.w, vertical: 16.h),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight - 32.h,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Tepa qator: brend (chap) + til tanlash (o‘ng).
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [_Brand(), LanguagePicker()],
+                            ),
+                            // Markaziy blok: sarlavha + forma — bo‘sh joyda
+                            // vertikal markazda (Figma kabi), Spacersiz.
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const _TitleBlock(),
+                                    SizedBox(height: 28.h),
+                                    _Form(
+                                      colors: colors,
+                                      loginController: _loginController,
+                                      passwordController: _passwordController,
+                                      onSubmit: _submit,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 44.h),
-                    const _TitleBlock(),
-                    SizedBox(height: 28.h),
-                    _Form(
-                      colors: colors,
-                      loginController: _loginController,
-                      passwordController: _passwordController,
-                      onSubmit: _submit,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],

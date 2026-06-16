@@ -11,9 +11,16 @@ import 'core/network/interceptors/auth_interceptor.dart';
 import 'core/network/interceptors/logging_interceptor.dart';
 import 'core/network/interceptors/refresh_interceptor.dart';
 import 'core/services/image_picker_service.dart';
+import 'core/services/location_service.dart';
 import 'core/services/logger_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/services/token_service.dart';
+import 'features/attendance/data/data_sources/attendance_remote_data_source.dart';
+import 'features/attendance/data/repository/attendance_repository_impl.dart';
+import 'features/attendance/domain/repository/attendance_repository.dart';
+import 'features/attendance/domain/usecases/get_today_attendance_usecase.dart';
+import 'features/attendance/domain/usecases/mark_attendance_usecase.dart';
+import 'features/attendance/presentation/bloc/attendance_check_bloc.dart';
 import 'features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'features/auth/data/repository/auth_repository_impl.dart';
 import 'features/auth/domain/repository/auth_repository.dart';
@@ -21,12 +28,18 @@ import 'features/auth/domain/usecases/login_usecase.dart';
 import 'features/auth/domain/usecases/verify_face_usecase.dart';
 import 'features/auth/presentation/bloc/login_bloc.dart';
 import 'features/auth/presentation/face/bloc/face_verify_bloc.dart';
+import 'features/home/presentation/bloc/attendance_bloc.dart';
 import 'features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'features/profile/data/repository/profile_repository_impl.dart';
 import 'features/profile/domain/repository/profile_repository.dart';
 import 'features/profile/domain/usecases/get_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_face_image_usecase.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/onboarding/data/data_sources/onboarding_remote_data_source.dart';
+import 'features/onboarding/data/repository/onboarding_repository_impl.dart';
+import 'features/onboarding/domain/repository/onboarding_repository.dart';
+import 'features/onboarding/domain/usecases/change_password_usecase.dart';
+import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -37,7 +50,8 @@ Future<void> configureDependencies() async {
     ..registerSingleton<StorageService>(storage)
     ..registerLazySingleton<LoggerService>(() => LoggerService())
     ..registerLazySingleton<TokenService>(() => TokenService(getIt()))
-    ..registerLazySingleton<ImagePickerService>(() => ImagePickerService());
+    ..registerLazySingleton<ImagePickerService>(() => ImagePickerService())
+    ..registerLazySingleton<LocationService>(() => const LocationService());
 
   // App-level state — singletons so router + UI share one instance each.
   getIt
@@ -79,6 +93,29 @@ Future<void> configureDependencies() async {
       () => FaceVerifyBloc(verifyFaceUseCase: getIt()),
     );
 
+  // ── Attendance feature (yuz-tekshiruv + GPS + POST + bugungi GET) ───────
+  getIt
+    ..registerLazySingleton<AttendanceRemoteDataSource>(
+      () => AttendanceRemoteDataSourceImpl(getIt()),
+    )
+    ..registerLazySingleton<AttendanceRepository>(
+      () => AttendanceRepositoryImpl(remote: getIt()),
+    )
+    ..registerLazySingleton<MarkAttendanceUseCase>(
+      () => MarkAttendanceUseCase(getIt()),
+    )
+    ..registerLazySingleton<GetTodayAttendanceUseCase>(
+      () => GetTodayAttendanceUseCase(getIt()),
+    )
+    ..registerFactory<AttendanceCheckBloc>(
+      () => AttendanceCheckBloc(markAttendance: getIt(), location: getIt()),
+    );
+
+  // ── Home (asosiy ekran davomat holati — backend bugungi yozuvlardan) ────
+  getIt.registerFactory<AttendanceBloc>(
+    () => AttendanceBloc(getToday: getIt()),
+  );
+
   // ── Profile feature ───────────────────────────────────────────────────
   getIt
     ..registerLazySingleton<ProfileRemoteDataSource>(
@@ -93,6 +130,26 @@ Future<void> configureDependencies() async {
     )
     ..registerFactory<ProfileBloc>(
       () => ProfileBloc(
+        getProfile: getIt(),
+        updateFaceImage: getIt(),
+        imagePicker: getIt(),
+      ),
+    );
+
+  // ── Onboarding feature ────────────────────────────────────────────────
+  getIt
+    ..registerLazySingleton<OnboardingRemoteDataSource>(
+      () => OnboardingRemoteDataSourceImpl(getIt()),
+    )
+    ..registerLazySingleton<OnboardingRepository>(
+      () => OnboardingRepositoryImpl(remote: getIt()),
+    )
+    ..registerLazySingleton<ChangePasswordUseCase>(
+      () => ChangePasswordUseCase(getIt()),
+    )
+    ..registerFactory<OnboardingBloc>(
+      () => OnboardingBloc(
+        changePassword: getIt(),
         getProfile: getIt(),
         updateFaceImage: getIt(),
         imagePicker: getIt(),

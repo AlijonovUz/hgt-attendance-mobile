@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme/app_colors.dart';
+import '../extentions/text_extensions.dart';
 import '../gen/assets.gen.dart';
 
 /// Loyihaning umumiy kiritish maydoni.
@@ -94,7 +94,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     final idleStroke = widget.hasError ? colors.errorStrong : colors.strokeSoft;
     final focusStroke = widget.hasError ? colors.errorStrong : colors.strokeAccent;
 
-    final textStyle = GoogleFonts.manrope(
+    final textStyle = kBaseTextStyle.copyWith(
       fontSize: 14.sp,
       fontWeight: FontWeight.w500,
       height: 20 / 14,
@@ -129,9 +129,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
         hintText: widget.hintText,
         labelText: widget.labelText,
         counterText: '',
-        hintStyle: GoogleFonts.manrope(fontSize: 14.sp, fontWeight: FontWeight.w400, height: 20 / 14, color: colors.controlTextSecondary),
-        labelStyle: GoogleFonts.manrope(fontSize: 14.sp, fontWeight: FontWeight.w400, color: colors.controlTextSecondary),
-        errorStyle: GoogleFonts.manrope(fontSize: 12.sp, fontWeight: FontWeight.w500, height: 16 / 12, color: colors.errorStrong),
+        hintStyle: kBaseTextStyle.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400, height: 20 / 14, color: colors.controlTextSecondary),
+        labelStyle: kBaseTextStyle.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400, color: colors.controlTextSecondary),
+        errorStyle: kBaseTextStyle.copyWith(fontSize: 12.sp, fontWeight: FontWeight.w500, height: 16 / 12, color: colors.errorStrong),
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         prefixIcon: widget.prefixIcon,
         prefixIconColor: colors.iconSoft,

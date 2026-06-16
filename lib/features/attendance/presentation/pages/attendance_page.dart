@@ -20,8 +20,9 @@ class AttendancePage extends StatelessWidget {
             const Text('Attendance'),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: () =>
-                  context.read<SessionBloc>().add(const SessionLogoutRequested()),
+              onPressed: () => context.read<SessionBloc>().add(
+                const SessionLogoutRequested(),
+              ),
               child: const Text('Sign out'),
             ),
           ],

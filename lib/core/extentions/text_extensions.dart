@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
+
+import '../gen/fonts.gen.dart';
+
+/// Ilova standart shrifti — Figma `family/sans` (lokal Inter, pubspec’da
+/// ro‘yxatdan o‘tgan, `FontFamily.inter` orqali). Matn kengaytmalari defaulti.
+const TextStyle kBaseTextStyle = TextStyle(fontFamily: FontFamily.inter);
 
 extension TextStringExtensions on String {
   Text s(double size) => Text(this).s(size);
@@ -155,22 +160,22 @@ extension TextExtensions on Text {
       );
 
   Text s(double size) => copyWith(
-        style: (style ?? GoogleFonts.manrope()).copyWith(fontSize: size),
+        style: (style ?? kBaseTextStyle).copyWith(fontSize: size),
       );
 
   Text c(Color color) => copyWith(
-        style: (style ?? GoogleFonts.manrope()).copyWith(color: color),
+        style: (style ?? kBaseTextStyle).copyWith(color: color),
       );
 
   Text w(int fontWeight) {
     final weight = FontWeight.values[fontWeight ~/ 100 - 1];
-    return copyWith(style: (style ?? GoogleFonts.manrope()).copyWith(fontWeight: weight));
+    return copyWith(style: (style ?? kBaseTextStyle).copyWith(fontWeight: weight));
   }
 
   Text a(TextAlign textAlign) => copyWith(style: style, textAlign: textAlign);
 
   Text h(double height) =>
-      copyWith(style: (style ?? GoogleFonts.manrope()).copyWith(height: height));
+      copyWith(style: (style ?? kBaseTextStyle).copyWith(height: height));
 }
 
 extension ResponseExtensions on String {}
