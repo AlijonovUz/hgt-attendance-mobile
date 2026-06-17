@@ -50,6 +50,8 @@
   "homeTimeToLunchOut": "Время уйти на обед",
   "homeTimeToLunchIn": "Время вернуться с обеда",
   "homeTimeToLeave": "Время уйти с работы",
+  "homeNotStarted": "Начать работу",
+  "homeWorkDayDone": "Рабочий день завершён",
   "homeSwipeArrive": "Я пришёл",
   "homeSwipeHint": "Проведите кнопку вправо, чтобы отметить",
   "homeAllDone": "Посещаемость на сегодня отмечена",

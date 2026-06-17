@@ -12,6 +12,7 @@ import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../auth/presentation/face/bloc/face_flow_mode.dart';
 import '../../../auth/presentation/face/bloc/face_verify_bloc.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../painters/face_inset_painter.dart';
@@ -50,7 +51,9 @@ class _FaceVerifyBodyState extends State<_FaceVerifyBody> {
     final data = context.read<OnboardingBloc>().state.data;
     setState(() => _started = true);
     context.read<FaceVerifyBloc>().add(
-      FaceStarted(accessToken: data.accessToken, fullName: data.fullName),
+      FaceStarted(
+        LoginFaceMode(accessToken: data.accessToken, fullName: data.fullName),
+      ),
     );
   }
 

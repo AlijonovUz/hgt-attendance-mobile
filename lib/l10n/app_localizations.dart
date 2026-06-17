@@ -345,6 +345,18 @@ abstract class AppLocalizations {
   /// **'Ishdan ketish vaqti'**
   String get homeTimeToLeave;
 
+  /// No description provided for @homeNotStarted.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishni boshlash'**
+  String get homeNotStarted;
+
+  /// No description provided for @homeWorkDayDone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ish kuni yakunlandi'**
+  String get homeWorkDayDone;
+
   /// No description provided for @homeSwipeArrive.
   ///
   /// In uz, this message translates to:

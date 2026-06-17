@@ -1,13 +1,10 @@
-import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/theme/app_colors.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../profile/domain/entities/profile.dart';
 
 /// Asosiy ekran sarlavhasi (Figma 130:1590) — dumaloq avatar + ism/lavozim +
@@ -49,7 +46,11 @@ class HomeHeader extends StatelessWidget {
             GestureDetector(
               onTap: onAvatarTap,
               onLongPress: onAvatarLongPress,
-              child: _Avatar(faceImage: profile?.faceImage, colors: colors),
+              child: UserAvatar(
+                faceImage: profile?.faceImage,
+                size: 48.r,
+                radius: 16.r,
+              ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,63 +110,3 @@ class _NotificationButton extends StatelessWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.faceImage, required this.colors});
-
-  final String? faceImage;
-  final AppColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48.r,
-      height: 48.r,
-      child: ClipRRect(
-        borderRadius: BorderRadiusGeometry.circular(16),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.avatarPlaceholder,
-            borderRadius: BorderRadius.circular(16)
-          ),
-          child: _image(),
-        ),
-      ),
-    );
-  }
-
-  Widget _image() {
-    final src = faceImage?.trim() ?? '';
-    if (src.isEmpty) return _placeholder();
-
-    if (src.startsWith('http')) {
-      return CachedNetworkImage(
-        imageUrl: src,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => _placeholder(),
-        errorWidget: (context, url, error) => _placeholder(),
-      );
-    }
-    if (src.startsWith('/media') || src.startsWith('media')) {
-      final origin = ApiConstants.baseUrl.replaceFirst('/api', '');
-      return CachedNetworkImage(
-        imageUrl: '$origin${src.startsWith('/') ? '' : '/'}$src',
-        fit: BoxFit.cover,
-        placeholder: (context, url) => _placeholder(),
-        errorWidget: (context, url, error) => _placeholder(),
-      );
-    }
-    return Image.file(
-      File(src),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stack) => _placeholder(),
-    );
-  }
-
-  Widget _placeholder() => Center(
-        child: Assets.icons.icUser.svg(
-          width: 24.r,
-          height: 24.r,
-          colorFilter: ColorFilter.mode(colors.iconSub, BlendMode.srcIn),
-        ),
-      );
-}
