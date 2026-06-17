@@ -273,6 +273,174 @@ abstract class AppLocalizations {
   /// **'Chiqish'**
   String get homeLogout;
 
+  /// No description provided for @navHome.
+  ///
+  /// In uz, this message translates to:
+  /// **'Asosiy'**
+  String get navHome;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In uz, this message translates to:
+  /// **'Davomat tarixi'**
+  String get navHistory;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In uz, this message translates to:
+  /// **'Shaxsiy'**
+  String get navProfile;
+
+  /// No description provided for @homeWorkEndsIn.
+  ///
+  /// In uz, this message translates to:
+  /// **'ish tugashiga qoldi'**
+  String get homeWorkEndsIn;
+
+  /// No description provided for @homeWorkedToday.
+  ///
+  /// In uz, this message translates to:
+  /// **'bugungi ish vaqti'**
+  String get homeWorkedToday;
+
+  /// No description provided for @homeUntilStart.
+  ///
+  /// In uz, this message translates to:
+  /// **'ish boshlanishiga qoldi'**
+  String get homeUntilStart;
+
+  /// No description provided for @homeUntilLunch.
+  ///
+  /// In uz, this message translates to:
+  /// **'tushlikka qoldi'**
+  String get homeUntilLunch;
+
+  /// No description provided for @homeUntilLunchEnd.
+  ///
+  /// In uz, this message translates to:
+  /// **'tushlik tugashiga qoldi'**
+  String get homeUntilLunchEnd;
+
+  /// No description provided for @homeTimeToArrive.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga kelish vaqti'**
+  String get homeTimeToArrive;
+
+  /// No description provided for @homeTimeToLunchOut.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikka chiqish vaqti'**
+  String get homeTimeToLunchOut;
+
+  /// No description provided for @homeTimeToLunchIn.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikdan qaytish vaqti'**
+  String get homeTimeToLunchIn;
+
+  /// No description provided for @homeTimeToLeave.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishdan ketish vaqti'**
+  String get homeTimeToLeave;
+
+  /// No description provided for @homeSwipeArrive.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga keldim'**
+  String get homeSwipeArrive;
+
+  /// No description provided for @homeSwipeHint.
+  ///
+  /// In uz, this message translates to:
+  /// **'Belgilash uchun tugmani o‘ngga suring'**
+  String get homeSwipeHint;
+
+  /// No description provided for @homeAllDone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bugungi davomat belgilandi'**
+  String get homeAllDone;
+
+  /// No description provided for @attendanceLocationError.
+  ///
+  /// In uz, this message translates to:
+  /// **'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.'**
+  String get attendanceLocationError;
+
+  /// No description provided for @homeTodaySchedule.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bugungi tartib'**
+  String get homeTodaySchedule;
+
+  /// No description provided for @homeScheduleArrive.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga keldim'**
+  String get homeScheduleArrive;
+
+  /// No description provided for @homeScheduleLunchOut.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikka chiqdim'**
+  String get homeScheduleLunchOut;
+
+  /// No description provided for @homeScheduleLunchIn.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikdan qaytdim'**
+  String get homeScheduleLunchIn;
+
+  /// No description provided for @homeScheduleLeave.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishdan ketdim'**
+  String get homeScheduleLeave;
+
+  /// No description provided for @homeKpi.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oylik KPI'**
+  String get homeKpi;
+
+  /// No description provided for @homeMonthlyAttendance.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oylik davomat'**
+  String get homeMonthlyAttendance;
+
+  /// No description provided for @profileFieldName.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ism sharif'**
+  String get profileFieldName;
+
+  /// No description provided for @profileFieldRole.
+  ///
+  /// In uz, this message translates to:
+  /// **'Lavozim'**
+  String get profileFieldRole;
+
+  /// No description provided for @profileFieldDepartment.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bo‘lim'**
+  String get profileFieldDepartment;
+
+  /// No description provided for @profileFieldPhone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Telefon'**
+  String get profileFieldPhone;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In uz, this message translates to:
+  /// **'Hozircha davomat yozuvlari yo‘q'**
+  String get historyEmpty;
+
   /// No description provided for @profilePhotoPromptTitle.
   ///
   /// In uz, this message translates to:
@@ -326,6 +494,198 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Internet aloqasi yo‘q. Ulanishni tekshiring.'**
   String get networkError;
+
+  /// No description provided for @onbWelcomeTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Xush kelibsiz!'**
+  String get onbWelcomeTitle;
+
+  /// No description provided for @onbWelcomeSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bu ilova orqali ishga kelish va ketishingizni qayd etasiz. Birinchi kirishda bir martalik sozlash kerak — bu 2 daqiqa vaqt oladi.'**
+  String get onbWelcomeSubtitle;
+
+  /// No description provided for @onbRoleEmployee.
+  ///
+  /// In uz, this message translates to:
+  /// **'Xodim'**
+  String get onbRoleEmployee;
+
+  /// No description provided for @onbContinue.
+  ///
+  /// In uz, this message translates to:
+  /// **'Davom etish'**
+  String get onbContinue;
+
+  /// No description provided for @onbPermissionsTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ruxsatlar'**
+  String get onbPermissionsTitle;
+
+  /// No description provided for @onbPermissionsSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ilova ishlashi uchun ikkita ruxsat zarur.'**
+  String get onbPermissionsSubtitle;
+
+  /// No description provided for @onbPermLocationTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Joylashuv (GPS)'**
+  String get onbPermLocationTitle;
+
+  /// No description provided for @onbPermLocationDesc.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ish hududida ekaningizni tekshirish uchun'**
+  String get onbPermLocationDesc;
+
+  /// No description provided for @onbPermCameraTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kamera'**
+  String get onbPermCameraTitle;
+
+  /// No description provided for @onbPermCameraDesc.
+  ///
+  /// In uz, this message translates to:
+  /// **'Face ID orqali shaxsni tasdiqlash uchun'**
+  String get onbPermCameraDesc;
+
+  /// No description provided for @onbGrant.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ruxsat berish'**
+  String get onbGrant;
+
+  /// No description provided for @onbPasswordTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi parol yarating'**
+  String get onbPasswordTitle;
+
+  /// No description provided for @onbPasswordSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kadrlar bo‘limi bergan vaqtinchalik parol o‘rniga o‘z parolingizni o‘rnating.'**
+  String get onbPasswordSubtitle;
+
+  /// No description provided for @onbPasswordOldLabel.
+  ///
+  /// In uz, this message translates to:
+  /// **'Eski parol'**
+  String get onbPasswordOldLabel;
+
+  /// No description provided for @onbPasswordLabel.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi parol'**
+  String get onbPasswordLabel;
+
+  /// No description provided for @onbPasswordConfirmLabel.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi parolni tasdiqlang'**
+  String get onbPasswordConfirmLabel;
+
+  /// No description provided for @onbPasswordMismatch.
+  ///
+  /// In uz, this message translates to:
+  /// **'Parollar mos kelmadi'**
+  String get onbPasswordMismatch;
+
+  /// No description provided for @onbRuleMinLength.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kamida 8 belgi'**
+  String get onbRuleMinLength;
+
+  /// No description provided for @onbRuleUpper.
+  ///
+  /// In uz, this message translates to:
+  /// **'Katta harf (A–Z)'**
+  String get onbRuleUpper;
+
+  /// No description provided for @onbRuleLower.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kichik harf (a–z)'**
+  String get onbRuleLower;
+
+  /// No description provided for @onbRuleDigit.
+  ///
+  /// In uz, this message translates to:
+  /// **'Raqam (0–9)'**
+  String get onbRuleDigit;
+
+  /// No description provided for @onbRuleSpecial.
+  ///
+  /// In uz, this message translates to:
+  /// **'Maxsus belgi (!@#\$%...)'**
+  String get onbRuleSpecial;
+
+  /// No description provided for @onbImageTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Shaxsiy rasmini o‘rnating'**
+  String get onbImageTitle;
+
+  /// No description provided for @onbImageSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bu rasm sizning asosiy suratingiz bo‘ladi. Har safar kirishda yuzingiz shu rasm bilan tekshiriladi.'**
+  String get onbImageSubtitle;
+
+  /// No description provided for @onbImageUpload.
+  ///
+  /// In uz, this message translates to:
+  /// **'Rasm yuklash'**
+  String get onbImageUpload;
+
+  /// No description provided for @onbImageHint.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuzingizni to‘liq ko‘rinsin'**
+  String get onbImageHint;
+
+  /// No description provided for @onbFaceTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuzni tekshirish'**
+  String get onbFaceTitle;
+
+  /// No description provided for @onbFaceSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuzingiz profil rasmi bilan solishtiriladi — mos kelsa, dasturga kiritilasiz.'**
+  String get onbFaceSubtitle;
+
+  /// No description provided for @onbFaceStart.
+  ///
+  /// In uz, this message translates to:
+  /// **'Skanerlashni boshlash'**
+  String get onbFaceStart;
+
+  /// No description provided for @onbDoneTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Hammasi tayyor!'**
+  String get onbDoneTitle;
+
+  /// No description provided for @onbDoneSubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Endi davomatingizni qayd etishingiz mumkin. Har kuni ishga kelganda «Ishga keldim» tugmasini suring.'**
+  String get onbDoneSubtitle;
+
+  /// No description provided for @onbDoneStart.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishni boshlash'**
+  String get onbDoneStart;
 }
 
 class _AppLocalizationsDelegate

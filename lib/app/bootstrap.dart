@@ -1,17 +1,17 @@
 import 'package:flutter/widgets.dart';
 
 import '../injection_container.dart';
-import 'bloc/session_bloc.dart';
 
 
 Future<void> bootstrap(Widget Function() builder) async {
   WidgetsFlutterBinding.ensureInitialized();
   // await SupabaseService.initialize();
   await configureDependencies();
-  // Resolve persisted session before first frame so the router has a
-  // concrete status (authenticated / unauthenticated) to act on.
-  final session = getIt<SessionBloc>()..add(const SessionStarted());
-  await session.stream.firstWhere((state) => state.isResolved);
+  // Session stays `unknown` (the router guard holds on the animated SplashPage,
+  // which the native splash hands off to). [SplashPage] dispatches
+  // [SessionStarted] only after its «Davomat» reveal finishes, so the splash is
+  // always visible for its full duration regardless of engine warm-up — then
+  // the guard redirects to login / face / home.
   // Bloc.observer = const AppBlocObserver();
   runApp(builder());
 }

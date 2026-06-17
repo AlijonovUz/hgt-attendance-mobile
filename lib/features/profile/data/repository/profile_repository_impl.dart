@@ -13,8 +13,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remote;
 
   @override
-  Future<Profile> getProfile() => _guard(() async {
-        final model = await _remote.getProfile();
+  Future<Profile> getProfile({String? accessToken}) => _guard(() async {
+        final model = await _remote.getProfile(accessToken: accessToken);
         return model.toEntity();
       });
 

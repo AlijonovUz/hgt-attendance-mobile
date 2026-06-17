@@ -19,6 +19,8 @@ class LoginState extends Equatable {
     this.accessToken,
     this.refreshToken,
     this.faceImage,
+    this.responseFullName,
+    this.isPasswordChanged = true,
   });
 
   /// Blokgacha ruxsat etilgan urinishlar soni (mobil tomonda sanaladi).
@@ -55,6 +57,14 @@ class LoginState extends Equatable {
   /// Login javobidagi `data.user.face_image` — `null` → yuzdan oldin rasm so‘raladi.
   final String? faceImage;
 
+  /// Login javobidagi `data.user.full_name` — onboarding kartasi uchun
+  /// (kiritilgan `fullName`dan ustun, mavjud bo‘lsa).
+  final String? responseFullName;
+
+  /// Login javobidagi `data.user.is_password_changed` — `false` → onboardingda
+  /// yangi parol o‘rnatish bosqichi ko‘rsatiladi.
+  final bool isPasswordChanged;
+
   bool get isLoading => status == LoginStatus.loading;
   bool get isBlocked =>
       errorKind == LoginErrorKind.blocked && blockedSeconds > 0;
@@ -88,6 +98,8 @@ class LoginState extends Equatable {
     String? accessToken,
     String? refreshToken,
     String? faceImage,
+    String? responseFullName,
+    bool? isPasswordChanged,
   }) {
     return LoginState(
       fullName: fullName ?? this.fullName,
@@ -102,6 +114,8 @@ class LoginState extends Equatable {
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
       faceImage: faceImage ?? this.faceImage,
+      responseFullName: responseFullName ?? this.responseFullName,
+      isPasswordChanged: isPasswordChanged ?? this.isPasswordChanged,
     );
   }
 
@@ -119,5 +133,7 @@ class LoginState extends Equatable {
         accessToken,
         refreshToken,
         faceImage,
+        responseFullName,
+        isPasswordChanged,
       ];
 }

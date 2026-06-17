@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/gen/fonts.gen.dart';
 import 'app_colors.dart';
 import 'theme_colors.dart';
 
@@ -35,10 +35,11 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: appColors.backgroundBase,
+      // Figma `family/sans` — lokal Inter (flutter_gen: `FontFamily.inter`).
+      fontFamily: FontFamily.inter,
     );
 
     return base.copyWith(
-      textTheme: GoogleFonts.manropeTextTheme(base.textTheme),
       extensions: <ThemeExtension<dynamic>>[appColors, themeColors],
     );
   }

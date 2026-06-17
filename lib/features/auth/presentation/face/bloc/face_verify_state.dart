@@ -21,6 +21,7 @@ class FaceVerifyState extends Equatable {
     this.status = FaceStatus.initializing,
     this.failureKind = FaceFailureKind.none,
     this.fullName = '',
+    this.failureMessage,
   });
 
   final FaceStatus status;
@@ -28,6 +29,9 @@ class FaceVerifyState extends Equatable {
 
   /// Karta sarlavhasi uchun login’da kiritilgan ism.
   final String fullName;
+
+  /// Backend `errorMsg`i (mavjud bo‘lsa) — to‘g‘ridan-to‘g‘ri ko‘rsatiladi.
+  final String? failureMessage;
 
   bool get isCameraLive =>
       status == FaceStatus.scanning ||
@@ -40,14 +44,19 @@ class FaceVerifyState extends Equatable {
     FaceStatus? status,
     FaceFailureKind? failureKind,
     String? fullName,
+    String? failureMessage,
+    bool clearFailureMessage = false,
   }) {
     return FaceVerifyState(
       status: status ?? this.status,
       failureKind: failureKind ?? this.failureKind,
       fullName: fullName ?? this.fullName,
+      failureMessage: clearFailureMessage
+          ? null
+          : (failureMessage ?? this.failureMessage),
     );
   }
 
   @override
-  List<Object?> get props => [status, failureKind, fullName];
+  List<Object?> get props => [status, failureKind, fullName, failureMessage];
 }

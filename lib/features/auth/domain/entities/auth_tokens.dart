@@ -1,20 +1,29 @@
 import 'package:equatable/equatable.dart';
 
-/// Kirish (access) va yangilash (refresh) tokenlari + profil rasm holati.
+/// Kirish (access) va yangilash (refresh) tokenlari + login javobidagi profil
+/// holati (onboarding oqimini boshqarish uchun).
 ///
-/// [faceImage] login javobidagi `data.user.face_image` — `null` bo‘lsa yuz
-/// tasdig‘idan oldin foydalanuvchidan profil rasmi so‘raladi.
+/// [faceImage] login javobidagi `data.user.face_image` — `null`/bo‘sh bo‘lsa
+/// onboardingda rasm yuklash bosqichi ko‘rsatiladi.
+/// [isPasswordChanged] `data.user.is_password_changed` — `false` bo‘lsa
+/// onboardingda yangi parol o‘rnatish bosqichi ko‘rsatiladi.
+/// [fullName] `data.user.full_name` — onboarding kartasida ko‘rsatiladi.
 class AuthTokens extends Equatable {
   const AuthTokens({
     required this.access,
     required this.refresh,
     this.faceImage,
+    this.fullName,
+    this.isPasswordChanged = true,
   });
 
   final String access;
   final String refresh;
   final String? faceImage;
+  final String? fullName;
+  final bool isPasswordChanged;
 
   @override
-  List<Object?> get props => [access, refresh, faceImage];
+  List<Object?> get props =>
+      [access, refresh, faceImage, fullName, isPasswordChanged];
 }

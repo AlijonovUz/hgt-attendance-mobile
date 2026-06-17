@@ -15,7 +15,6 @@ dependencies:
   get_it: ^9.2.1
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
-  google_fonts: ^8.1.0
   gap: ^3.0.1
   intl: ^0.20.2
   flutter_gen: ^5.14.1
@@ -33,6 +32,8 @@ dependencies:
   camera: ^0.12.0+1
   google_mlkit_face_detection: ^0.13.2
   image_picker: ^1.1.2
+  geolocator: ^13.0.0
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -59,3 +60,73 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+  # ── Inter (Figma `family/sans`) — lokal statik fontlar (18pt optik o‘lcham).
+  # Manrope’dan voz kechildi. Barcha matn shu oila orqali (ThemeData.fontFamily
+  # + text_extensions defaulti) chiqadi.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter_18pt-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Inter_18pt-ThinItalic.ttf
+          weight: 100
+          style: italic
+        - asset: assets/fonts/Inter_18pt-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Inter_18pt-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Inter_18pt-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter_18pt-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Inter_18pt-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter_18pt-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Inter_18pt-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter_18pt-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Inter_18pt-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter_18pt-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Inter_18pt-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter_18pt-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Inter_18pt-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Inter_18pt-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Inter_18pt-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Inter_18pt-BlackItalic.ttf
+          weight: 900
+          style: italic
+
+# ── Native splash (flutter_native_splash) ───────────────────────────────────
+# Minimal OS splash: solid brand color only (light + dark), no logo. Android
+# 12+ cannot render a full background image natively, so the native frame is
+# kept a plain color and the Flutter SplashPage owns the full branded visual
+# (background image + tinted logo + animated «Davomat» wordmark). The colors
+# match the SplashPage base so the native → Flutter handoff is seamless.
+# Regenerate after edits with:
+#   dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#D6E6FB"
+  color_dark: "#0A0A0A"
+  android: true
+  ios: true
+  web: false
+  android_12:
+    color: "#D6E6FB"
+    color_dark: "#0A0A0A"

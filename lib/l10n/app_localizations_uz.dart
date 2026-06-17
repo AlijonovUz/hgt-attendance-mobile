@@ -104,6 +104,91 @@ class AppLocalizationsUz extends AppLocalizations {
   String get homeLogout => 'Chiqish';
 
   @override
+  String get navHome => 'Asosiy';
+
+  @override
+  String get navHistory => 'Davomat tarixi';
+
+  @override
+  String get navProfile => 'Shaxsiy';
+
+  @override
+  String get homeWorkEndsIn => 'ish tugashiga qoldi';
+
+  @override
+  String get homeWorkedToday => 'bugungi ish vaqti';
+
+  @override
+  String get homeUntilStart => 'ish boshlanishiga qoldi';
+
+  @override
+  String get homeUntilLunch => 'tushlikka qoldi';
+
+  @override
+  String get homeUntilLunchEnd => 'tushlik tugashiga qoldi';
+
+  @override
+  String get homeTimeToArrive => 'Ishga kelish vaqti';
+
+  @override
+  String get homeTimeToLunchOut => 'Tushlikka chiqish vaqti';
+
+  @override
+  String get homeTimeToLunchIn => 'Tushlikdan qaytish vaqti';
+
+  @override
+  String get homeTimeToLeave => 'Ishdan ketish vaqti';
+
+  @override
+  String get homeSwipeArrive => 'Ishga keldim';
+
+  @override
+  String get homeSwipeHint => 'Belgilash uchun tugmani o‘ngga suring';
+
+  @override
+  String get homeAllDone => 'Bugungi davomat belgilandi';
+
+  @override
+  String get attendanceLocationError =>
+      'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.';
+
+  @override
+  String get homeTodaySchedule => 'Bugungi tartib';
+
+  @override
+  String get homeScheduleArrive => 'Ishga keldim';
+
+  @override
+  String get homeScheduleLunchOut => 'Tushlikka chiqdim';
+
+  @override
+  String get homeScheduleLunchIn => 'Tushlikdan qaytdim';
+
+  @override
+  String get homeScheduleLeave => 'Ishdan ketdim';
+
+  @override
+  String get homeKpi => 'Oylik KPI';
+
+  @override
+  String get homeMonthlyAttendance => 'Oylik davomat';
+
+  @override
+  String get profileFieldName => 'Ism sharif';
+
+  @override
+  String get profileFieldRole => 'Lavozim';
+
+  @override
+  String get profileFieldDepartment => 'Bo‘lim';
+
+  @override
+  String get profileFieldPhone => 'Telefon';
+
+  @override
+  String get historyEmpty => 'Hozircha davomat yozuvlari yo‘q';
+
+  @override
   String get profilePhotoPromptTitle =>
       'Iltimos, skanerlashdan o‘tish uchun profilingiz uchun shaxsiy rasmingizni o‘rnating!';
 
@@ -131,6 +216,108 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get networkError => 'Internet aloqasi yo‘q. Ulanishni tekshiring.';
+
+  @override
+  String get onbWelcomeTitle => 'Xush kelibsiz!';
+
+  @override
+  String get onbWelcomeSubtitle =>
+      'Bu ilova orqali ishga kelish va ketishingizni qayd etasiz. Birinchi kirishda bir martalik sozlash kerak — bu 2 daqiqa vaqt oladi.';
+
+  @override
+  String get onbRoleEmployee => 'Xodim';
+
+  @override
+  String get onbContinue => 'Davom etish';
+
+  @override
+  String get onbPermissionsTitle => 'Ruxsatlar';
+
+  @override
+  String get onbPermissionsSubtitle =>
+      'Ilova ishlashi uchun ikkita ruxsat zarur.';
+
+  @override
+  String get onbPermLocationTitle => 'Joylashuv (GPS)';
+
+  @override
+  String get onbPermLocationDesc => 'Ish hududida ekaningizni tekshirish uchun';
+
+  @override
+  String get onbPermCameraTitle => 'Kamera';
+
+  @override
+  String get onbPermCameraDesc => 'Face ID orqali shaxsni tasdiqlash uchun';
+
+  @override
+  String get onbGrant => 'Ruxsat berish';
+
+  @override
+  String get onbPasswordTitle => 'Yangi parol yarating';
+
+  @override
+  String get onbPasswordSubtitle =>
+      'Kadrlar bo‘limi bergan vaqtinchalik parol o‘rniga o‘z parolingizni o‘rnating.';
+
+  @override
+  String get onbPasswordOldLabel => 'Eski parol';
+
+  @override
+  String get onbPasswordLabel => 'Yangi parol';
+
+  @override
+  String get onbPasswordConfirmLabel => 'Yangi parolni tasdiqlang';
+
+  @override
+  String get onbPasswordMismatch => 'Parollar mos kelmadi';
+
+  @override
+  String get onbRuleMinLength => 'Kamida 8 belgi';
+
+  @override
+  String get onbRuleUpper => 'Katta harf (A–Z)';
+
+  @override
+  String get onbRuleLower => 'Kichik harf (a–z)';
+
+  @override
+  String get onbRuleDigit => 'Raqam (0–9)';
+
+  @override
+  String get onbRuleSpecial => 'Maxsus belgi (!@#\$%...)';
+
+  @override
+  String get onbImageTitle => 'Shaxsiy rasmini o‘rnating';
+
+  @override
+  String get onbImageSubtitle =>
+      'Bu rasm sizning asosiy suratingiz bo‘ladi. Har safar kirishda yuzingiz shu rasm bilan tekshiriladi.';
+
+  @override
+  String get onbImageUpload => 'Rasm yuklash';
+
+  @override
+  String get onbImageHint => 'Yuzingizni to‘liq ko‘rinsin';
+
+  @override
+  String get onbFaceTitle => 'Yuzni tekshirish';
+
+  @override
+  String get onbFaceSubtitle =>
+      'Yuzingiz profil rasmi bilan solishtiriladi — mos kelsa, dasturga kiritilasiz.';
+
+  @override
+  String get onbFaceStart => 'Skanerlashni boshlash';
+
+  @override
+  String get onbDoneTitle => 'Hammasi tayyor!';
+
+  @override
+  String get onbDoneSubtitle =>
+      'Endi davomatingizni qayd etishingiz mumkin. Har kuni ishga kelganda «Ishga keldim» tugmasini suring.';
+
+  @override
+  String get onbDoneStart => 'Ishni boshlash';
 }
 
 /// The translations for Uzbek, using the Cyrillic script (`uz_Cyrl`).
@@ -233,6 +420,91 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
   String get homeLogout => 'Чиқиш';
 
   @override
+  String get navHome => 'Асосий';
+
+  @override
+  String get navHistory => 'Давомат тарихи';
+
+  @override
+  String get navProfile => 'Шахсий';
+
+  @override
+  String get homeWorkEndsIn => 'иш тугашига қолди';
+
+  @override
+  String get homeWorkedToday => 'бугунги иш вақти';
+
+  @override
+  String get homeUntilStart => 'иш бошланишига қолди';
+
+  @override
+  String get homeUntilLunch => 'тушликка қолди';
+
+  @override
+  String get homeUntilLunchEnd => 'тушлик тугашига қолди';
+
+  @override
+  String get homeTimeToArrive => 'Ишга келиш вақти';
+
+  @override
+  String get homeTimeToLunchOut => 'Тушликка чиқиш вақти';
+
+  @override
+  String get homeTimeToLunchIn => 'Тушликдан қайтиш вақти';
+
+  @override
+  String get homeTimeToLeave => 'Ишдан кетиш вақти';
+
+  @override
+  String get homeSwipeArrive => 'Ишга келдим';
+
+  @override
+  String get homeSwipeHint => 'Белгилаш учун тугмани ўнгга суринг';
+
+  @override
+  String get homeAllDone => 'Бугунги давомат белгиланди';
+
+  @override
+  String get attendanceLocationError =>
+      'Жойлашув аниқланмади. GPS ва рухсатни текширинг.';
+
+  @override
+  String get homeTodaySchedule => 'Бугунги тартиб';
+
+  @override
+  String get homeScheduleArrive => 'Ишга келдим';
+
+  @override
+  String get homeScheduleLunchOut => 'Тушликка чиқдим';
+
+  @override
+  String get homeScheduleLunchIn => 'Тушликдан қайтдим';
+
+  @override
+  String get homeScheduleLeave => 'Ишдан кетдим';
+
+  @override
+  String get homeKpi => 'Ойлик KPI';
+
+  @override
+  String get homeMonthlyAttendance => 'Ойлик давомат';
+
+  @override
+  String get profileFieldName => 'Исм шариф';
+
+  @override
+  String get profileFieldRole => 'Лавозим';
+
+  @override
+  String get profileFieldDepartment => 'Бўлим';
+
+  @override
+  String get profileFieldPhone => 'Телефон';
+
+  @override
+  String get historyEmpty => 'Ҳозирча давомат ёзувлари йўқ';
+
+  @override
   String get profilePhotoPromptTitle =>
       'Илтимос, сканерлашдан ўтиш учун профилингиз учун шахсий расмингизни ўрнатинг!';
 
@@ -260,4 +532,105 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get networkError => 'Интернет алоқаси йўқ. Уланишни текширинг.';
+
+  @override
+  String get onbWelcomeTitle => 'Хуш келибсиз!';
+
+  @override
+  String get onbWelcomeSubtitle =>
+      'Бу илова орқали ишга келиш ва кетишингизни қайд этасиз. Биринчи киришда бир марталик созлаш керак — бу 2 дақиқа вақт олади.';
+
+  @override
+  String get onbRoleEmployee => 'Ходим';
+
+  @override
+  String get onbContinue => 'Давом этиш';
+
+  @override
+  String get onbPermissionsTitle => 'Рухсатлар';
+
+  @override
+  String get onbPermissionsSubtitle => 'Илова ишлаши учун иккита рухсат зарур.';
+
+  @override
+  String get onbPermLocationTitle => 'Жойлашув (GPS)';
+
+  @override
+  String get onbPermLocationDesc => 'Иш ҳудудида эканингизни текшириш учун';
+
+  @override
+  String get onbPermCameraTitle => 'Камера';
+
+  @override
+  String get onbPermCameraDesc => 'Face ID орқали шахсни тасдиқлаш учун';
+
+  @override
+  String get onbGrant => 'Рухсат бериш';
+
+  @override
+  String get onbPasswordTitle => 'Янги парол яратинг';
+
+  @override
+  String get onbPasswordSubtitle =>
+      'Кадрлар бўлими берган вақтинчалик парол ўрнига ўз паролингизни ўрнатинг.';
+
+  @override
+  String get onbPasswordOldLabel => 'Эски парол';
+
+  @override
+  String get onbPasswordLabel => 'Янги парол';
+
+  @override
+  String get onbPasswordConfirmLabel => 'Янги паролни тасдиқланг';
+
+  @override
+  String get onbPasswordMismatch => 'Пароллар мос келмади';
+
+  @override
+  String get onbRuleMinLength => 'Камида 8 белги';
+
+  @override
+  String get onbRuleUpper => 'Катта ҳарф (A–Z)';
+
+  @override
+  String get onbRuleLower => 'Кичик ҳарф (a–z)';
+
+  @override
+  String get onbRuleDigit => 'Рақам (0–9)';
+
+  @override
+  String get onbRuleSpecial => 'Махсус белги (!@#\$%...)';
+
+  @override
+  String get onbImageTitle => 'Шахсий расмини ўрнатинг';
+
+  @override
+  String get onbImageSubtitle =>
+      'Бу расм сизнинг асосий суратингиз бўлади. Ҳар сафар киришда юзингиз шу расм билан текширилади.';
+
+  @override
+  String get onbImageUpload => 'Расм юклаш';
+
+  @override
+  String get onbImageHint => 'Юзингизни тўлиқ кўринсин';
+
+  @override
+  String get onbFaceTitle => 'Юзни текшириш';
+
+  @override
+  String get onbFaceSubtitle =>
+      'Юзингиз профил расми билан солиштирилади — мос келса, дастурга киритиласиз.';
+
+  @override
+  String get onbFaceStart => 'Сканерлашни бошлаш';
+
+  @override
+  String get onbDoneTitle => 'Ҳаммаси тайёр!';
+
+  @override
+  String get onbDoneSubtitle =>
+      'Энди давоматингизни қайд этишингиз мумкин. Ҳар куни ишга келганда «Ишга келдим» тугмасини суринг.';
+
+  @override
+  String get onbDoneStart => 'Ишни бошлаш';
 }

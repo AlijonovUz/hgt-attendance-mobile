@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/image_picker_service.dart';
-import '../../../../core/usecases/no_params.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
 import '../../domain/usecases/update_face_image_usecase.dart';
@@ -56,7 +55,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       loadErrorKind: ProfileErrorKind.none,
     ));
     try {
-      final profile = await _getProfile(const NoParams());
+      final profile = await _getProfile(const GetProfileParams());
       emit(state.copyWith(status: ProfileStatus.loaded, profile: profile));
     } on Failure catch (failure) {
       emit(state.copyWith(

@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/bloc/session_bloc.dart';
 import '../../features/attendance/presentation/pages/attendance_page.dart';
+import '../../features/attendance/domain/entities/attendance_event_type.dart';
+import '../../features/attendance/presentation/pages/attendance_face_page.dart';
 import '../../features/auth/presentation/face/pages/face_verify_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import 'entity/routes.dart';
 
 /// Root navigator key — exposed for context-free navigation (snackbars,
@@ -48,6 +51,11 @@ class AppRouter {
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
+          name: Routes.onboarding.name,
+          path: Routes.onboarding.path,
+          builder: (context, state) => const OnboardingPage(),
+        ),
+        GoRoute(
           name: Routes.faceVerify.name,
           path: Routes.faceVerify.path,
           builder: (context, state) => const FaceVerifyPage(),
@@ -61,6 +69,12 @@ class AppRouter {
           name: Routes.home.name,
           path: Routes.home.path,
           builder: (context, state) => const HomePage(),
+        ),
+        GoRoute(
+          name: Routes.attendanceFace.name,
+          path: Routes.attendanceFace.path,
+          builder: (context, state) =>
+              AttendanceFacePage(eventType: state.extra as AttendanceEventType),
         ),
       ],
     );
@@ -76,7 +90,7 @@ class AppRouter {
 
     final onSplash = location == Routes.splash.path;
     final onLogin = location == Routes.login.path;
-    final onFace = location == Routes.faceVerify.path;
+    final onOnboarding = location == Routes.onboarding.path;
 
     // Still resolving stored session -> hold on splash.
     if (!session.isResolved) {
@@ -88,13 +102,13 @@ class AppRouter {
       return onLogin ? null : Routes.login.path;
     }
 
-    // Logged in but face not yet verified -> face screen.
+    // Logged in but onboarding (incl. face verify) not finished -> onboarding.
     if (session.isFaceVerificationRequired) {
-      return onFace ? null : Routes.faceVerify.path;
+      return onOnboarding ? null : Routes.onboarding.path;
     }
 
     // Fully authenticated: keep away from gates.
-    if (onSplash || onLogin || onFace) {
+    if (onSplash || onLogin || onOnboarding) {
       return Routes.home.path;
     }
 
@@ -107,9 +121,9 @@ class AppRouter {
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
-    _subscription = stream
-        .asBroadcastStream()
-        .listen((dynamic _) => notifyListeners());
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
   }
 
   late final StreamSubscription<dynamic> _subscription;

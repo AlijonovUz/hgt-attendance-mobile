@@ -3,46 +3,55 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/bloc/session_bloc.dart';
-import '../../../../app/bloc/theme/theme_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
+import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../attendance/presentation/pages/davomat_tarixi_page.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../../../profile/presentation/widgets/profile_avatar_card.dart';
+import '../../../profile/presentation/pages/shaxsiy_page.dart';
 import '../../../profile/presentation/widgets/profile_photo_prompt_sheet.dart';
+import '../bloc/attendance_bloc.dart';
+import 'asosiy_page.dart';
 
-/// Autentifikatsiyadan keyingi asosiy ekran (Figma 57-2578).
+/// Autentifikatsiyadan keyingi asosiy qobiq (shell): pastki navigatsiya bilan
+/// uchta tab — Asosiy / Davomat tarixi / Shaxsiy (Figma 57:2055, 125:488).
 ///
-/// Yuklanishida profil olinadi; profil rasmi (`face_image`) yo‘q bo‘lsa
-/// «shaxsiy rasm o‘rnating» modali avtomatik ochiladi. Foydalanuvchi qurilmadan
-/// rasm tanlab yuklaydi → PATCH `face_image`.
+/// [ProfileBloc] shu yerda taqdim etiladi va Asosiy header avatari hamda
+/// Shaxsiy tab o‘rtasida bo‘lishiladi. Profil rasmi (`face_image`) yo‘q bo‘lsa
+/// «shaxsiy rasm o‘rnating» modali avtomatik ochiladi.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ProfileBloc>(
-      create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested()),
-      child: const _HomeView(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ProfileBloc>(
+          create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested()),
+        ),
+        BlocProvider<AttendanceBloc>(create: (_) => getIt<AttendanceBloc>()),
+      ],
+      child: const _HomeShell(),
     );
   }
 }
 
-class _HomeView extends StatefulWidget {
-  const _HomeView();
+class _HomeShell extends StatefulWidget {
+  const _HomeShell();
 
   @override
-  State<_HomeView> createState() => _HomeViewState();
+  State<_HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeViewState extends State<_HomeView> {
+class _HomeShellState extends State<_HomeShell> {
+  int _index = 0;
   bool _promptShown = false;
 
   void _openPrompt() {
-    final bloc = context.read<ProfileBloc>();
-    showProfilePhotoPrompt(context, bloc);
+    showProfilePhotoPrompt(context, context.read<ProfileBloc>());
   }
 
   Future<void> _confirmLogout() async {
@@ -78,7 +87,7 @@ class _HomeViewState extends State<_HomeView> {
 
     return Scaffold(
       backgroundColor: colors.backgroundBase,
-      body: BlocConsumer<ProfileBloc, ProfileState>(
+      body: BlocListener<ProfileBloc, ProfileState>(
         listenWhen: (p, c) => p.needsPhoto != c.needsPhoto,
         listener: (context, state) {
           if (state.needsPhoto && !_promptShown) {
@@ -88,110 +97,35 @@ class _HomeViewState extends State<_HomeView> {
             });
           }
         },
-        builder: (context, state) {
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 12.h),
-                  ProfileAvatarCard(
-                    profile: state.profile,
-                    usernameFallback: l10n.profileUsernameFallback,
-                    onTap: state.needsPhoto ? _openPrompt : null,
-                    onLongPress: _confirmLogout,
-                  ),
-                  SizedBox(height: 24.h),
-                  const Center(child: _ControlPill()),
-                ],
-              ),
+        child: IndexedStack(
+          index: _index,
+          children: [
+            AsosiyPage(
+              onAvatarNeedsPhoto: _openPrompt,
+              onLogout: _confirmLogout,
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Markazlashgan segment (Figma `Frame 1999`): tema almashtirish + yuz skani.
-class _ControlPill extends StatelessWidget {
-  const _ControlPill();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return BlocBuilder<ThemeBloc, ThemeMode>(
-      builder: (context, mode) {
-        final isDark = mode == ThemeMode.dark ||
-            (mode == ThemeMode.system &&
-                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.backgroundElevation1Alt,
-            borderRadius: BorderRadius.circular(999.r),
-            border: Border.all(color: colors.strokeSoft),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(3.r),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _PillButton(
-                  icon: isDark
-                      ? Assets.icons.icHugeiconsMoon
-                      : Assets.icons.icHugeiconsSun,
-                  colors: colors,
-                  onTap: () => context.read<ThemeBloc>().add(
-                        ThemeModeSelected(
-                          isDark ? ThemeMode.light : ThemeMode.dark,
-                        ),
-                      ),
-                ),
-                _PillButton(
-                  icon: Assets.icons.icLucideScanFace,
-                  colors: colors,
-                  onTap: () => context
-                      .read<ProfileBloc>()
-                      .add(const ProfileRequested()),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _PillButton extends StatelessWidget {
-  const _PillButton({
-    required this.icon,
-    required this.colors,
-    required this.onTap,
-  });
-
-  final SvgGenImage icon;
-  final AppColors colors;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 52.w,
-        height: 36.h,
-        child: Center(
-          child: icon.svg(
-            width: 20.r,
-            height: 20.r,
-            colorFilter: ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
-          ),
+            const DavomatTarixiPage(),
+            ShaxsiyPage(onLogout: _confirmLogout),
+          ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: _index,
+        onTap: (i) => setState(() => _index = i),
+        items: [
+          AppBottomNavItem(
+            icon: Assets.icons.icHugeiconsMenuSquare,
+            label: l10n.navHome,
+          ),
+          AppBottomNavItem(
+            icon: Assets.icons.icHugeiconsClock,
+            label: l10n.navHistory,
+          ),
+          AppBottomNavItem(
+            icon: Assets.icons.icHugeiconsMale,
+            label: l10n.navProfile,
+          ),
+        ],
       ),
     );
   }

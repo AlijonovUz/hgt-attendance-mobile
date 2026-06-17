@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../config/theme/app_colors.dart';
+import '../extentions/text_extensions.dart';
 import '../gen/assets.gen.dart';
 
 /// Loyihaning umumiy kiritish maydoni.
@@ -40,6 +40,8 @@ class CustomTextField extends StatefulWidget {
     this.suffixIcon,
     this.autovalidateMode,
     this.autofocus = false,
+    this.backgroundColor,
+    this.disabledBackgroundColor,
   });
 
   final TextEditingController? controller;
@@ -73,12 +75,44 @@ class CustomTextField extends StatefulWidget {
   final AutovalidateMode? autovalidateMode;
   final bool autofocus;
 
+  /// Yoqilgan holatdagi fon (`fillColor`) — berilmasa `backgroundElevation1Alt`.
+  final Color? backgroundColor;
+
+  /// O‘chirilgan holatdagi fon — berilmasa `controlBgDisabled`.
+  final Color? disabledBackgroundColor;
+
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
   late bool _obscured = widget.obscureText;
+
+  /// Matn bormi — yashirish/ko‘rsatish tugmasi faqat matn kiritilganda chiqadi.
+  late bool _hasText =
+      (widget.controller?.text ?? widget.initialValue ?? '').isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    final has = widget.controller!.text.isNotEmpty;
+    if (has != _hasText) setState(() => _hasText = has);
+  }
+
+  void _syncHasText(String value) {
+    final has = value.isNotEmpty;
+    if (has != _hasText) setState(() => _hasText = has);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onControllerChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +126,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     // Tashqi xato bo‘lsa oddiy/fokus ramkalar ham qizil bo‘ladi.
     final idleStroke = widget.hasError ? colors.errorStrong : colors.strokeSoft;
-    final focusStroke = widget.hasError ? colors.errorStrong : colors.strokeAccent;
+    final focusStroke = widget.hasError
+        ? colors.errorStrong
+        : colors.strokeAccent;
 
-    final textStyle = GoogleFonts.manrope(
+    final textStyle = kBaseTextStyle.copyWith(
       fontSize: 14.sp,
       fontWeight: FontWeight.w500,
       height: 20 / 14,
@@ -115,7 +151,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
       minLines: widget.minLines,
       maxLength: widget.maxLength,
       validator: widget.validator,
-      onChanged: widget.onChanged,
+      onChanged: (v) {
+        _syncHasText(v);
+        widget.onChanged?.call(v);
+      },
       onFieldSubmitted: widget.onSubmitted,
       onTap: widget.onTap,
       inputFormatters: widget.inputFormatters,
@@ -125,13 +164,29 @@ class _CustomTextFieldState extends State<CustomTextField> {
       decoration: InputDecoration(
         isDense: true,
         filled: true,
-        fillColor: widget.enabled ? colors.backgroundElevation1Alt : colors.controlBgDisabled,
+        fillColor: widget.enabled
+            ? (widget.backgroundColor ?? colors.backgroundElevation1Alt)
+            : (widget.disabledBackgroundColor ?? colors.controlBgDisabled),
         hintText: widget.hintText,
         labelText: widget.labelText,
         counterText: '',
-        hintStyle: GoogleFonts.manrope(fontSize: 14.sp, fontWeight: FontWeight.w400, height: 20 / 14, color: colors.controlTextSecondary),
-        labelStyle: GoogleFonts.manrope(fontSize: 14.sp, fontWeight: FontWeight.w400, color: colors.controlTextSecondary),
-        errorStyle: GoogleFonts.manrope(fontSize: 12.sp, fontWeight: FontWeight.w500, height: 16 / 12, color: colors.errorStrong),
+        hintStyle: kBaseTextStyle.copyWith(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w400,
+          height: 20 / 14,
+          color: colors.controlTextSecondary,
+        ),
+        labelStyle: kBaseTextStyle.copyWith(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w400,
+          color: colors.controlTextSecondary,
+        ),
+        errorStyle: kBaseTextStyle.copyWith(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          height: 16 / 12,
+          color: colors.errorStrong,
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         prefixIcon: widget.prefixIcon,
         prefixIconColor: colors.iconSoft,
@@ -148,12 +203,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 
   Widget? _buildSuffix(AppColors colors) {
-    if (widget.showObscureToggle && widget.obscureText) {
+    if (widget.showObscureToggle && widget.obscureText && _hasText) {
       return IconButton(
         onPressed: () => setState(() => _obscured = !_obscured),
         icon: _obscured
-            ? Assets.icons.icEyeOpen.svg(colorFilter: ColorFilter.mode(colors.iconSoft, BlendMode.srcIn))
-            : Assets.icons.icEyeClose.svg(colorFilter: ColorFilter.mode(colors.iconSoft, BlendMode.srcIn)),
+            ? Assets.icons.icEyeOpen.svg(
+                colorFilter: ColorFilter.mode(colors.iconSoft, BlendMode.srcIn),
+              )
+            : Assets.icons.icEyeClose.svg(
+                colorFilter: ColorFilter.mode(colors.iconSoft, BlendMode.srcIn),
+              ),
         /*Icon(
           _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
           size: 20.r,

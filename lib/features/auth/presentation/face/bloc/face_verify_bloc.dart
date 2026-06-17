@@ -14,6 +14,21 @@ import '../../../domain/usecases/verify_face_usecase.dart';
 part 'face_verify_event.dart';
 part 'face_verify_state.dart';
 
+/// Backend `errorMsg`ini qaytaradi — umumiy/zaxira xabarlar `null` (UI l10n
+/// fallback’iga tushadi).
+String? _friendlyFaceMessage(String message) {
+  final m = message.trim();
+  final lower = m.toLowerCase();
+  if (m.isEmpty ||
+      lower == 'server failure' ||
+      lower == 'server xatosi' ||
+      lower == 'unauthorized' ||
+      lower == 'too many requests') {
+    return null;
+  }
+  return m;
+}
+
 /// Yuz tasdig‘ini boshqaradi: kamera oqimi + ML Kit yuz aniqlash + verify-face.
 ///
 /// Tirik oqimda yuz barqaror aniqlansa, selfie avtomatik olinadi va RAM’dagi
@@ -21,8 +36,8 @@ part 'face_verify_state.dart';
 /// `SessionFaceVerified` yuboradi (tokenlar shunda saqlanadi).
 class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   FaceVerifyBloc({required VerifyFaceUseCase verifyFaceUseCase})
-      : _verifyFace = verifyFaceUseCase,
-        super(const FaceVerifyState()) {
+    : _verifyFace = verifyFaceUseCase,
+      super(const FaceVerifyState()) {
     on<FaceStarted>(_onStarted);
     on<FaceDetectionUpdated>(_onDetectionUpdated);
     on<FaceCaptureRequested>(_onCaptureRequested);
@@ -57,11 +72,14 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     Emitter<FaceVerifyState> emit,
   ) async {
     _accessToken = event.accessToken;
-    emit(state.copyWith(
-      status: FaceStatus.initializing,
-      fullName: event.fullName,
-      failureKind: FaceFailureKind.none,
-    ));
+    emit(
+      state.copyWith(
+        status: FaceStatus.initializing,
+        fullName: event.fullName,
+        failureKind: FaceFailureKind.none,
+        clearFailureMessage: true,
+      ),
+    );
 
     final granted = await _ensurePermission();
     if (!granted) {
@@ -104,8 +122,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
         front,
         ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup:
-            Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888,
+        imageFormatGroup: Platform.isAndroid
+            ? ImageFormatGroup.nv21
+            : ImageFormatGroup.bgra8888,
       );
       await controller.initialize();
       _controller = controller;
@@ -140,13 +159,17 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     if (inputImage == null) return;
 
     _detectorBusy = true;
-    _detector?.processImage(inputImage).then((faces) {
-      if (!isClosed) {
-        add(FaceDetectionUpdated(facePresent: faces.isNotEmpty));
-      }
-    }).catchError((_) {
-      // Kadr xatosi — keyingi kadrda qayta uriniladi.
-    }).whenComplete(() => _detectorBusy = false);
+    _detector
+        ?.processImage(inputImage)
+        .then((faces) {
+          if (!isClosed) {
+            add(FaceDetectionUpdated(facePresent: faces.isNotEmpty));
+          }
+        })
+        .catchError((_) {
+          // Kadr xatosi — keyingi kadrda qayta uriniladi.
+        })
+        .whenComplete(() => _detectorBusy = false);
   }
 
   void _onDetectionUpdated(
@@ -193,27 +216,41 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
         VerifyFaceParams(imagePath: shot.path, accessToken: _accessToken),
       );
       if (emit.isDone) return;
-      emit(state.copyWith(
-        status: FaceStatus.success,
-        failureKind: FaceFailureKind.none,
-      ));
+      emit(
+        state.copyWith(
+          status: FaceStatus.success,
+          failureKind: FaceFailureKind.none,
+          clearFailureMessage: true,
+        ),
+      );
     } on Failure catch (failure) {
       if (emit.isDone) return;
-      emit(state.copyWith(
-        status: FaceStatus.failure,
-        failureKind: failure is NetworkFailure
-            ? FaceFailureKind.network
-            : FaceFailureKind.verifyFailed,
-      ));
+      final isNetwork = failure is NetworkFailure;
+      emit(
+        state.copyWith(
+          status: FaceStatus.failure,
+          failureKind: isNetwork
+              ? FaceFailureKind.network
+              : FaceFailureKind.verifyFailed,
+          // Backend `errorMsg`i bo‘lsa UI uni ko‘rsatadi (aks holda l10n fallback).
+          failureMessage: isNetwork
+              ? null
+              : _friendlyFaceMessage(failure.message),
+          clearFailureMessage: isNetwork,
+        ),
+      );
       // Xato → kamerani to‘liq bo‘shatamiz (resurs/performans). Qayta urinishda
       // qaytadan ishga tushadi.
       await _disposeCamera();
     } catch (_) {
       if (emit.isDone) return;
-      emit(state.copyWith(
-        status: FaceStatus.failure,
-        failureKind: FaceFailureKind.verifyFailed,
-      ));
+      emit(
+        state.copyWith(
+          status: FaceStatus.failure,
+          failureKind: FaceFailureKind.verifyFailed,
+          clearFailureMessage: true,
+        ),
+      );
       await _disposeCamera();
     }
   }
@@ -223,10 +260,13 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     Emitter<FaceVerifyState> emit,
   ) async {
     // Xatoda kamera bo‘shatilgan — qaytadan ishga tushiramiz.
-    emit(state.copyWith(
-      status: FaceStatus.initializing,
-      failureKind: FaceFailureKind.none,
-    ));
+    emit(
+      state.copyWith(
+        status: FaceStatus.initializing,
+        failureKind: FaceFailureKind.none,
+        clearFailureMessage: true,
+      ),
+    );
 
     final ok = await _initCamera();
     if (emit.isDone) return;

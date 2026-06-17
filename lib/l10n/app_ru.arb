@@ -1,7 +1,7 @@
 {
   "@@locale": "ru",
 
-  "appName": "Давомат",
+  "appName": "Посещаемость",
 
   "loginTitle": "Вход в систему",
   "loginSubtitle": "Войдите в аккаунт, чтобы отметить посещаемость.",
@@ -37,6 +37,38 @@
 
   "homeLogout": "Выйти",
 
+  "navHome": "Главная",
+  "navHistory": "История",
+  "navProfile": "Профиль",
+
+  "homeWorkEndsIn": "до конца работы",
+  "homeWorkedToday": "отработано сегодня",
+  "homeUntilStart": "до начала работы",
+  "homeUntilLunch": "до обеда",
+  "homeUntilLunchEnd": "до конца обеда",
+  "homeTimeToArrive": "Время прийти на работу",
+  "homeTimeToLunchOut": "Время уйти на обед",
+  "homeTimeToLunchIn": "Время вернуться с обеда",
+  "homeTimeToLeave": "Время уйти с работы",
+  "homeSwipeArrive": "Я пришёл",
+  "homeSwipeHint": "Проведите кнопку вправо, чтобы отметить",
+  "homeAllDone": "Посещаемость на сегодня отмечена",
+  "attendanceLocationError": "Не удалось определить местоположение. Проверьте GPS и разрешение.",
+  "homeTodaySchedule": "Распорядок на сегодня",
+  "homeScheduleArrive": "Пришёл на работу",
+  "homeScheduleLunchOut": "Ушёл на обед",
+  "homeScheduleLunchIn": "Вернулся с обеда",
+  "homeScheduleLeave": "Ушёл с работы",
+  "homeKpi": "Месячный KPI",
+  "homeMonthlyAttendance": "Месячная посещаемость",
+
+  "profileFieldName": "Ф.И.О.",
+  "profileFieldRole": "Должность",
+  "profileFieldDepartment": "Отдел",
+  "profileFieldPhone": "Телефон",
+
+  "historyEmpty": "Пока нет записей о посещаемости",
+
   "profilePhotoPromptTitle": "Пожалуйста, установите личное фото профиля, чтобы пройти сканирование!",
   "profilePhotoUploadLabel": "Загрузить фото",
   "profilePhotoUploadButton": "Загрузить",
@@ -46,5 +78,38 @@
 
   "commonCancel": "Отмена",
   "commonError": "Что-то пошло не так. Повторите попытку позже.",
-  "networkError": "Нет подключения к интернету. Проверьте соединение."
+  "networkError": "Нет подключения к интернету. Проверьте соединение.",
+
+  "onbWelcomeTitle": "Добро пожаловать!",
+  "onbWelcomeSubtitle": "Через это приложение вы будете отмечать приход и уход с работы. При первом входе нужна разовая настройка — она займёт 2 минуты.",
+  "onbRoleEmployee": "Сотрудник",
+  "onbContinue": "Продолжить",
+  "onbPermissionsTitle": "Разрешения",
+  "onbPermissionsSubtitle": "Для работы приложения нужны два разрешения.",
+  "onbPermLocationTitle": "Местоположение (GPS)",
+  "onbPermLocationDesc": "Чтобы проверить, что вы находитесь на рабочей территории",
+  "onbPermCameraTitle": "Камера",
+  "onbPermCameraDesc": "Для подтверждения личности через Face ID",
+  "onbGrant": "Разрешить",
+  "onbPasswordTitle": "Создайте новый пароль",
+  "onbPasswordSubtitle": "Установите свой пароль вместо временного, выданного отделом кадров.",
+  "onbPasswordOldLabel": "Старый пароль",
+  "onbPasswordLabel": "Новый пароль",
+  "onbPasswordConfirmLabel": "Подтвердите новый пароль",
+  "onbPasswordMismatch": "Пароли не совпадают",
+  "onbRuleMinLength": "Не менее 8 символов",
+  "onbRuleUpper": "Заглавная буква (A–Z)",
+  "onbRuleLower": "Строчная буква (a–z)",
+  "onbRuleDigit": "Цифра (0–9)",
+  "onbRuleSpecial": "Специальный символ (!@#$%...)",
+  "onbImageTitle": "Установите личное фото",
+  "onbImageSubtitle": "Это фото станет вашим основным снимком. При каждом входе ваше лицо будет сверяться с этим фото.",
+  "onbImageUpload": "Загрузить фото",
+  "onbImageHint": "Лицо должно быть полностью видно",
+  "onbFaceTitle": "Проверка лица",
+  "onbFaceSubtitle": "Ваше лицо сверяется с фото профиля — при совпадении вы войдёте в приложение.",
+  "onbFaceStart": "Начать сканирование",
+  "onbDoneTitle": "Всё готово!",
+  "onbDoneSubtitle": "Теперь вы можете отмечать посещаемость. Каждый день при приходе на работу нажимайте кнопку «Я пришёл».",
+  "onbDoneStart": "Начать работу"
 }

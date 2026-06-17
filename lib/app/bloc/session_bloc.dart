@@ -18,12 +18,10 @@ part 'session_state.dart';
 /// yagona ikkinchi bosqich. Tokenlar yuz tasdiqlangach (`SessionFaceVerified`)
 /// saqlanadi; ungacha RAM’da turadi.
 class SessionBloc extends Bloc<SessionEvent, SessionState> {
-  SessionBloc({
-    required TokenService tokenService,
-    required StorageService storage,
-  })  : _tokenService = tokenService,
-        _storage = storage,
-        super(const SessionState.unknown()) {
+  SessionBloc({required TokenService tokenService, required StorageService storage})
+    : _tokenService = tokenService,
+      _storage = storage,
+      super(const SessionState.unknown()) {
     on<SessionStarted>(_onStarted);
     on<SessionLoginSucceeded>(_onLoginSucceeded);
     on<SessionFaceVerified>(_onFaceVerified);
@@ -38,7 +36,9 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   String? _pendingAccess;
   String? _pendingRefresh;
   String? _pendingFullName;
+  String? _pendingLoginPassword;
   String? _pendingFaceImage;
+  bool _pendingIsPasswordChanged = true;
 
   /// Yuz so‘roviga Bearer sifatida biriktiriladigan, hali saqlanmagan token.
   String? get pendingAccessToken => _pendingAccess;
@@ -46,42 +46,41 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   /// Face ekrani kartasi uchun login’da kiritilgan ism.
   String? get pendingFullName => _pendingFullName;
 
+  /// Login’da kiritilgan parol — onboarding parol bosqichida «eski parol».
+  String? get pendingLoginPassword => _pendingLoginPassword;
+
   /// Login javobidagi profil rasmi — `null`/bo‘sh bo‘lsa yuzdan oldin rasm
-  /// so‘rovi ko‘rsatiladi (face ekrani gate’i shu qiymatdan kelib chiqadi).
+  /// so‘rovi ko‘rsatiladi (onboarding gate’i shu qiymatdan kelib chiqadi).
   String? get pendingFaceImage => _pendingFaceImage;
+
+  /// Login javobidagi `is_password_changed` — onboarding parol bosqichi
+  /// shu qiymatdan kelib chiqadi (`false` → parol o‘rnatish bosqichi).
+  bool get pendingIsPasswordChanged => _pendingIsPasswordChanged;
 
   bool get _hasToken {
     final token = _tokenService.getToken();
     return token != null && token.isNotEmpty;
   }
 
-  Future<void> _onStarted(
-    SessionStarted event,
-    Emitter<SessionState> emit,
-  ) async {
+  /// Dispatched by [SplashPage] once its «Davomat» reveal animation finishes,
+  /// so the splash is guaranteed visible for its full duration regardless of
+  /// engine warm-up (the native splash covers warm-up; this resolves after).
+  Future<void> _onStarted(SessionStarted event, Emitter<SessionState> emit) async {
     // Saqlangan token bor → to‘liq autentifikatsiya (yuz qayta so‘ralmaydi).
-    emit(
-      _hasToken
-          ? const SessionState.authenticated()
-          : const SessionState.unauthenticated(),
-    );
+    emit(_hasToken ? const SessionState.authenticated() : const SessionState.unauthenticated());
   }
 
-  Future<void> _onLoginSucceeded(
-    SessionLoginSucceeded event,
-    Emitter<SessionState> emit,
-  ) async {
+  Future<void> _onLoginSucceeded(SessionLoginSucceeded event, Emitter<SessionState> emit) async {
     _pendingAccess = event.accessToken;
     _pendingRefresh = event.refreshToken;
     _pendingFullName = event.fullName;
+    _pendingLoginPassword = event.loginPassword;
     _pendingFaceImage = event.faceImage;
+    _pendingIsPasswordChanged = event.isPasswordChanged;
     emit(const SessionState.faceVerificationRequired());
   }
 
-  Future<void> _onFaceVerified(
-    SessionFaceVerified event,
-    Emitter<SessionState> emit,
-  ) async {
+  Future<void> _onFaceVerified(SessionFaceVerified event, Emitter<SessionState> emit) async {
     final access = _pendingAccess;
     final refresh = _pendingRefresh;
     if (access == null || access.isEmpty) {
@@ -100,19 +99,13 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     emit(const SessionState.authenticated());
   }
 
-  Future<void> _onExpired(
-    SessionExpired event,
-    Emitter<SessionState> emit,
-  ) async {
+  Future<void> _onExpired(SessionExpired event, Emitter<SessionState> emit) async {
     _clearPending();
     await _clearAll();
     emit(const SessionState.unauthenticated());
   }
 
-  Future<void> _onLogoutRequested(
-    SessionLogoutRequested event,
-    Emitter<SessionState> emit,
-  ) async {
+  Future<void> _onLogoutRequested(SessionLogoutRequested event, Emitter<SessionState> emit) async {
     _clearPending();
     await _clearAll();
     emit(const SessionState.unauthenticated());
@@ -122,7 +115,9 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingAccess = null;
     _pendingRefresh = null;
     _pendingFullName = null;
+    _pendingLoginPassword = null;
     _pendingFaceImage = null;
+    _pendingIsPasswordChanged = true;
   }
 
   Future<void> _clearAll() async {

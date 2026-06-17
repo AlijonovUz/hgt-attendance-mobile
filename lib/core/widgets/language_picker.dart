@@ -21,30 +21,45 @@ class LanguagePicker extends StatelessWidget {
         return PopupMenuButton<AppLanguage>(
           tooltip: '',
           position: PopupMenuPosition.under,
-          color: colors.backgroundBase,
+          offset: Offset(0, 8.h),
+          color: colors.popover,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
             side: BorderSide(color: colors.strokeSoft),
           ),
-          onSelected: (lang) =>
-              context.read<LocaleBloc>().add(LocaleChanged(lang)),
+          onSelected: (lang) => context.read<LocaleBloc>().add(LocaleChanged(lang)),
           itemBuilder: (context) => [
             for (final lang in AppLanguage.values)
               PopupMenuItem<AppLanguage>(
                 value: lang,
                 height: 44.h,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: lang.label
-                          .s(14.sp)
-                          .w(lang == current ? 600 : 500)
-                          .c(colors.textStrong)
-                          .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+                padding: EdgeInsets.zero,
+                child: Center(
+                  child: SizedBox(
+                    width: 150.w,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: lang == current ? colors.backgroundElevation2Alt : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: lang.label
+                                  .s(14.sp)
+                                  .w(400)
+                                  .c(colors.textStrong)
+                                  .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                            if (lang == current)
+                              Assets.icons.icLucideCheck.svg(width: 16.w, height: 16.h, colorFilter: ColorFilter.mode(colors.foregroundAccent, BlendMode.srcIn)),
+                          ],
+                        ),
+                      ),
                     ),
-                    if (lang == current)
-                      Icon(Icons.check, size: 18.r, color: colors.accentSub),
-                  ],
+                  ),
                 ),
               ),
           ],
@@ -52,24 +67,16 @@ class LanguagePicker extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.backgroundElevation1Alt,
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: colors.strokeSoft),
+              // border: Border.all(color: colors.strokeSoft),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                spacing: 2,
                 children: [
-                  current.shortCode
-                      .s(14.sp)
-                      .w(600)
-                      .c(colors.textStrong),
-                  SizedBox(width: 4.w),
-                  Assets.icons.icArrowDown.svg(
-                    width: 16.r,
-                    height: 16.r,
-                    colorFilter:
-                        ColorFilter.mode(colors.iconSub, BlendMode.srcIn),
-                  ),
+                  current.shortCode.s(14.sp).w(600).c(colors.textStrong),
+                  Assets.icons.icArrowDown.svg(width: 16.r, height: 16.r, colorFilter: ColorFilter.mode(colors.iconSub, BlendMode.srcIn)),
                 ],
               ),
             ),

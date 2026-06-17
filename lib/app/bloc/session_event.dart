@@ -19,7 +19,9 @@ class SessionLoginSucceeded extends SessionEvent {
     required this.accessToken,
     required this.refreshToken,
     required this.fullName,
+    this.loginPassword = '',
     this.faceImage,
+    this.isPasswordChanged = true,
   });
 
   final String accessToken;
@@ -28,12 +30,26 @@ class SessionLoginSucceeded extends SessionEvent {
   /// Login’da kiritilgan ism — face ekranidagi karta uchun (profil kelguncha).
   final String fullName;
 
+  /// Login’da kiritilgan parol — onboarding parol bosqichidagi «eski parol».
+  final String loginPassword;
+
   /// Login javobidagi profil rasmi (`data.user.face_image`) — `null` bo‘lsa
   /// yuz tasdig‘idan oldin rasm so‘rovi ko‘rsatiladi.
   final String? faceImage;
 
+  /// Login javobidagi `is_password_changed` — `false` bo‘lsa onboardingda
+  /// yangi parol o‘rnatish bosqichi ko‘rsatiladi.
+  final bool isPasswordChanged;
+
   @override
-  List<Object?> get props => [accessToken, refreshToken, fullName, faceImage];
+  List<Object?> get props => [
+        accessToken,
+        refreshToken,
+        fullName,
+        loginPassword,
+        faceImage,
+        isPasswordChanged,
+      ];
 }
 
 /// Yuz muvaffaqiyatli tasdiqlandi → RAM’dagi tokenlar diskka saqlanadi.

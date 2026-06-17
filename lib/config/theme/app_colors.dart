@@ -6,6 +6,11 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color black;
   final Color shadow;
 
+  // ── Foreground ────────────────────────────────────────────────────────
+  final Color foregroundPrimary;
+  final Color foregroundAccent;
+  final Color popover;
+
   // ── Background ────────────────────────────────────────────────────────
   final Color backgroundBase;
   final Color backgroundBase2;
@@ -79,6 +84,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// O‘chirilgan tugma foni (Figma: components/control/bg/disabled).
   final Color controlBgDisabled;
 
+  /// O‘chirilgan asosiy tugma foni (Figma login `ring` #737373) — har ikkala rejimda bir xil.
+  final Color controlBgDisabledStrong;
+
+  /// O‘chirilgan asosiy tugma yozuvi (Figma login: light `secondary` #f5f5f5, dark `black-in-de` #444444).
+  final Color controlTextDisabledStrong;
+
   const AppColors({
     required this.white,
     required this.black,
@@ -131,6 +142,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.controlTextSecondary,
     required this.controlTextDisabled,
     required this.controlBgDisabled,
+    required this.controlBgDisabledStrong,
+    required this.controlTextDisabledStrong,
+    required this.foregroundPrimary,
+    required this.foregroundAccent,
+    required this.popover,
   });
 
   // Figma «HGT» design system (shadcn neutral) — Light.
@@ -140,7 +156,8 @@ class AppColors extends ThemeExtension<AppColors> {
   factory AppColors.light() => const AppColors(
     white: Color(0xFFFFFFFF),
     black: Color(0xFF000000),
-    shadow: Color(0x1A000000), // shadow-xs
+    shadow: Color(0x1A000000),
+    // shadow-xs
     backgroundBase: Color(0xFFFFFFFF),
     backgroundBase2: Color(0xFFFFFFFF),
     backgroundElevation1: Color(0xFFFFFFFF),
@@ -149,6 +166,9 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundElevation2Alt: Color(0xFFF5F5F5),
     backgroundElevation3: Color(0xFFE5E5E5),
     backgroundElevation3Alt: Color(0xFFE5E5E5),
+    foregroundPrimary: Color(0xFFFAFAFA),
+    foregroundAccent: Color(0xFF171717),
+    popover: Color(0xFFFFFFFF),
     accentStrong: Color(0xFF0D74CE),
     accentSub: Color(0xFF0D74CE),
     accentSoft: Color(0xFF3B9EFF),
@@ -189,6 +209,8 @@ class AppColors extends ThemeExtension<AppColors> {
     controlTextSecondary: Color(0xFF737373),
     controlTextDisabled: Color(0xFFA3A3A3),
     controlBgDisabled: Color(0xFFF5F5F5),
+    controlBgDisabledStrong: Color(0xFF737373),
+    controlTextDisabledStrong: Color(0xFFF5F5F5),
   );
 
   // Figma «HGT» design system (shadcn neutral) — Dark.
@@ -206,6 +228,9 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundElevation2Alt: Color(0xFF404040),
     backgroundElevation3: Color(0xFF404040),
     backgroundElevation3Alt: Color(0xFF525252),
+    foregroundPrimary: Color(0xFF171717),
+    foregroundAccent: Color(0xFFFAFAFA),
+    popover: Color(0xFF262626),
     accentStrong: Color(0xFF0D74CE),
     accentSub: Color(0xFF0D74CE),
     accentSoft: Color(0xFF3B9EFF),
@@ -246,6 +271,8 @@ class AppColors extends ThemeExtension<AppColors> {
     controlTextSecondary: Color(0xFFA3A3A3),
     controlTextDisabled: Color(0xFF737373),
     controlBgDisabled: Color(0xFF262626),
+    controlBgDisabledStrong: Color(0xFF737373),
+    controlTextDisabledStrong: Color(0xFF444444),
   );
 
   /// Ogohlantirish / blok sanagichi (orange) — login bloklangan holatidagi
@@ -263,11 +290,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static const Gradient authBackgroundGradient = LinearGradient(
     begin: Alignment(-1.0, -0.1),
     end: Alignment(1.0, 0.1),
-    colors: [
-      Color(0xFFE6ECFF),
-      Color(0xFFA5B4FC),
-      Color(0xFF6E86E1),
-    ],
+    colors: [Color(0xFFE6ECFF), Color(0xFFA5B4FC), Color(0xFF6E86E1)],
     stops: [0.0025, 0.3575, 1.0],
   );
 
@@ -289,8 +312,101 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static Gradient loginHeaderGradient(Brightness brightness) =>
       brightness == Brightness.dark
-          ? loginHeaderGradientDark
-          : loginHeaderGradientLight;
+      ? loginHeaderGradientDark
+      : loginHeaderGradientLight;
+
+  /// Onboarding fon gradienti — Figma (vertikal, tepada ko‘k, pastga so‘ladi).
+  static const Gradient onboardingBackgroundGradientLight = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFA8C5F2), Color(0xFFC9DBF6), Color(0xFFFFFFFF)],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  static const Gradient onboardingBackgroundGradientDark = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF10316E), Color(0xFF0C1C40), Color(0xFF0A0A0A)],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  static Gradient onboardingBackgroundGradient(Brightness brightness) =>
+      brightness == Brightness.dark
+      ? onboardingBackgroundGradientDark
+      : onboardingBackgroundGradientLight;
+
+  /// Onboarding asosiy tugma gradienti (Figma: chapdan `#0090ff` → o‘ngda
+  /// `rgba(12,96,254,.5)`) — har ikki rejimda bir xil.
+  static const Gradient onboardingActionGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFF0090FF), Color(0x800C60FE)],
+  );
+
+  // ── Onboarding kartalari (Figma — ko‘k gradient ustidagi navy kartalar; ranglar
+  // qat'iy, har ikkala rejimda bir xil) ───────────────────────────────────────
+  /// Karta yuzasi (Figma `#313f5d`).
+  static const Color onboardingCardBg = Color(0xFF313F5D);
+
+  /// Karta ramkasi (Figma `#49505e`).
+  static const Color onboardingCardBorder = Color(0xFF49505E);
+
+  /// Kartadagi asosiy yozuv (Figma `foreground` `#fafafa`).
+  static const Color onboardingCardText = Color(0xFFFAFAFA);
+
+  /// Kartadagi ikkilamchi yozuv (Figma `muted-foreground` `#a3a3a3`).
+  static const Color onboardingCardTextSub = Color(0xFFA3A3A3);
+
+  /// Ruxsat kartasi ichidagi ikon qutisi foni (Figma `card` dark `#171717`).
+  static const Color onboardingCardIconBg = Color(0xFF171717);
+
+  /// «Ruxsat berish» tugmasi (Figma `primary` `#e5e5e5` + `primary-foreground` `#171717`).
+  static const Color onboardingCardButtonBg = Color(0xFFE5E5E5);
+  static const Color onboardingCardButtonText = Color(0xFF171717);
+
+  /// Profil kartasidagi avatar (Figma `secondary` `#f5f5f5` fon + `foreground` `#0a0a0a` harf).
+  static const Color onboardingAvatarBg = Color(0xFFF5F5F5);
+  static const Color onboardingAvatarText = Color(0xFF0A0A0A);
+
+  // ── Swipe (surish) tugmasi tokenlari ────────────────────────────────────
+  // Surilganda ochiladigan fon gradientlari (chapda yorqinroq rang @50% →
+  // o‘ngda to‘q asos), yo‘lak foni esa har ikki rejimda ham och qoladi
+  // (Figma: dark mode’da ham `blue/3`). Dasta rangi = gradient oxirgi rangi.
+  // `SwipeActionButton` orqali istalgan boshqa gradient ham berilishi mumkin.
+
+  /// «Ishga keldim» (ko‘k). Figma: rgba(12,96,254,.5) → #0090ff.
+  static const Gradient swipeArriveGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0x800C60FE), Color(0xFF0090FF)],
+  );
+
+  /// «Tushlikka chiqdim» va «Tushlikdan qaytdim» (to‘q-sariq, bir xil).
+  /// Figma: #ffc182 → #ef5f00.
+  static const Gradient swipeLunchGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFFFC182), Color(0xFFEF5F00)],
+  );
+
+  /// «Ishdan ketdim» (yashil). Figma: #adddc0 → #2b9a66.
+  static const Gradient swipeLeaveGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFADDDC0), Color(0xFF2B9A66)],
+  );
+
+  /// Swipe yo‘lagi fonlari (Figma: har ikki rejimda ham och) — bosqichga mos.
+  static const Color swipeTrackBlue = Color(0xFFE6F4FE); // blue/3
+  static const Color swipeTrackOrange = Color(0xFFFFEFD6); // orange/3
+  static const Color swipeTrackGreen = Color(0xFFE3F5EA);
+
+  /// Surilmagan holatdagi yozuv rangi (Figma `black-in-de`) — yo‘lak och
+  /// bo‘lgani uchun har ikki rejimda ham bir xil to‘q.
+  static const Color swipeIdleText = Color(0xFF444444);
+
+  /// Swipe yo‘lagi ramkasi (Figma `secondary` #f5f5f5).
+  static const Color swipeTrackBorder = Color(0xFFF0F0F0);
 
   /// Access from anywhere: `Theme.of(context).extension<AppColors>()!`
   static AppColors of(BuildContext context) =>
@@ -315,6 +431,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? backgroundElevation2Alt,
     Color? backgroundElevation3,
     Color? backgroundElevation3Alt,
+    Color? foregroundPrimary,
+    Color? foregroundAccent,
+    Color? popover,
     Color? accentStrong,
     Color? accentSub,
     Color? accentSoft,
@@ -355,6 +474,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? controlTextSecondary,
     Color? controlTextDisabled,
     Color? controlBgDisabled,
+    Color? controlBgDisabledStrong,
+    Color? controlTextDisabledStrong,
   }) => AppColors(
     white: white ?? this.white,
     black: black ?? this.black,
@@ -370,6 +491,9 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundElevation3: backgroundElevation3 ?? this.backgroundElevation3,
     backgroundElevation3Alt:
         backgroundElevation3Alt ?? this.backgroundElevation3Alt,
+    foregroundPrimary: foregroundPrimary ?? this.foregroundPrimary,
+    foregroundAccent: foregroundAccent ?? this.foregroundAccent,
+    popover: popover ?? this.popover,
     accentStrong: accentStrong ?? this.accentStrong,
     accentSub: accentSub ?? this.accentSub,
     accentSoft: accentSoft ?? this.accentSoft,
@@ -410,6 +534,10 @@ class AppColors extends ThemeExtension<AppColors> {
     controlTextSecondary: controlTextSecondary ?? this.controlTextSecondary,
     controlTextDisabled: controlTextDisabled ?? this.controlTextDisabled,
     controlBgDisabled: controlBgDisabled ?? this.controlBgDisabled,
+    controlBgDisabledStrong:
+        controlBgDisabledStrong ?? this.controlBgDisabledStrong,
+    controlTextDisabledStrong:
+        controlTextDisabledStrong ?? this.controlTextDisabledStrong,
   );
 
   @override
@@ -451,6 +579,17 @@ class AppColors extends ThemeExtension<AppColors> {
         other.backgroundElevation3Alt,
         t,
       )!,
+      foregroundPrimary: Color.lerp(
+        foregroundPrimary,
+        other.foregroundPrimary,
+        t,
+      )!,
+      foregroundAccent: Color.lerp(
+        foregroundAccent,
+        other.foregroundAccent,
+        t,
+      )!,
+      popover: Color.lerp(popover, other.popover, t)!,
       accentStrong: Color.lerp(accentStrong, other.accentStrong, t)!,
       accentSub: Color.lerp(accentSub, other.accentSub, t)!,
       accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
@@ -505,6 +644,16 @@ class AppColors extends ThemeExtension<AppColors> {
       controlBgDisabled: Color.lerp(
         controlBgDisabled,
         other.controlBgDisabled,
+        t,
+      )!,
+      controlBgDisabledStrong: Color.lerp(
+        controlBgDisabledStrong,
+        other.controlBgDisabledStrong,
+        t,
+      )!,
+      controlTextDisabledStrong: Color.lerp(
+        controlTextDisabledStrong,
+        other.controlTextDisabledStrong,
         t,
       )!,
     );

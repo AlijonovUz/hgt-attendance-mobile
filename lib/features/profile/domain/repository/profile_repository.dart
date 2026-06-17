@@ -3,8 +3,9 @@ import '../entities/profile.dart';
 /// Profil domeni shartnomasi. Xatolarda `Failure` (core/error/failures.dart)
 /// `throw` qiladi; bloc ularni xato enumiga, widget esa lokalizatsiyaga o‘giradi.
 abstract interface class ProfileRepository {
-  /// Joriy foydalanuvchi profilini oladi.
-  Future<Profile> getProfile();
+  /// Joriy foydalanuvchi profilini oladi. [accessToken] berilsa manual Bearer
+  /// (token hali saqlanmagan onboarding bosqichi uchun).
+  Future<Profile> getProfile({String? accessToken});
 
   /// Faqat profil rasmini (`face_image`) yangilaydi — multipart PATCH.
   /// Yangilangan profil qaytadi. [accessToken] berilsa manual Bearer (token
