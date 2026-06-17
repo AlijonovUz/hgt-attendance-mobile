@@ -62,6 +62,8 @@
   "homeTimeToLunchOut": "Tushlikka chiqish vaqti",
   "homeTimeToLunchIn": "Tushlikdan qaytish vaqti",
   "homeTimeToLeave": "Ishdan ketish vaqti",
+  "homeNotStarted": "Ishni boshlash",
+  "homeWorkDayDone": "Ish kuni yakunlandi",
   "homeSwipeArrive": "Ishga keldim",
   "homeSwipeHint": "Belgilash uchun tugmani o‘ngga suring",
   "homeAllDone": "Bugungi davomat belgilandi",

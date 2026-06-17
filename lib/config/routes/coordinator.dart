@@ -91,6 +91,7 @@ class AppRouter {
     final onSplash = location == Routes.splash.path;
     final onLogin = location == Routes.login.path;
     final onOnboarding = location == Routes.onboarding.path;
+    final onFaceVerify = location == Routes.faceVerify.path;
 
     // Still resolving stored session -> hold on splash.
     if (!session.isResolved) {
@@ -102,13 +103,17 @@ class AppRouter {
       return onLogin ? null : Routes.login.path;
     }
 
-    // Logged in but onboarding (incl. face verify) not finished -> onboarding.
+    // Logged in, face pending. First-ever completion on this device -> full
+    // onboarding; afterwards -> standalone face-verify screen only.
     if (session.isFaceVerificationRequired) {
-      return onOnboarding ? null : Routes.onboarding.path;
+      final target = _session.requiresOnboarding
+          ? Routes.onboarding.path
+          : Routes.faceVerify.path;
+      return location == target ? null : target;
     }
 
     // Fully authenticated: keep away from gates.
-    if (onSplash || onLogin || onOnboarding) {
+    if (onSplash || onLogin || onOnboarding || onFaceVerify) {
       return Routes.home.path;
     }
 

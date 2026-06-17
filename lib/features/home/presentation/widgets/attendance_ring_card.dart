@@ -8,16 +8,18 @@ import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/date_extensions.dart';
 import '../../../../core/extentions/text_extensions.dart';
 
-/// Asosiy ekrandagi «davomat halqasi» kartasi (Figma 301:9377).
+/// Asosiy ekrandagi «davomat halqasi» kartasi.
 ///
 /// Joriy **oraliq** uchun sanagich (kelish→tushlik, tushlik→qaytish,
 /// qaytish→ketish). Oraliq tashqaridan [start]–[end] sifatida beriladi:
+/// - [idle] (ish hali boshlanmagan) → bo‘sh kulrang halqa, vaqt **yo‘q**,
+///   faqat [idleLabel] («Ishni boshlash») — sanamaydi.
 /// - `now < end` → sanaydi: markazda `end − now` + [countingLabel], ko‘k halqa
 ///   ([start]..[end] ulushiga to‘ladi).
 /// - `now ≥ end` (keyingi bosqich hali qilinmagan) → halqa **to‘ladi**
 ///   (to‘q-sariq) va [overdueLabel] yoziladi («Tushlikka chiqish vaqti» …).
-/// - [done] (ishdan ketilgan) → to‘liq yashil, bugungi ishlagan vaqt
-///   ([worked]) + [doneLabel].
+/// - [done] (ish kuni yakunlangan) → to‘liq yashil halqa, vaqt **yo‘q**,
+///   faqat [doneLabel] («Ish kuni yakunlandi» — Figma 301:11340).
 class AttendanceRingCard extends StatefulWidget {
   const AttendanceRingCard({
     super.key,
@@ -26,10 +28,16 @@ class AttendanceRingCard extends StatefulWidget {
     required this.countingLabel,
     required this.overdueLabel,
     required this.rangeText,
+    this.idle = false,
+    this.idleLabel = '',
     this.done = false,
     this.worked = Duration.zero,
     this.doneLabel = '',
   });
+
+  /// Ish hali boshlanmagan (kelishdan oldin) — bo‘sh halqa, sanamaydi.
+  final bool idle;
+  final String idleLabel;
 
   /// Joriy oraliq boshlanishi (haqiqiy belgilangan vaqt) — `done` da e’tiborsiz.
   final DateTime? start;
@@ -79,13 +87,24 @@ class _AttendanceRingCardState extends State<AttendanceRingCard> {
     return '${two(s.inHours)}:${two(s.inMinutes % 60)}:${two(s.inSeconds % 60)}';
   }
 
-  /// Joriy holat: markaz matni, izoh, halqa rangi va ulushi.
-  ({String time, String label, Color color, double progress}) _resolve(
+  /// Joriy holat: markaz matni (null → vaqt ko‘rsatilmaydi), izoh, rang, ulush.
+  ({String? time, String label, Color color, double progress}) _resolve(
     AppColors colors,
   ) {
+    // Ish boshlanmagan — bo‘sh halqa, vaqtsiz, faqat izoh.
+    if (widget.idle) {
+      return (
+        time: null,
+        label: widget.idleLabel,
+        color: colors.accentStrong,
+        progress: 0,
+      );
+    }
+
+    // Ish kuni yakunlandi — to‘liq yashil, vaqtsiz, faqat izoh.
     if (widget.done) {
       return (
-        time: _fmt(widget.worked),
+        time: null,
         label: widget.doneLabel,
         color: colors.successPrimary,
         progress: 1,
@@ -156,19 +175,21 @@ class _AttendanceRingCardState extends State<AttendanceRingCard> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Vaqt — har doim bitta qatorda (zarur bo‘lsa kichrayadi).
-                        SizedBox(
-                          width: 120.r,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: r.time
-                                .s(28.sp)
-                                .w(600)
-                                .c(colors.textStrong)
-                                .h(32 / 28),
+                        // Vaqt — bitta qatorda (idle/done holatda ko‘rsatilmaydi).
+                        if (r.time != null) ...[
+                          SizedBox(
+                            width: 120.r,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: r.time!
+                                  .s(28.sp)
+                                  .w(600)
+                                  .c(colors.textStrong)
+                                  .h(32 / 28),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 2.h),
+                          SizedBox(height: 2.h),
+                        ],
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
                           child: r.label

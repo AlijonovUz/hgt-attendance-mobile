@@ -101,13 +101,44 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     }
   }
 
+  /// `error.details`dagi maydon xatolari (`non_field_errors`, …) aniqroq sabab
+  /// beradi (masalan «Siz ish joyida emassiz.») — umumiy `errorMsg`dan ustun.
   String _messageFromBody(Map<String, dynamic> body) {
     final error = body['error'];
-    if (error is Map && error['errorMsg'] is String) {
-      return error['errorMsg'] as String;
+    if (error is Map) {
+      final detailMsg = _detailErrors(error['details']);
+      if (detailMsg != null) return detailMsg;
+      if (error['errorMsg'] is String) return error['errorMsg'] as String;
     }
     if (body['detail'] is String) return body['detail'] as String;
     return 'Server xatosi';
+  }
+
+  /// `error.details` ichidagi matn/ro‘yxat xatolarini yig‘adi (`non_field_errors`
+  /// birinchi). Throttle hisoblagichlari chetlab o‘tiladi.
+  String? _detailErrors(Object? details) {
+    if (details is! Map) return null;
+    final messages = <String>[];
+    void collect(Object? v) {
+      if (v is String) {
+        if (v.trim().isNotEmpty) messages.add(v.trim());
+      } else if (v is List) {
+        for (final e in v) {
+          collect(e);
+        }
+      }
+    }
+
+    collect(details['non_field_errors']);
+    details.forEach((key, value) {
+      if (key == 'non_field_errors' ||
+          key == 'attempts_left' ||
+          key == 'retry_after_seconds') {
+        return;
+      }
+      collect(value);
+    });
+    return messages.isEmpty ? null : messages.join('\n');
   }
 
   Exception _mapDioException(DioException e) {

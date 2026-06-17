@@ -20,7 +20,6 @@ import 'features/attendance/data/repository/attendance_repository_impl.dart';
 import 'features/attendance/domain/repository/attendance_repository.dart';
 import 'features/attendance/domain/usecases/get_today_attendance_usecase.dart';
 import 'features/attendance/domain/usecases/mark_attendance_usecase.dart';
-import 'features/attendance/presentation/bloc/attendance_check_bloc.dart';
 import 'features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'features/auth/data/repository/auth_repository_impl.dart';
 import 'features/auth/domain/repository/auth_repository.dart';
@@ -89,8 +88,14 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<LoginUseCase>(() => LoginUseCase(getIt()))
     ..registerLazySingleton<VerifyFaceUseCase>(() => VerifyFaceUseCase(getIt()))
     ..registerFactory<LoginBloc>(() => LoginBloc(loginUseCase: getIt()))
+    // Universal yuz-tekshiruv (login gate + davomat) — verify-face, mark-attendance
+    // va GPS injekt qilinadi; rejim `FaceStarted(mode)` orqali tanlanadi.
     ..registerFactory<FaceVerifyBloc>(
-      () => FaceVerifyBloc(verifyFaceUseCase: getIt()),
+      () => FaceVerifyBloc(
+        verifyFaceUseCase: getIt(),
+        markAttendance: getIt(),
+        location: getIt(),
+      ),
     );
 
   // ── Attendance feature (yuz-tekshiruv + GPS + POST + bugungi GET) ───────
@@ -106,9 +111,6 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<GetTodayAttendanceUseCase>(
       () => GetTodayAttendanceUseCase(getIt()),
-    )
-    ..registerFactory<AttendanceCheckBloc>(
-      () => AttendanceCheckBloc(markAttendance: getIt(), location: getIt()),
     );
 
   // ── Home (asosiy ekran davomat holati — backend bugungi yozuvlardan) ────

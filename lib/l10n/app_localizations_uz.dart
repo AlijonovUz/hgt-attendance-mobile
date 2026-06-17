@@ -140,6 +140,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get homeTimeToLeave => 'Ishdan ketish vaqti';
 
   @override
+  String get homeNotStarted => 'Ishni boshlash';
+
+  @override
+  String get homeWorkDayDone => 'Ish kuni yakunlandi';
+
+  @override
   String get homeSwipeArrive => 'Ishga keldim';
 
   @override
@@ -454,6 +460,12 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get homeTimeToLeave => 'Ишдан кетиш вақти';
+
+  @override
+  String get homeNotStarted => 'Ишни бошлаш';
+
+  @override
+  String get homeWorkDayDone => 'Иш куни якунланди';
 
   @override
   String get homeSwipeArrive => 'Ишга келдим';

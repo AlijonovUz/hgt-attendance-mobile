@@ -32,6 +32,16 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   final TokenService _tokenService;
   final StorageService _storage;
 
+  /// Onboarding shu qurilmada kamida bir marta tugatilganmi (device-once).
+  /// `_onStarted`da storage’dan o‘qiladi; yuz tasdiqlangach `true`ga o‘tadi va
+  /// saqlanadi. Logout/expire’da TOZALANMAYDI — keyingi login’lar onboardingni
+  /// emas, to‘g‘ridan-to‘g‘ri yuz tasdig‘ini ko‘radi.
+  bool _onboardingCompleted = false;
+
+  /// Guard shu qiymatdan kelib chiqib `faceVerificationRequired`da onboarding
+  /// (birinchi marta) yoki yuz tasdig‘i (keyin) sahifasini tanlaydi.
+  bool get requiresOnboarding => !_onboardingCompleted;
+
   // ── RAM’dagi (hali saqlanmagan) login natijasi ────────────────────────
   String? _pendingAccess;
   String? _pendingRefresh;
@@ -66,6 +76,9 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   /// so the splash is guaranteed visible for its full duration regardless of
   /// engine warm-up (the native splash covers warm-up; this resolves after).
   Future<void> _onStarted(SessionStarted event, Emitter<SessionState> emit) async {
+    // Onboarding bir marta tugatilgan-tugatilmaganini o‘qib qo‘yamiz (device-once).
+    final flag = _storage.getString(StorageKeys.onboardingCompleted);
+    _onboardingCompleted = flag == '1' || flag == 'true';
     // Saqlangan token bor → to‘liq autentifikatsiya (yuz qayta so‘ralmaydi).
     emit(_hasToken ? const SessionState.authenticated() : const SessionState.unauthenticated());
   }
@@ -95,6 +108,9 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     if (_pendingFullName != null) {
       await _storage.setString(StorageKeys.loginUsername, _pendingFullName!);
     }
+    // Onboarding/yuz tasdig‘i kamida bir marta tugadi — device-once flag.
+    await _storage.setString(StorageKeys.onboardingCompleted, '1');
+    _onboardingCompleted = true;
     _clearPending();
     emit(const SessionState.authenticated());
   }

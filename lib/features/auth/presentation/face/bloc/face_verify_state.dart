@@ -13,8 +13,9 @@ enum FaceStatus {
   cameraError,
 }
 
-/// Xato sababi — lokalizatsiya widget qatlamida.
-enum FaceFailureKind { none, noFace, verifyFailed, network }
+/// Xato sababi — lokalizatsiya widget qatlamida. [location] faqat davomat
+/// rejimida (GPS olinmasa) uchraydi.
+enum FaceFailureKind { none, noFace, verifyFailed, network, location }
 
 class FaceVerifyState extends Equatable {
   const FaceVerifyState({

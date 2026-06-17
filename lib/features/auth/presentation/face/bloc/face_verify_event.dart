@@ -7,16 +7,16 @@ sealed class FaceVerifyEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Ekran ochildi — ruxsat, kamera va detektor ishga tushadi. Tokenni RAM’dan
-/// olib keladi (`SessionBloc.pendingAccessToken`).
+/// Ekran ochildi — ruxsat, (davomatda) GPS, kamera va detektor ishga tushadi.
+/// Rejim [FaceFlowMode] orqali beriladi: login (verify-face, RAM token) yoki
+/// davomat (attendance, GPS + event_type).
 class FaceStarted extends FaceVerifyEvent {
-  const FaceStarted({required this.accessToken, required this.fullName});
+  const FaceStarted(this.mode);
 
-  final String accessToken;
-  final String fullName;
+  final FaceFlowMode mode;
 
   @override
-  List<Object?> get props => [accessToken, fullName];
+  List<Object?> get props => [mode];
 }
 
 /// Stream kadrida yuz aniqlanish natijasi (ichki).

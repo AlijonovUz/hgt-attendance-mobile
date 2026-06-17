@@ -139,6 +139,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeTimeToLeave => 'Время уйти с работы';
 
   @override
+  String get homeNotStarted => 'Начать работу';
+
+  @override
+  String get homeWorkDayDone => 'Рабочий день завершён';
+
+  @override
   String get homeSwipeArrive => 'Я пришёл';
 
   @override

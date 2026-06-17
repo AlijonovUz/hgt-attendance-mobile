@@ -50,6 +50,8 @@
   "homeTimeToLunchOut": "Тушликка чиқиш вақти",
   "homeTimeToLunchIn": "Тушликдан қайтиш вақти",
   "homeTimeToLeave": "Ишдан кетиш вақти",
+  "homeNotStarted": "Ишни бошлаш",
+  "homeWorkDayDone": "Иш куни якунланди",
   "homeSwipeArrive": "Ишга келдим",
   "homeSwipeHint": "Белгилаш учун тугмани ўнгга суринг",
   "homeAllDone": "Бугунги давомат белгиланди",

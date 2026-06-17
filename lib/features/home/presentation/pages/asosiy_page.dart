@@ -78,6 +78,8 @@ class AsosiyPage extends StatelessWidget {
                                 countingLabel: phase.countingLabel,
                                 overdueLabel: phase.overdueLabel,
                                 rangeText: phase.rangeText,
+                                idle: phase.idle,
+                                idleLabel: phase.idleLabel,
                                 done: phase.done,
                                 worked: phase.worked,
                                 doneLabel: phase.doneLabel,
@@ -215,7 +217,7 @@ class _SwipeSection extends StatelessWidget {
 ///
 /// Oraliq boshlanishi — haqiqiy belgilangan vaqt (backend `created_at`); tugashi
 /// — schedule’dagi keyingi belgilangan vaqt. Ish tugab ketilsa — ishlagan vaqt.
-({DateTime? start, DateTime? end, String countingLabel, String overdueLabel, String rangeText, bool done, Duration worked, String doneLabel})
+({DateTime? start, DateTime? end, String countingLabel, String overdueLabel, String rangeText, bool idle, String idleLabel, bool done, Duration worked, String doneLabel})
 _ringPhase(AttendanceState state, ScheduleInfo? sch, AppLocalizations l10n) {
   final now = DateTime.now();
 
@@ -255,53 +257,63 @@ _ringPhase(AttendanceState state, ScheduleInfo? sch, AppLocalizations l10n) {
       countingLabel: '',
       overdueLabel: '',
       rangeText: rangeText,
+      idle: false,
+      idleLabel: '',
       done: true,
       worked: worked,
-      doneLabel: l10n.homeWorkedToday,
+      doneLabel: l10n.homeWorkDayDone,
     );
   }
 
   return switch (state.current) {
-    // Hali kelmagan — ish boshlanishigacha; o‘tib ketsa «Ishga kelish vaqti».
+    // Hali kelmagan — sanamaydi, bo‘sh halqa «Ishni boshlash» (Figma 301:9387).
     AttendanceStep.arrive => (
-      start: DateTime(now.year, now.month, now.day),
-      end: at(sch?.workStartTime, 9, 0),
-      countingLabel: l10n.homeUntilStart,
-      overdueLabel: l10n.homeTimeToArrive,
+      start: null,
+      end: null,
+      countingLabel: '',
+      overdueLabel: '',
       rangeText: rangeText,
+      idle: true,
+      idleLabel: l10n.homeNotStarted,
       done: false,
       worked: Duration.zero,
       doneLabel: '',
     ),
-    // Kelishdan tushlikka chiqishgacha.
+    // Kelishdan tushlikka chiqishgacha — haqiqiy kelish vaqtidan sanaladi.
     AttendanceStep.lunchOut => (
       start: state.arrivalAt,
       end: ls ?? we,
       countingLabel: l10n.homeUntilLunch,
       overdueLabel: l10n.homeTimeToLunchOut,
       rangeText: rangeText,
+      idle: false,
+      idleLabel: '',
       done: false,
       worked: Duration.zero,
       doneLabel: '',
     ),
-    // Tushlikka chiqishdan qaytishgacha.
+    // Tushlikka chiqishdan qaytishgacha — haqiqiy chiqish vaqtidan sanaladi.
     AttendanceStep.lunchIn => (
       start: state.lunchOutAt,
       end: le ?? we,
       countingLabel: l10n.homeUntilLunchEnd,
       overdueLabel: l10n.homeTimeToLunchIn,
       rangeText: rangeText,
+      idle: false,
+      idleLabel: '',
       done: false,
       worked: Duration.zero,
       doneLabel: '',
     ),
-    // Tushlikdan qaytishdan ish tugashigacha.
+    // Tushlikdan qaytishdan ish tugashigacha — haqiqiy qaytish vaqtidan sanaladi.
     AttendanceStep.leave => (
       start: state.lunchInAt ?? state.arrivalAt,
       end: we,
       countingLabel: l10n.homeWorkEndsIn,
       overdueLabel: l10n.homeTimeToLeave,
       rangeText: rangeText,
+      idle: false,
+      idleLabel: '',
       done: false,
       worked: Duration.zero,
       doneLabel: '',
@@ -312,9 +324,11 @@ _ringPhase(AttendanceState state, ScheduleInfo? sch, AppLocalizations l10n) {
       countingLabel: '',
       overdueLabel: '',
       rangeText: rangeText,
+      idle: false,
+      idleLabel: '',
       done: true,
       worked: Duration.zero,
-      doneLabel: l10n.homeWorkedToday,
+      doneLabel: l10n.homeWorkDayDone,
     ),
   };
 }

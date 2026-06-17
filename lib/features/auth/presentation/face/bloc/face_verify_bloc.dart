@@ -9,7 +9,10 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../core/error/failures.dart';
+import '../../../../../core/services/location_service.dart';
+import '../../../../attendance/domain/usecases/mark_attendance_usecase.dart';
 import '../../../domain/usecases/verify_face_usecase.dart';
+import 'face_flow_mode.dart';
 
 part 'face_verify_event.dart';
 part 'face_verify_state.dart';
@@ -29,15 +32,25 @@ String? _friendlyFaceMessage(String message) {
   return m;
 }
 
-/// Yuz tasdig‘ini boshqaradi: kamera oqimi + ML Kit yuz aniqlash + verify-face.
+/// Universal yuz-tekshiruv: kamera oqimi + ML Kit yuz aniqlash + (rejimga qarab)
+/// `verify-face` yoki `attendance` yuborish.
 ///
-/// Tirik oqimda yuz barqaror aniqlansa, selfie avtomatik olinadi va RAM’dagi
-/// (hali saqlanmagan) access token bilan yuboriladi. 2xx → success → sahifa
-/// `SessionFaceVerified` yuboradi (tokenlar shunda saqlanadi).
+/// Rejim [FaceFlowMode] orqali keladi:
+/// - [LoginFaceMode] — login’dan keyingi yuz tasdig‘i (RAM access token,
+///   2xx → sahifa `SessionFaceVerified` yuboradi).
+/// - [AttendanceFaceMode] — davomat hodisasi (start’da GPS olinadi, selfie
+///   `event_type` + koordinata bilan yuboriladi; 2xx → sahifa `pop(true)`).
+///
+/// Tirik oqimda yuz barqaror aniqlansa, selfie avtomatik olinadi va yuboriladi.
 class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
-  FaceVerifyBloc({required VerifyFaceUseCase verifyFaceUseCase})
-    : _verifyFace = verifyFaceUseCase,
-      super(const FaceVerifyState()) {
+  FaceVerifyBloc({
+    required VerifyFaceUseCase verifyFaceUseCase,
+    required MarkAttendanceUseCase markAttendance,
+    required LocationService location,
+  }) : _verifyFace = verifyFaceUseCase,
+       _markAttendance = markAttendance,
+       _location = location,
+       super(const FaceVerifyState()) {
     on<FaceStarted>(_onStarted);
     on<FaceDetectionUpdated>(_onDetectionUpdated);
     on<FaceCaptureRequested>(_onCaptureRequested);
@@ -45,10 +58,14 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   }
 
   final VerifyFaceUseCase _verifyFace;
+  final MarkAttendanceUseCase _markAttendance;
+  final LocationService _location;
 
   CameraController? _controller;
   FaceDetector? _detector;
-  String _accessToken = '';
+  FaceFlowMode _mode = const LoginFaceMode(accessToken: '', fullName: '');
+  double? _lat;
+  double? _lng;
 
   bool _detectorBusy = false;
   DateTime _lastDetect = DateTime.fromMillisecondsSinceEpoch(0);
@@ -71,11 +88,12 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     FaceStarted event,
     Emitter<FaceVerifyState> emit,
   ) async {
-    _accessToken = event.accessToken;
+    final mode = event.mode;
+    _mode = mode;
     emit(
       state.copyWith(
         status: FaceStatus.initializing,
-        fullName: event.fullName,
+        fullName: mode is LoginFaceMode ? mode.fullName : '',
         failureKind: FaceFailureKind.none,
         clearFailureMessage: true,
       ),
@@ -85,6 +103,24 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     if (!granted) {
       emit(state.copyWith(status: FaceStatus.permissionDenied));
       return;
+    }
+
+    // Davomat rejimida GPS start’da olinadi (xato → failure(location)).
+    if (mode is AttendanceFaceMode) {
+      try {
+        final pos = await _location.current();
+        _lat = pos.latitude;
+        _lng = pos.longitude;
+      } on LocationException {
+        emit(
+          state.copyWith(
+            status: FaceStatus.failure,
+            failureKind: FaceFailureKind.location,
+            clearFailureMessage: true,
+          ),
+        );
+        return;
+      }
     }
 
     final ok = await _initCamera();
@@ -207,14 +243,27 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     if (state.status == FaceStatus.verifying) return;
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) return;
+    final mode = _mode;
+    if (mode is AttendanceFaceMode && (_lat == null || _lng == null)) return;
 
     emit(state.copyWith(status: FaceStatus.verifying));
     try {
       await _stopStream();
       final XFile shot = await controller.takePicture();
-      await _verifyFace(
-        VerifyFaceParams(imagePath: shot.path, accessToken: _accessToken),
-      );
+      if (mode is AttendanceFaceMode) {
+        await _markAttendance(
+          MarkAttendanceParams(
+            eventType: mode.eventType,
+            latitude: _lat!,
+            longitude: _lng!,
+            imagePath: shot.path,
+          ),
+        );
+      } else if (mode is LoginFaceMode) {
+        await _verifyFace(
+          VerifyFaceParams(imagePath: shot.path, accessToken: mode.accessToken),
+        );
+      }
       if (emit.isDone) return;
       emit(
         state.copyWith(
@@ -259,30 +308,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     FaceRetryRequested event,
     Emitter<FaceVerifyState> emit,
   ) async {
-    // Xatoda kamera bo‘shatilgan — qaytadan ishga tushiramiz.
-    emit(
-      state.copyWith(
-        status: FaceStatus.initializing,
-        failureKind: FaceFailureKind.none,
-        clearFailureMessage: true,
-      ),
-    );
-
-    final ok = await _initCamera();
-    if (emit.isDone) return;
-    if (!ok) {
-      emit(state.copyWith(status: FaceStatus.cameraError));
-      return;
-    }
-    _detector ??= FaceDetector(
-      options: FaceDetectorOptions(
-        performanceMode: FaceDetectorMode.fast,
-        minFaceSize: 0.15,
-      ),
-    );
-    await _startStream();
-    if (emit.isDone) return;
-    emit(state.copyWith(status: FaceStatus.scanning));
+    // Xatoda kamera bo‘shatilgan — to‘liq oqimni (ruxsat → GPS → kamera) saqlangan
+    // rejim bilan qaytadan boshlaymiz.
+    add(FaceStarted(_mode));
   }
 
   /// Kamerani to‘liq bo‘shatadi (stream + controller). Detektor saqlanadi —
