@@ -13,13 +13,12 @@ class ChangePasswordUseCase implements UseCase<void, ChangePasswordParams> {
   final OnboardingRepository _repository;
 
   @override
-  Future<void> call(ChangePasswordParams params) =>
-      _repository.changePassword(
-        oldPassword: params.oldPassword,
-        newPassword: params.newPassword,
-        confirmNewPassword: params.confirmNewPassword,
-        accessToken: params.accessToken,
-      );
+  Future<void> call(ChangePasswordParams params) => _repository.changePassword(
+    oldPassword: params.oldPassword,
+    newPassword: params.newPassword,
+    confirmNewPassword: params.confirmNewPassword,
+    accessToken: params.accessToken,
+  );
 }
 
 class ChangePasswordParams extends Equatable {
@@ -36,6 +35,10 @@ class ChangePasswordParams extends Equatable {
   final String? accessToken;
 
   @override
-  List<Object?> get props =>
-      [oldPassword, newPassword, confirmNewPassword, accessToken];
+  List<Object?> get props => [
+    oldPassword,
+    newPassword,
+    confirmNewPassword,
+    accessToken,
+  ];
 }

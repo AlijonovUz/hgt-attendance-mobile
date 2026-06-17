@@ -27,25 +27,24 @@ class OnboardingData extends Equatable {
   final String? roleName;
 
   /// Login javobida profil rasmi bormi (yo‘q bo‘lsa — rasm yuklash bosqichi).
-  bool get hasFaceImage =>
-      faceImage != null && faceImage!.trim().isNotEmpty;
+  bool get hasFaceImage => faceImage != null && faceImage!.trim().isNotEmpty;
 
   OnboardingData copyWith({String? roleName}) => OnboardingData(
-        accessToken: accessToken,
-        fullName: fullName,
-        isPasswordChanged: isPasswordChanged,
-        loginPassword: loginPassword,
-        faceImage: faceImage,
-        roleName: roleName ?? this.roleName,
-      );
+    accessToken: accessToken,
+    fullName: fullName,
+    isPasswordChanged: isPasswordChanged,
+    loginPassword: loginPassword,
+    faceImage: faceImage,
+    roleName: roleName ?? this.roleName,
+  );
 
   @override
   List<Object?> get props => [
-        accessToken,
-        fullName,
-        isPasswordChanged,
-        loginPassword,
-        faceImage,
-        roleName,
-      ];
+    accessToken,
+    fullName,
+    isPasswordChanged,
+    loginPassword,
+    faceImage,
+    roleName,
+  ];
 }

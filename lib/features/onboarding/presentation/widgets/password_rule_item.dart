@@ -21,30 +21,32 @@ class PasswordRuleItem extends StatelessWidget {
     final colors = AppColors.of(context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.h),
+      padding: EdgeInsets.symmetric(vertical: 3.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 6.h),
+            padding: EdgeInsets.only(top: 5.h),
             child: SizedBox(
               width: 8.r,
               height: 8.r,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: satisfied ? colors.successPrimary : colors.strokeStrong,
+                  color: satisfied
+                      ? colors.successPrimary
+                      : colors.strokeStrong,
                   shape: BoxShape.circle,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 8.w),
           Expanded(
             child: label
-                .s(13.sp)
-                .w(satisfied ? 500 : 400)
+                .s(12.sp)
+                .w(500)
                 .c(satisfied ? colors.textStrong : colors.textSub)
-                .h(18 / 13)
+                .h(16 / 12)
                 .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
           ),
         ],

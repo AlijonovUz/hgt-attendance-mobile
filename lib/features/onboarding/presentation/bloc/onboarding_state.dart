@@ -2,7 +2,14 @@ part of 'onboarding_bloc.dart';
 
 /// Onboarding bosqichlari (PageView sahifalari). [done] — yakuniy «Hammasi
 /// tayyor!» ekrani (progress/orqaga yo‘q).
-enum OnboardingStep { welcome, permissions, password, imageUpload, faceVerify, done }
+enum OnboardingStep {
+  welcome,
+  permissions,
+  password,
+  imageUpload,
+  faceVerify,
+  done,
+}
 
 /// So‘raladigan ruxsatlar.
 enum OnboardingPermission { location, camera }
@@ -32,13 +39,13 @@ class OnboardingState extends Equatable {
 
   /// Boshlang‘ich (bo‘sh) holat — bloc qurilishida (`OnboardingStarted`gacha).
   factory OnboardingState.initial() => const OnboardingState(
-        data: OnboardingData(
-          accessToken: '',
-          fullName: '',
-          isPasswordChanged: true,
-        ),
-        steps: [OnboardingStep.welcome],
-      );
+    data: OnboardingData(
+      accessToken: '',
+      fullName: '',
+      isPasswordChanged: true,
+    ),
+    steps: [OnboardingStep.welcome],
+  );
 
   final OnboardingData data;
   final List<OnboardingStep> steps;
@@ -66,8 +73,7 @@ class OnboardingState extends Equatable {
       steps[currentIndex.clamp(0, steps.length - 1)];
 
   /// Faqat progress ko‘rsatkichida hisoblanadigan bosqichlar (yakuniysiz).
-  int get progressTotal =>
-      steps.where((s) => s != OnboardingStep.done).length;
+  int get progressTotal => steps.where((s) => s != OnboardingStep.done).length;
 
   /// Joriy bosqichning progressdagi tartibi (1‑asosli, `done`da progress yo‘q).
   int get progressIndex => currentStep == OnboardingStep.done
@@ -102,13 +108,13 @@ class OnboardingState extends Equatable {
 
   /// Bosqich yakunlanganmi (keyingisiga ruxsat shartidan kelib chiqadi).
   bool isStepComplete(OnboardingStep step) => switch (step) {
-        OnboardingStep.welcome => true,
-        OnboardingStep.permissions => locationGranted && cameraGranted,
-        OnboardingStep.password => passwordChanged,
-        OnboardingStep.imageUpload => imageUploaded,
-        OnboardingStep.faceVerify => faceVerified,
-        OnboardingStep.done => true,
-      };
+    OnboardingStep.welcome => true,
+    OnboardingStep.permissions => locationGranted && cameraGranted,
+    OnboardingStep.password => passwordChanged,
+    OnboardingStep.imageUpload => imageUploaded,
+    OnboardingStep.faceVerify => faceVerified,
+    OnboardingStep.done => true,
+  };
 
   /// Foydalanuvchi yetib bora oladigan eng katta indeks (oldingi barcha
   /// bosqichlar yakunlangan bo‘lsa). Oldinga surishni cheklash uchun.
@@ -155,8 +161,9 @@ class OnboardingState extends Equatable {
       passwordSubmitting: passwordSubmitting ?? this.passwordSubmitting,
       passwordChanged: passwordChanged ?? this.passwordChanged,
       passwordError: passwordError ?? this.passwordError,
-      pickedImagePath:
-          clearPickedImage ? null : (pickedImagePath ?? this.pickedImagePath),
+      pickedImagePath: clearPickedImage
+          ? null
+          : (pickedImagePath ?? this.pickedImagePath),
       imageUploading: imageUploading ?? this.imageUploading,
       imageUploaded: imageUploaded ?? this.imageUploaded,
       imageError: imageError ?? this.imageError,
@@ -166,21 +173,21 @@ class OnboardingState extends Equatable {
 
   @override
   List<Object?> get props => [
-        data,
-        steps,
-        currentIndex,
-        locationGranted,
-        cameraGranted,
-        oldPassword,
-        newPassword,
-        confirmPassword,
-        passwordSubmitting,
-        passwordChanged,
-        passwordError,
-        pickedImagePath,
-        imageUploading,
-        imageUploaded,
-        imageError,
-        faceVerified,
-      ];
+    data,
+    steps,
+    currentIndex,
+    locationGranted,
+    cameraGranted,
+    oldPassword,
+    newPassword,
+    confirmPassword,
+    passwordSubmitting,
+    passwordChanged,
+    passwordError,
+    pickedImagePath,
+    imageUploading,
+    imageUploaded,
+    imageError,
+    faceVerified,
+  ];
 }

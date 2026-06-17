@@ -10,12 +10,12 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/face/bloc/face_verify_bloc.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../painters/face_inset_painter.dart';
+import 'onboarding_action_button.dart';
 
 /// Onboarding 5‑bosqich: yuz tasdig‘i (Figma 296‑2886 / 299‑8095).
 ///
@@ -50,8 +50,8 @@ class _FaceVerifyBodyState extends State<_FaceVerifyBody> {
     final data = context.read<OnboardingBloc>().state.data;
     setState(() => _started = true);
     context.read<FaceVerifyBloc>().add(
-          FaceStarted(accessToken: data.accessToken, fullName: data.fullName),
-        );
+      FaceStarted(accessToken: data.accessToken, fullName: data.fullName),
+    );
   }
 
   @override
@@ -65,9 +65,9 @@ class _FaceVerifyBodyState extends State<_FaceVerifyBody> {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == FaceStatus.success) {
-          context
-              .read<OnboardingBloc>()
-              .add(const OnboardingFaceVerifiedReported());
+          context.read<OnboardingBloc>().add(
+            const OnboardingFaceVerifiedReported(),
+          );
         }
       },
       child: Padding(
@@ -126,9 +126,8 @@ class _FaceBottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!started) {
-      return CustomButton(
+      return OnboardingActionButton(
         label: l10n.onbFaceStart,
-        gradient: AppColors.onboardingActionGradient,
         onPressed: onStart,
       );
     }
@@ -138,15 +137,15 @@ class _FaceBottomButton extends StatelessWidget {
         final bloc = context.read<FaceVerifyBloc>();
         switch (state.status) {
           case FaceStatus.permissionDenied:
-            return CustomButton(
+            return OnboardingActionButton(
               label: l10n.facePermissionOpenSettings,
+              gradient: false,
               onPressed: openAppSettings,
             );
           case FaceStatus.failure:
           case FaceStatus.cameraError:
-            return CustomButton(
+            return OnboardingActionButton(
               label: l10n.faceRetry,
-              gradient: AppColors.onboardingActionGradient,
               onPressed: () => bloc.add(const FaceRetryRequested()),
             );
           case FaceStatus.initializing:
@@ -235,11 +234,13 @@ class _FaceStage extends StatelessWidget {
             _hintText(started, state, l10n)
                 .s(15.sp)
                 .w(500)
-                .c(state.status == FaceStatus.failure
-                    ? colors.errorStrong
-                    : colors.textSub)
+                .c(
+                  state.status == FaceStatus.failure
+                      ? colors.errorStrong
+                      : colors.textSub,
+                )
                 .a(TextAlign.center)
-                .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
+                .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis),
           ],
         );
       },
@@ -252,9 +253,10 @@ class _FaceStage extends StatelessWidget {
       FaceStatus.success => l10n.faceHintSuccess,
       FaceStatus.verifying || FaceStatus.detecting => l10n.faceHintScanning,
       FaceStatus.scanning => l10n.faceHintDefault,
-      FaceStatus.failure => state.failureKind == FaceFailureKind.network
-          ? l10n.networkError
-          : l10n.faceVerifyFailed,
+      FaceStatus.failure =>
+        state.failureKind == FaceFailureKind.network
+            ? l10n.networkError
+            : (state.failureMessage ?? l10n.faceVerifyFailed),
       FaceStatus.permissionDenied => l10n.facePermissionBody,
       FaceStatus.cameraError => l10n.faceCameraError,
       FaceStatus.initializing => l10n.faceHintDefault,
@@ -284,7 +286,8 @@ class _CirclePreview extends StatelessWidget {
     return BlocBuilder<FaceVerifyBloc, FaceVerifyState>(
       buildWhen: (p, c) => p.status != c.status,
       builder: (context, state) {
-        final live = started &&
+        final live =
+            started &&
             controller != null &&
             controller.value.isInitialized &&
             state.isCameraLive;
@@ -325,19 +328,20 @@ class _CirclePreview extends StatelessWidget {
           child: ColoredBox(
             color: colors.backgroundElevation2Alt,
             child: Center(
-              child: (state.status == FaceStatus.success
-                      ? Assets.icons.icHugeiconsSecurityCheck
-                      : Assets.icons.icLucideScanFace)
-                  .svg(
-                width: 64.r,
-                height: 64.r,
-                colorFilter: ColorFilter.mode(
-                  state.status == FaceStatus.success
-                      ? colors.successPrimary
-                      : colors.iconSoft,
-                  BlendMode.srcIn,
-                ),
-              ),
+              child:
+                  (state.status == FaceStatus.success
+                          ? Assets.icons.icHugeiconsSecurityCheck
+                          : Assets.icons.icLucideScanFace)
+                      .svg(
+                        width: 64.r,
+                        height: 64.r,
+                        colorFilter: ColorFilter.mode(
+                          state.status == FaceStatus.success
+                              ? colors.successPrimary
+                              : colors.iconSoft,
+                          BlendMode.srcIn,
+                        ),
+                      ),
             ),
           ),
         );

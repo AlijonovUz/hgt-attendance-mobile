@@ -70,6 +70,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_globe.svg
   SvgGenImage get icGlobe => const SvgGenImage('assets/icons/ic_globe.svg');
 
+  /// File path: assets/icons/ic_hugeicons_arrow_left_round.svg
+  SvgGenImage get icHugeiconsArrowLeftRound =>
+      const SvgGenImage('assets/icons/ic_hugeicons_arrow_left_round.svg');
+
   /// File path: assets/icons/ic_hugeicons_arrow_right_double_round.svg
   SvgGenImage get icHugeiconsArrowRightDoubleRound => const SvgGenImage(
     'assets/icons/ic_hugeicons_arrow_right_double_round.svg',
@@ -143,6 +147,10 @@ class $AssetsIconsGen {
   SvgGenImage get icHugeiconsSun =>
       const SvgGenImage('assets/icons/ic_hugeicons_sun.svg');
 
+  /// File path: assets/icons/ic_lucide_check.svg
+  SvgGenImage get icLucideCheck =>
+      const SvgGenImage('assets/icons/ic_lucide_check.svg');
+
   /// File path: assets/icons/ic_lucide_scan_face.svg
   SvgGenImage get icLucideScanFace =>
       const SvgGenImage('assets/icons/ic_lucide_scan_face.svg');
@@ -153,6 +161,10 @@ class $AssetsIconsGen {
 
   /// File path: assets/icons/ic_profile.svg
   SvgGenImage get icProfile => const SvgGenImage('assets/icons/ic_profile.svg');
+
+  /// File path: assets/icons/ic_splash_logo_dark.svg
+  SvgGenImage get icSplashLogoDark =>
+      const SvgGenImage('assets/icons/ic_splash_logo_dark.svg');
 
   /// File path: assets/icons/ic_user.svg
   SvgGenImage get icUser => const SvgGenImage('assets/icons/ic_user.svg');
@@ -173,6 +185,7 @@ class $AssetsIconsGen {
     icEyeClose,
     icEyeOpen,
     icGlobe,
+    icHugeiconsArrowLeftRound,
     icHugeiconsArrowRightDoubleRound,
     icHugeiconsCameraAdd,
     icHugeiconsCheckmarkBadge,
@@ -191,9 +204,11 @@ class $AssetsIconsGen {
     icHugeiconsPizza,
     icHugeiconsSecurityCheck,
     icHugeiconsSun,
+    icLucideCheck,
     icLucideScanFace,
     icLucideShieldAlert,
     icProfile,
+    icSplashLogoDark,
     icUser,
   ];
 }
@@ -209,6 +224,10 @@ class $AssetsImagesGen {
   AssetGenImage get splashBackgroundImage =>
       const AssetGenImage('assets/images/splash_background_image.png');
 
+  /// File path: assets/images/splash_background_image_dark.png
+  AssetGenImage get splashBackgroundImageDark =>
+      const AssetGenImage('assets/images/splash_background_image_dark.png');
+
   /// File path: assets/images/splash_logo.png
   AssetGenImage get splashLogo =>
       const AssetGenImage('assets/images/splash_logo.png');
@@ -217,6 +236,7 @@ class $AssetsImagesGen {
   List<AssetGenImage> get values => [
     cardboardTexture,
     splashBackgroundImage,
+    splashBackgroundImageDark,
     splashLogo,
   ];
 }

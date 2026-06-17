@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +8,7 @@ import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/dashed_circle_painter.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/profile_bloc.dart';
 
@@ -61,32 +61,32 @@ class _ProfilePhotoPromptSheet extends StatelessWidget {
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
           child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.backgroundElevation1,
-            borderRadius: BorderRadius.circular(22.r),
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                l10n.profilePhotoPromptTitle
-                    .s(20.sp)
-                    .w(600)
-                    .c(colors.textStrong)
-                    .h(28 / 20)
-                    .a(TextAlign.center)
-                    .copyWith(maxLines: 4, overflow: TextOverflow.ellipsis),
-                SizedBox(height: 16.h),
-                const Center(child: _PhotoPicker()),
-                SizedBox(height: 24.h),
-                const _UploadError(),
-                const _UploadButton(),
-              ],
+            decoration: BoxDecoration(
+              color: colors.backgroundElevation1,
+              borderRadius: BorderRadius.circular(22.r),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  l10n.profilePhotoPromptTitle
+                      .s(20.sp)
+                      .w(600)
+                      .c(colors.textStrong)
+                      .h(28 / 20)
+                      .a(TextAlign.center)
+                      .copyWith(maxLines: 4, overflow: TextOverflow.ellipsis),
+                  SizedBox(height: 16.h),
+                  const Center(child: _PhotoPicker()),
+                  SizedBox(height: 24.h),
+                  const _UploadError(),
+                  const _UploadButton(),
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -109,19 +109,14 @@ class _PhotoPicker extends StatelessWidget {
         final size = 150.r;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => context
-              .read<ProfileBloc>()
-              .add(const ProfilePhotoPickRequested(ImageSourceKind.gallery)),
+          onTap: () => context.read<ProfileBloc>().add(
+            const ProfilePhotoPickRequested(ImageSourceKind.gallery),
+          ),
           child: SizedBox(
             width: size,
             height: size,
             child: CustomPaint(
-              painter: _DashedCirclePainter(
-                color: colors.strokeStrong,
-                strokeWidth: 1.5,
-                dashLength: 6,
-                gapLength: 6,
-              ),
+              painter: DashedCirclePainter(color: colors.strokeStrong),
               child: state.hasPickedImage
                   ? Padding(
                       padding: EdgeInsets.all(4.r),
@@ -230,50 +225,4 @@ class _UploadButton extends StatelessWidget {
       },
     );
   }
-}
-
-/// Uzuq-uzuq aylana ramka chizadi (radius-full placeholder doirasi uchun).
-class _DashedCirclePainter extends CustomPainter {
-  _DashedCirclePainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.dashLength,
-    required this.gapLength,
-  });
-
-  final Color color;
-  final double strokeWidth;
-  final double dashLength;
-  final double gapLength;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final radius = (math.min(size.width, size.height) - strokeWidth) / 2;
-    final center = Offset(size.width / 2, size.height / 2);
-    final circumference = 2 * math.pi * radius;
-    final step = dashLength + gapLength;
-    final dashCount = (circumference / step).floor();
-    final dashAngle = dashLength / radius;
-    final gapAngle = (2 * math.pi - dashCount * dashAngle) / dashCount;
-
-    var angle = -math.pi / 2;
-    for (var i = 0; i < dashCount; i++) {
-      final rect = Rect.fromCircle(center: center, radius: radius);
-      canvas.drawArc(rect, angle, dashAngle, false, paint);
-      angle += dashAngle + gapAngle;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedCirclePainter old) =>
-      old.color != color ||
-      old.strokeWidth != strokeWidth ||
-      old.dashLength != dashLength ||
-      old.gapLength != gapLength;
 }

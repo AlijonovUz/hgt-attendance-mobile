@@ -114,24 +114,19 @@ flutter:
           style: italic
 
 # ── Native splash (flutter_native_splash) ───────────────────────────────────
-# Static OS splash shown instantly at cold start: brand gradient background +
-# centered navy logo (Figma frame 221:689 — logo only). The Flutter SplashPage
-# then takes over and animates the «Davomat» wordmark in (Figma frame 221:814),
-# giving a seamless native → Flutter handoff. Regenerate after edits with:
+# Minimal OS splash: solid brand color only (light + dark), no logo. Android
+# 12+ cannot render a full background image natively, so the native frame is
+# kept a plain color and the Flutter SplashPage owns the full branded visual
+# (background image + tinted logo + animated «Davomat» wordmark). The colors
+# match the SplashPage base so the native → Flutter handoff is seamless.
+# Regenerate after edits with:
 #   dart run flutter_native_splash:create
 flutter_native_splash:
-  background_image: "assets/images/splash_background_image.png"
-  image: "assets/images/splash_logo.png"
+  color: "#D6E6FB"
+  color_dark: "#0A0A0A"
   android: true
   ios: true
   web: false
-  # Gravity/content-mode apply to the foreground logo — keep it centered at its
-  # natural size. The background_image fills the screen on its own.
-  android_gravity: center
-  ios_content_mode: center
-  # Android 12+ uses the OS SplashScreen API (no background image support) —
-  # navy logo masked into a navy circle on the light-blue brand color.
   android_12:
-    image: "assets/images/splash_logo.png"
     color: "#D6E6FB"
-    icon_background_color: "#113264"
+    color_dark: "#0A0A0A"

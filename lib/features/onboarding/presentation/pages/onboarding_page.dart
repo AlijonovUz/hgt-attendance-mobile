@@ -75,7 +75,30 @@ class _OnboardingViewState extends State<_OnboardingView> {
     if (!_controller.hasClients) return;
     final current = _controller.page?.round() ?? _controller.initialPage;
     if (current == index) return;
-    _controller.animateToPage(index, duration: const Duration(milliseconds: 320), curve: Curves.easeInOutCubic);
+    // Bosqich almashganda ochiq klaviaturani yopamiz (parol → yuz o‘tishida
+    // klaviatura osilib qolmasin).
+    FocusManager.instance.primaryFocus?.unfocus();
+    _controller.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  /// Orqaga: bosqich > 0 bo‘lsa avvalgi bosqichga qaytadi; 0-bosqichda onboarding
+  /// bekor qilinadi (`SessionLogoutRequested`) — RAM’dagi pending login tozalanib,
+  /// guard avtomatik login’ga yo‘naltiradi. Tizim (apparat/imo-ishora) «orqaga»si
+  /// ham shu yo‘ldan yuradi, shu sabab ilovadan chiqib ketmaydi.
+  void _handleBack() {
+    final state = context.read<OnboardingBloc>().state;
+    if (state.currentIndex > 0) {
+      _controller.previousPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      context.read<SessionBloc>().add(const SessionLogoutRequested());
+    }
   }
 
   Widget _stepWidget(OnboardingStep step) => switch (step) {
@@ -92,65 +115,86 @@ class _OnboardingViewState extends State<_OnboardingView> {
     final colors = AppColors.of(context);
     final brightness = Theme.of(context).brightness;
 
-    return Scaffold(
-      backgroundColor: colors.backgroundBase,
-      // Klaviatura ochilganda body kichrayadi — parol bosqichidagi maydonlar
-      // (ayniqsa «tasdiqlash») klaviatura tepasiga suriladi. Boshqa bosqichlarda
-      // matn kiritish yo‘q, shu sabab inset 0 — hech narsa o‘zgarmaydi.
-      resizeToAvoidBottomInset: true,
-      body: DecoratedBox(
-        decoration: BoxDecoration(gradient: AppColors.onboardingBackgroundGradient(brightness)),
-        child: BlocConsumer<OnboardingBloc, OnboardingState>(
-          listenWhen: (p, c) =>
-              p.currentIndex != c.currentIndex ||
-              p.maxUnlockedIndex != c.maxUnlockedIndex,
-          listener: (context, state) {
-            _maxUnlocked.value = state.maxUnlockedIndex;
-            _syncPage(state.currentIndex);
-          },
-          builder: (context, state) {
-            return SafeArea(
-              child: Column(
-                children: [
-                  // Tepa boshqaruv — yakuniy bosqichda yashiriladi.
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    child: state.showChrome
-                        ? _TopChrome(
-                            key: const ValueKey('chrome'),
-                            total: state.progressTotal,
-                            index: state.progressIndex,
-                            canGoBack: state.currentIndex > 0,
-                            onBack: () => _controller.previousPage(duration: const Duration(milliseconds: 320), curve: Curves.easeInOutCubic),
-                          )
-                        : const SizedBox.shrink(key: ValueKey('no-chrome')),
-                  ),
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _controller,
-                      physics: _GatedPagePhysics(maxIndexListenable: _maxUnlocked, parent: const BouncingScrollPhysics()),
-                      itemCount: state.steps.length,
-                      onPageChanged: (i) => context.read<OnboardingBloc>().add(OnboardingPageSettled(i)),
-                      itemBuilder: (context, i) => _stepWidget(state.steps[i]),
+    // Tizim «orqaga»sini ushlaymiz: standart pop ilovadan chiqarib yuboradi
+    // (login → onboarding guard `redirect` bilan o‘tgani uchun back-stack yo‘q).
+    // O‘rniga bosqichlar bo‘ylab orqaga, 0-bosqichda esa login’ga qaytamiz.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleBack();
+      },
+      child: Scaffold(
+        backgroundColor: colors.backgroundBase,
+        // Klaviatura ochilganda body kichrayadi — parol bosqichidagi maydonlar
+        // (ayniqsa «tasdiqlash») klaviatura tepasiga suriladi. Boshqa bosqichlarda
+        // matn kiritish yo‘q, shu sabab inset 0 — hech narsa o‘zgarmaydi.
+        resizeToAvoidBottomInset: true,
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: AppColors.onboardingBackgroundGradient(brightness),
+          ),
+          child: BlocConsumer<OnboardingBloc, OnboardingState>(
+            listenWhen: (p, c) =>
+                p.currentIndex != c.currentIndex ||
+                p.maxUnlockedIndex != c.maxUnlockedIndex,
+            listener: (context, state) {
+              _maxUnlocked.value = state.maxUnlockedIndex;
+              _syncPage(state.currentIndex);
+            },
+            builder: (context, state) {
+              return SafeArea(
+                child: Column(
+                  children: [
+                    // Tepa boshqaruv — yakuniy bosqichda yashiriladi.
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      child: state.showChrome
+                          ? _TopChrome(
+                              key: const ValueKey('chrome'),
+                              total: state.progressTotal,
+                              index: state.progressIndex,
+                              onBack: _handleBack,
+                            )
+                          : const SizedBox.shrink(key: ValueKey('no-chrome')),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _controller,
+                        physics: _GatedPagePhysics(
+                          maxIndexListenable: _maxUnlocked,
+                          parent: const BouncingScrollPhysics(),
+                        ),
+                        itemCount: state.steps.length,
+                        onPageChanged: (i) => context
+                            .read<OnboardingBloc>()
+                            .add(OnboardingPageSettled(i)),
+                        itemBuilder: (context, i) =>
+                            _stepWidget(state.steps[i]),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-/// Tepa qator: orqaga tugmasi (chap) + progress (markaz).
+/// Tepa qator: orqaga tugmasi (chap, doimo ko‘rinadi) + progress (markaz).
 class _TopChrome extends StatelessWidget {
-  const _TopChrome({super.key, required this.total, required this.index, required this.canGoBack, required this.onBack});
+  const _TopChrome({
+    super.key,
+    required this.total,
+    required this.index,
+    required this.onBack,
+  });
 
   final int total;
   final int index;
-  final bool canGoBack;
   final VoidCallback onBack;
 
   @override
@@ -166,13 +210,7 @@ class _TopChrome extends StatelessWidget {
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Opacity(
-                opacity: canGoBack ? 1 : 0,
-                child: IgnorePointer(
-                  ignoring: !canGoBack,
-                  child: _BackButton(colors: colors, onTap: onBack),
-                ),
-              ),
+              child: _BackButton(colors: colors, onTap: onBack),
             ),
             OnboardingProgress(total: total, index: index),
           ],
@@ -182,6 +220,8 @@ class _TopChrome extends StatelessWidget {
   }
 }
 
+/// Orqaga tugmasi — Figma (299:6098) bo‘yicha oddiy chevron (foni yo‘q), rangi
+/// mavzuga moslanadi (`iconStrong`).
 class _BackButton extends StatelessWidget {
   const _BackButton({required this.colors, required this.onTap});
 
@@ -194,12 +234,22 @@ class _BackButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 44.r,
-        height: 44.r,
+        width: 40.r,
+        height: 40.r,
         child: DecoratedBox(
-          decoration: BoxDecoration(color: colors.white, shape: BoxShape.circle),
-          child: Center(
-            child: Assets.icons.icArrowLeftLarge.svg(width: 20.r, height: 20.r, colorFilter: ColorFilter.mode(colors.iconInBlack, BlendMode.srcIn)),
+          decoration: BoxDecoration(
+            color: colors.white,
+            borderRadius: BorderRadiusGeometry.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Assets.icons.icHugeiconsArrowLeftRound.svg(
+                // width: 24.r,
+                // height: 24.r,
+                // colorFilter: ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
+              ),
+            ),
           ),
         ),
       ),

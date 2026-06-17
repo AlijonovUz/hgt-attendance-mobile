@@ -7,9 +7,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
-import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/dashed_circle_painter.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/onboarding_bloc.dart';
+import 'onboarding_action_button.dart';
 
 /// Onboarding «imageUpload» bosqichi (Figma 290‑916): katta yumaloq tugma —
 /// bosilganda galereyadan rasm tanlab yuklaydi. Yuklangach «Davom etish»
@@ -27,26 +28,28 @@ class ImageUploadStep extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
       child: Column(
         children: [
-          SizedBox(height: 12.h),
-          l10n.onbImageTitle
-              .s(24.sp)
-              .w(700)
-              .c(colors.textStrong)
-              .a(TextAlign.center)
-              .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
-          SizedBox(height: 8.h),
-          l10n.onbImageSubtitle
-              .s(14.sp)
-              .w(400)
-              .c(colors.textSub)
-              .h(20 / 14)
-              .a(TextAlign.center)
-              .copyWith(maxLines: 4, overflow: TextOverflow.ellipsis),
+          // Sarlavha + doira + chip — bo‘sh joyda vertikal markazda bitta guruh
+          // (Figma 299:8041: gap 2 sarlavha→tavsif, gap 20 qolganlari).
           Expanded(
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  l10n.onbImageTitle
+                      .s(24.sp)
+                      .w(700)
+                      .c(colors.textStrong)
+                      .a(TextAlign.center)
+                      .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
+                  SizedBox(height: 2.h),
+                  l10n.onbImageSubtitle
+                      .s(14.sp)
+                      .w(500)
+                      .c(colors.textSub)
+                      .h(20 / 14)
+                      .a(TextAlign.center)
+                      .copyWith(maxLines: 4, overflow: TextOverflow.ellipsis),
+                  SizedBox(height: 20.h),
                   BlocBuilder<OnboardingBloc, OnboardingState>(
                     buildWhen: (p, c) =>
                         p.pickedImagePath != c.pickedImagePath ||
@@ -72,9 +75,8 @@ class ImageUploadStep extends StatelessWidget {
             buildWhen: (p, c) => p.imageUploaded != c.imageUploaded,
             builder: (context, state) {
               if (!state.imageUploaded) return SizedBox(height: 52.h);
-              return CustomButton(
+              return OnboardingActionButton(
                 label: l10n.onbContinue,
-                gradient: AppColors.onboardingActionGradient,
                 onPressed: () => bloc.add(const OnboardingNextPressed()),
               );
             },
@@ -107,73 +109,95 @@ class _UploadCircle extends StatelessWidget {
       onTap: state.imageUploading ? null : onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 180.r,
-        height: 180.r,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.avatarPlaceholder,
-            shape: BoxShape.circle,
-            border: state.imageUploaded
-                ? Border.all(color: colors.successPrimary, width: 3.r)
-                : Border.all(color: colors.strokeSoft, width: 1),
-          ),
-          child: ClipOval(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (hasImage)
-                  Image.file(File(state.pickedImagePath!), fit: BoxFit.cover)
-                else
-                  Center(
+        width: 148.r,
+        height: 148.r,
+        child: hasImage
+            ? _PickedImage(state: state, colors: colors)
+            : CustomPaint(
+                // Uzuq-uzuq ramka fon ustiga chiziladi (Figma: dashed border).
+                foregroundPainter: DashedCirclePainter(
+                  color: colors.strokeSoft,
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.backgroundElevation1Alt,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Assets.icons.icHugeiconsCameraAdd.svg(
-                          width: 36.r,
-                          height: 36.r,
+                          width: 24.r,
+                          height: 24.r,
                           colorFilter: ColorFilter.mode(
-                            colors.iconSoft,
+                            colors.iconSub,
                             BlendMode.srcIn,
                           ),
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 4.h),
                         l10n.onbImageUpload
                             .s(13.sp)
-                            .w(400)
+                            .w(500)
                             .c(colors.textSub)
+                            .h(20 / 13)
                             .a(TextAlign.center),
                       ],
                     ),
                   ),
-                if (state.imageUploading)
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.black.withValues(alpha: 0.35),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: SizedBox(
-                        width: 32.r,
-                        height: 32.r,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3.r,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colors.white,
-                          ),
-                        ),
-                      ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+/// Tanlangan rasm doirasi (yuklanganda yashil ramka, yuklanayotganda spinner).
+class _PickedImage extends StatelessWidget {
+  const _PickedImage({required this.state, required this.colors});
+
+  final OnboardingState state;
+  final AppColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: state.imageUploaded
+            ? Border.all(color: colors.successPrimary, width: 3.r)
+            : null,
+      ),
+      child: ClipOval(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.file(File(state.pickedImagePath!), fit: BoxFit.cover),
+            if (state.imageUploading)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.black.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 32.r,
+                    height: 32.r,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.r,
+                      valueColor: AlwaysStoppedAnimation<Color>(colors.white),
                     ),
                   ),
-              ],
-            ),
-          ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// «Yuzingizni to‘liq ko‘rinsin» pill chipi + scan-face ikoni.
+/// «Yuzingizni to‘liq ko‘rinsin» pill chipi + scan-face ikoni (Figma 299:8052).
 class _HintChip extends StatelessWidget {
   const _HintChip({required this.label, required this.colors});
 
@@ -185,25 +209,31 @@ class _HintChip extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.backgroundElevation1Alt,
-        borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: colors.strokeSoft),
+        borderRadius: BorderRadius.circular(100.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        padding: EdgeInsets.all(8.r),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Assets.icons.icLucideScanFace.svg(
-              width: 16.r,
-              height: 16.r,
-              colorFilter: ColorFilter.mode(colors.iconSub, BlendMode.srcIn),
+              width: 20.r,
+              height: 20.r,
+              colorFilter: ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 4.w),
             Flexible(
               child: label
-                  .s(13.sp)
-                  .w(400)
-                  .c(colors.textSub)
+                  .s(12.sp)
+                  .w(500)
+                  .c(colors.textStrong)
+                  .h(16 / 12)
                   .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ],

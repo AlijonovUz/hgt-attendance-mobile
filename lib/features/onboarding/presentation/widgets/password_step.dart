@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/password_rule.dart';
 import '../bloc/onboarding_bloc.dart';
+import 'onboarding_action_button.dart';
 import 'password_rule_item.dart';
 
 /// Onboarding «password» bosqichi (Figma 263‑1333): eski parol (login’dan
@@ -21,12 +21,12 @@ class PasswordStep extends StatelessWidget {
 
   /// Shart matnini l10n’dan oladi.
   String _ruleLabel(AppLocalizations l10n, PasswordRule rule) => switch (rule) {
-        PasswordRule.minLength => l10n.onbRuleMinLength,
-        PasswordRule.upperCase => l10n.onbRuleUpper,
-        PasswordRule.lowerCase => l10n.onbRuleLower,
-        PasswordRule.digit => l10n.onbRuleDigit,
-        PasswordRule.special => l10n.onbRuleSpecial,
-      };
+    PasswordRule.minLength => l10n.onbRuleMinLength,
+    PasswordRule.upperCase => l10n.onbRuleUpper,
+    PasswordRule.lowerCase => l10n.onbRuleLower,
+    PasswordRule.digit => l10n.onbRuleDigit,
+    PasswordRule.special => l10n.onbRuleSpecial,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class PasswordStep extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 12.h),
           l10n.onbPasswordTitle
@@ -49,10 +49,10 @@ class PasswordStep extends StatelessWidget {
               .c(colors.textStrong)
               .a(TextAlign.center)
               .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
-          SizedBox(height: 8.h),
+          SizedBox(height: 2.h),
           l10n.onbPasswordSubtitle
               .s(14.sp)
-              .w(400)
+              .w(500)
               .c(colors.textSub)
               .h(20 / 14)
               .a(TextAlign.center)
@@ -84,22 +84,6 @@ class PasswordStep extends StatelessWidget {
                       onChanged: (v) => bloc.add(OnboardingPasswordChanged(v)),
                     ),
                   ),
-                  SizedBox(height: 12.h),
-                  BlocBuilder<OnboardingBloc, OnboardingState>(
-                    buildWhen: (p, c) => p.satisfiedRules != c.satisfiedRules,
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final rule in PasswordRule.values)
-                            PasswordRuleItem(
-                              label: _ruleLabel(l10n, rule),
-                              satisfied: state.satisfiedRules.contains(rule),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
                   SizedBox(height: 16.h),
                   // ── Yangi parolni tasdiqlash ───────────────────────────────
                   BlocBuilder<OnboardingBloc, OnboardingState>(
@@ -108,7 +92,8 @@ class PasswordStep extends StatelessWidget {
                         p.newPassword != c.newPassword ||
                         p.confirmPassword != c.confirmPassword,
                     builder: (context, state) {
-                      final mismatch = state.confirmPassword.isNotEmpty &&
+                      final mismatch =
+                          state.confirmPassword.isNotEmpty &&
                           state.newPassword != state.confirmPassword;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +101,8 @@ class PasswordStep extends StatelessWidget {
                           _PasswordField(
                             label: l10n.onbPasswordConfirmLabel,
                             textInputAction: TextInputAction.done,
-                            hasError: mismatch ||
+                            hasError:
+                                mismatch ||
                                 state.passwordError != OnboardingErrorKind.none,
                             onChanged: (v) =>
                                 bloc.add(OnboardingConfirmPasswordChanged(v)),
@@ -138,25 +124,49 @@ class PasswordStep extends StatelessWidget {
                       );
                     },
                   ),
+                  SizedBox(height: 12.h),
+                  // ── Parol shartlari (Figma: maydonlardan keyin) ────────────
+                  BlocBuilder<OnboardingBloc, OnboardingState>(
+                    buildWhen: (p, c) => p.satisfiedRules != c.satisfiedRules,
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final rule in PasswordRule.values)
+                            PasswordRuleItem(
+                              label: _ruleLabel(l10n, rule),
+                              satisfied: state.satisfiedRules.contains(rule),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                   const _ErrorText(),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 8.h),
+          // Tugma ko‘rinmaganda joy ham egallamasligi kerak (klaviatura ostida
+          // bo‘sh band qolmaydi) — shu sabab `SizedBox.shrink`.
           BlocBuilder<OnboardingBloc, OnboardingState>(
             buildWhen: (p, c) =>
                 p.canSubmitPassword != c.canSubmitPassword ||
                 p.passwordSubmitting != c.passwordSubmitting,
             builder: (context, state) {
               if (!state.canSubmitPassword && !state.passwordSubmitting) {
-                return SizedBox(height: 52.h);
+                return const SizedBox.shrink();
               }
-              return CustomButton(
-                label: l10n.onbContinue,
-                gradient: AppColors.onboardingActionGradient,
-                isLoading: state.passwordSubmitting,
-                onPressed: () => bloc.add(const OnboardingPasswordSubmitted()),
+              return Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: OnboardingActionButton(
+                  label: l10n.onbContinue,
+                  isLoading: state.passwordSubmitting,
+                  onPressed: () {
+                    // Keyingi bosqichga o‘tishdan oldin klaviaturani yopamiz.
+                    FocusScope.of(context).unfocus();
+                    bloc.add(const OnboardingPasswordSubmitted());
+                  },
+                ),
               );
             },
           ),
@@ -199,8 +209,17 @@ class _PasswordField extends StatelessWidget {
           showObscureToggle: true,
           keyboardType: TextInputType.visiblePassword,
           textInputAction: textInputAction,
+          backgroundColor: colors.backgroundBase,
           hasError: hasError,
           onChanged: onChanged,
+          // «Next» → keyingi maydonga fokus; «Done» → klaviaturani yopadi.
+          onSubmitted: (_) {
+            if (textInputAction == TextInputAction.done) {
+              FocusScope.of(context).unfocus();
+            } else {
+              FocusScope.of(context).nextFocus();
+            }
+          },
         ),
       ],
     );

@@ -6,8 +6,8 @@ import '../../../../app/bloc/session_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'onboarding_action_button.dart';
 
 /// Onboarding yakuniy bosqichi (Figma 299‑8223): «Hammasi tayyor!». «Ishni
 /// boshlash» bosilganda `SessionFaceVerified` yuboriladi — RAM tokenlar diskka
@@ -29,19 +29,19 @@ class OnboardingDoneStep extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Assets.icons.icHugeiconsParty.svg(width: 64.r, height: 64.r),
-                  SizedBox(height: 24.h),
+                  Assets.icons.icHugeiconsParty.svg(width: 96.r, height: 96.r),
+                  SizedBox(height: 20.h),
                   l10n.onbDoneTitle
                       .s(24.sp)
-                      .w(700)
-                      .c(colors.textStrong)
+                      .w(600)
+                      .c(colors.white)
                       .a(TextAlign.center)
                       .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 2.h),
                   l10n.onbDoneSubtitle
                       .s(14.sp)
-                      .w(400)
-                      .c(colors.textSub)
+                      .w(600)
+                      .c(AppColors.onboardingAvatarBg)
                       .h(20 / 14)
                       .a(TextAlign.center)
                       .copyWith(maxLines: 4, overflow: TextOverflow.ellipsis),
@@ -49,7 +49,7 @@ class OnboardingDoneStep extends StatelessWidget {
               ),
             ),
           ),
-          CustomButton(
+          OnboardingActionButton(
             label: l10n.onbDoneStart,
             onPressed: () =>
                 context.read<SessionBloc>().add(const SessionFaceVerified()),

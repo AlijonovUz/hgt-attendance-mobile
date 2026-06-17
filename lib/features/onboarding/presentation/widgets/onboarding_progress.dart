@@ -7,7 +7,11 @@ import '../../../../config/theme/app_colors.dart';
 /// oq «pill», qolganlari — kichik nuqtalar. Tepa har ikkala rejimda ko‘k/navy
 /// gradient ustida bo‘lgani uchun ranglar oq asosida (opasitet bilan).
 class OnboardingProgress extends StatelessWidget {
-  const OnboardingProgress({super.key, required this.total, required this.index});
+  const OnboardingProgress({
+    super.key,
+    required this.total,
+    required this.index,
+  });
 
   /// Bosqichlar soni (yakuniy «done»siz).
   final int total;
@@ -33,9 +37,7 @@ class OnboardingProgress extends StatelessWidget {
             width: i == index ? 26.w : 7.r,
             height: 7.r,
             decoration: BoxDecoration(
-              color: i == index
-                  ? active
-                  : (i < index ? done : idle),
+              color: i == index ? active : (i < index ? done : idle),
               borderRadius: BorderRadius.circular(999.r),
             ),
           ),

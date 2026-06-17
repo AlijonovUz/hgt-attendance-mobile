@@ -20,12 +20,12 @@ enum PasswordRule {
 extension PasswordRuleX on PasswordRule {
   /// [value] shu shartni qondiradimi.
   bool isSatisfiedBy(String value) => switch (this) {
-        PasswordRule.minLength => value.length >= 8,
-        PasswordRule.upperCase => value.contains(RegExp('[A-Z]')),
-        PasswordRule.lowerCase => value.contains(RegExp('[a-z]')),
-        PasswordRule.digit => value.contains(RegExp('[0-9]')),
-        PasswordRule.special => value.contains(RegExp(r'[^A-Za-z0-9]')),
-      };
+    PasswordRule.minLength => value.length >= 8,
+    PasswordRule.upperCase => value.contains(RegExp('[A-Z]')),
+    PasswordRule.lowerCase => value.contains(RegExp('[a-z]')),
+    PasswordRule.digit => value.contains(RegExp('[0-9]')),
+    PasswordRule.special => value.contains(RegExp(r'[^A-Za-z0-9]')),
+  };
 }
 
 /// Barcha shartlar bajarilganda parol kuchli — keyingi bosqichga ruxsat.

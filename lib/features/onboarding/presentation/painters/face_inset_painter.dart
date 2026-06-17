@@ -48,7 +48,12 @@ class FaceInsetPainter extends CustomPainter {
       final dstW = img.width * scale;
       final dstH = img.height * scale;
       final dst = Rect.fromCenter(center: center, width: dstW, height: dstH);
-      canvas.drawImageRect(img, src, dst, Paint()..filterQuality = FilterQuality.medium);
+      canvas.drawImageRect(
+        img,
+        src,
+        dst,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
       canvas.restore();
     }
 

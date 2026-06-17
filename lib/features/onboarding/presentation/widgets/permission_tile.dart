@@ -27,60 +27,58 @@ class PermissionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.backgroundElevation1Alt,
+        color: AppColors.onboardingCardBg,
         borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: colors.strokeSoft),
+        border: Border.all(color: AppColors.onboardingCardBorder),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        child: Row(
+        padding: EdgeInsets.all(16.r),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            _IconBox(icon: icon, granted: granted, colors: colors),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  title
-                      .s(15.sp)
-                      .w(600)
-                      .c(colors.textStrong)
-                      .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-                  SizedBox(height: 2.h),
-                  description
-                      .s(13.sp)
-                      .w(400)
-                      .c(colors.textSub)
-                      .h(18 / 13)
-                      .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
-                ],
-              ),
-            ),
-            if (granted)
-              Padding(
-                padding: EdgeInsets.only(left: 12.w),
-                child: Assets.icons.icHugeiconsSecurityCheck.svg(
-                  width: 22.r,
-                  height: 22.r,
-                  colorFilter: ColorFilter.mode(
-                    colors.successPrimary,
-                    BlendMode.srcIn,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _IconBox(icon: icon, granted: granted),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      title
+                          .s(14.sp)
+                          .w(500)
+                          .c(AppColors.onboardingCardText)
+                          .h(20 / 14)
+                          .copyWith(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      SizedBox(height: 2.h),
+                      description
+                          .s(14.sp)
+                          .w(400)
+                          .c(AppColors.onboardingCardTextSub)
+                          .h(20 / 14)
+                          .copyWith(
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    ],
                   ),
                 ),
-              )
-            else ...[
-              SizedBox(width: 12.w),
-              _GrantButton(
-                label: l10n.onbGrant,
-                colors: colors,
-                onTap: onGrant,
-              ),
+              ],
+            ),
+            // Berilmagan bo‘lsa «Ruxsat berish» tugmasi pastda, o‘ngda (Figma).
+            if (!granted) ...[
+              SizedBox(height: 16.h),
+              _GrantButton(label: l10n.onbGrant, onTap: onGrant),
             ],
           ],
         ),
@@ -89,35 +87,31 @@ class PermissionTile extends StatelessWidget {
   }
 }
 
-/// Oq yumaloq ikon qutisi — berilganda yashil tus oladi.
+/// To‘q yumaloq ikon qutisi (Figma `card` fon) — berilganda ikon yashil tus oladi.
 class _IconBox extends StatelessWidget {
-  const _IconBox({
-    required this.icon,
-    required this.granted,
-    required this.colors,
-  });
+  const _IconBox({required this.icon, required this.granted});
 
   final SvgGenImage icon;
   final bool granted;
-  final AppColors colors;
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return SizedBox(
-      width: 44.r,
-      height: 44.r,
+      width: 40.r,
+      height: 40.r,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: granted ? colors.successSoft : colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: colors.strokeSoft),
+          color: AppColors.onboardingCardIconBg,
+          borderRadius: BorderRadius.circular(14.r),
         ),
         child: Center(
           child: icon.svg(
-            width: 22.r,
-            height: 22.r,
+            width: 20.r,
+            height: 20.r,
             colorFilter: ColorFilter.mode(
-              granted ? colors.successPrimary : colors.iconStrong,
+              granted ? colors.successPrimary : colors.iconWhite,
               BlendMode.srcIn,
             ),
           ),
@@ -127,16 +121,11 @@ class _IconBox extends StatelessWidget {
   }
 }
 
-/// To‘q «pill» tugma (`textStrong` fon, oq yozuv).
+/// «Ruxsat berish» pill tugmasi (Figma `primary` `#e5e5e5` fon, `#171717` yozuv).
 class _GrantButton extends StatelessWidget {
-  const _GrantButton({
-    required this.label,
-    required this.colors,
-    required this.onTap,
-  });
+  const _GrantButton({required this.label, required this.onTap});
 
   final String label;
-  final AppColors colors;
   final VoidCallback onTap;
 
   @override
@@ -144,7 +133,7 @@ class _GrantButton extends StatelessWidget {
     final radius = BorderRadius.circular(10.r);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.textStrong,
+        color: AppColors.onboardingCardButtonBg,
         borderRadius: radius,
       ),
       child: Material(
@@ -153,8 +142,8 @@ class _GrantButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: radius,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
-            child: label.s(13.sp).w(600).c(colors.backgroundBase),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            child: label.s(14.sp).w(500).c(AppColors.onboardingCardButtonText),
           ),
         ),
       ),

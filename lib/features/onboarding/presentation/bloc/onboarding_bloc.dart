@@ -61,7 +61,10 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     ];
   }
 
-  Future<void> _onStarted(OnboardingStarted event, Emitter<OnboardingState> emit) async {
+  Future<void> _onStarted(
+    OnboardingStarted event,
+    Emitter<OnboardingState> emit,
+  ) async {
     final location = await Permission.location.status;
     final camera = await Permission.camera.status;
     emit(
@@ -77,30 +80,44 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
 
     // Lavozim profil endpointidan (RAM token bilan) — bloklamaydi.
     try {
-      final profile = await _getProfile(GetProfileParams(accessToken: event.data.accessToken));
+      final profile = await _getProfile(
+        GetProfileParams(accessToken: event.data.accessToken),
+      );
       if (!isClosed) add(OnboardingRoleLoaded(profile.roleName));
     } catch (_) {
       // Lavozim olinmadi — UI fallback ko‘rsatadi.
     }
   }
 
-  void _onRoleLoaded(OnboardingRoleLoaded event, Emitter<OnboardingState> emit) {
+  void _onRoleLoaded(
+    OnboardingRoleLoaded event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (event.roleName == null || event.roleName!.trim().isEmpty) return;
     emit(state.copyWith(data: state.data.copyWith(roleName: event.roleName)));
   }
 
-  void _onPageSettled(OnboardingPageSettled event, Emitter<OnboardingState> emit) {
+  void _onPageSettled(
+    OnboardingPageSettled event,
+    Emitter<OnboardingState> emit,
+  ) {
     final clamped = event.index.clamp(0, state.maxUnlockedIndex);
     if (clamped == state.currentIndex) return;
     emit(state.copyWith(currentIndex: clamped));
   }
 
-  void _onNextPressed(OnboardingNextPressed event, Emitter<OnboardingState> emit) {
+  void _onNextPressed(
+    OnboardingNextPressed event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (!state.canAdvanceCurrent) return;
     emit(state.copyWith(currentIndex: state.currentIndex + 1));
   }
 
-  Future<void> _onPermissionRequested(OnboardingPermissionRequested event, Emitter<OnboardingState> emit) async {
+  Future<void> _onPermissionRequested(
+    OnboardingPermissionRequested event,
+    Emitter<OnboardingState> emit,
+  ) async {
     final permission = switch (event.permission) {
       OnboardingPermission.location => Permission.location,
       OnboardingPermission.camera => Permission.camera,
@@ -119,21 +136,53 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     });
   }
 
-  void _onOldPasswordChanged(OnboardingOldPasswordChanged event, Emitter<OnboardingState> emit) {
-    emit(state.copyWith(oldPassword: event.value, passwordError: OnboardingErrorKind.none));
+  void _onOldPasswordChanged(
+    OnboardingOldPasswordChanged event,
+    Emitter<OnboardingState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        oldPassword: event.value,
+        passwordError: OnboardingErrorKind.none,
+      ),
+    );
   }
 
-  void _onPasswordChanged(OnboardingPasswordChanged event, Emitter<OnboardingState> emit) {
-    emit(state.copyWith(newPassword: event.value, passwordError: OnboardingErrorKind.none));
+  void _onPasswordChanged(
+    OnboardingPasswordChanged event,
+    Emitter<OnboardingState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        newPassword: event.value,
+        passwordError: OnboardingErrorKind.none,
+      ),
+    );
   }
 
-  void _onConfirmPasswordChanged(OnboardingConfirmPasswordChanged event, Emitter<OnboardingState> emit) {
-    emit(state.copyWith(confirmPassword: event.value, passwordError: OnboardingErrorKind.none));
+  void _onConfirmPasswordChanged(
+    OnboardingConfirmPasswordChanged event,
+    Emitter<OnboardingState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        confirmPassword: event.value,
+        passwordError: OnboardingErrorKind.none,
+      ),
+    );
   }
 
-  Future<void> _onPasswordSubmitted(OnboardingPasswordSubmitted event, Emitter<OnboardingState> emit) async {
+  Future<void> _onPasswordSubmitted(
+    OnboardingPasswordSubmitted event,
+    Emitter<OnboardingState> emit,
+  ) async {
     if (!state.canSubmitPassword) return;
-    emit(state.copyWith(passwordSubmitting: true, passwordError: OnboardingErrorKind.none));
+    emit(
+      state.copyWith(
+        passwordSubmitting: true,
+        passwordError: OnboardingErrorKind.none,
+      ),
+    );
     try {
       await _changePassword(
         ChangePasswordParams(
@@ -144,43 +193,84 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         ),
       );
       // Yopilgach: belgilab, keyingi bosqichga o‘tamiz.
-      emit(state.copyWith(passwordSubmitting: false, passwordChanged: true, currentIndex: state.currentIndex + 1));
+      emit(
+        state.copyWith(
+          passwordSubmitting: false,
+          passwordChanged: true,
+          currentIndex: state.currentIndex + 1,
+        ),
+      );
     } on Failure catch (failure) {
       emit(
         state.copyWith(
           passwordSubmitting: false,
-          passwordError: failure is NetworkFailure ? OnboardingErrorKind.network : OnboardingErrorKind.server,
+          passwordError: failure is NetworkFailure
+              ? OnboardingErrorKind.network
+              : OnboardingErrorKind.server,
         ),
       );
     } catch (_) {
-      emit(state.copyWith(passwordSubmitting: false, passwordError: OnboardingErrorKind.server));
+      emit(
+        state.copyWith(
+          passwordSubmitting: false,
+          passwordError: OnboardingErrorKind.server,
+        ),
+      );
     }
   }
 
-  Future<void> _onImagePickRequested(OnboardingImagePickRequested event, Emitter<OnboardingState> emit) async {
+  Future<void> _onImagePickRequested(
+    OnboardingImagePickRequested event,
+    Emitter<OnboardingState> emit,
+  ) async {
     if (state.imageUploading) return;
     final path = await _imagePicker.pickFromGallery();
     if (path == null) return; // bekor qilindi
-    emit(state.copyWith(pickedImagePath: path, imageUploading: true, imageUploaded: false, imageError: OnboardingErrorKind.none));
+    emit(
+      state.copyWith(
+        pickedImagePath: path,
+        imageUploading: true,
+        imageUploaded: false,
+        imageError: OnboardingErrorKind.none,
+      ),
+    );
     try {
-      await _updateFaceImage(UpdateFaceImageParams(imagePath: path, accessToken: state.data.accessToken));
+      await _updateFaceImage(
+        UpdateFaceImageParams(
+          imagePath: path,
+          accessToken: state.data.accessToken,
+        ),
+      );
       emit(state.copyWith(imageUploading: false, imageUploaded: true));
     } on Failure catch (failure) {
       emit(
         state.copyWith(
           imageUploading: false,
           imageUploaded: false,
-          imageError: failure is NetworkFailure ? OnboardingErrorKind.network : OnboardingErrorKind.server,
+          imageError: failure is NetworkFailure
+              ? OnboardingErrorKind.network
+              : OnboardingErrorKind.server,
         ),
       );
     } catch (_) {
-      emit(state.copyWith(imageUploading: false, imageUploaded: false, imageError: OnboardingErrorKind.server));
+      emit(
+        state.copyWith(
+          imageUploading: false,
+          imageUploaded: false,
+          imageError: OnboardingErrorKind.server,
+        ),
+      );
     }
   }
 
-  void _onFaceVerified(OnboardingFaceVerifiedReported event, Emitter<OnboardingState> emit) {
+  void _onFaceVerified(
+    OnboardingFaceVerifiedReported event,
+    Emitter<OnboardingState> emit,
+  ) {
     if (state.faceVerified) return;
-    final nextIndex = state.currentIndex < state.steps.length - 1 ? state.currentIndex + 1 : state.currentIndex;
+    final nextIndex = state.currentIndex < state.steps.length - 1
+        ? state.currentIndex + 1
+        : state.currentIndex;
     emit(state.copyWith(faceVerified: true, currentIndex: nextIndex));
   }
 }

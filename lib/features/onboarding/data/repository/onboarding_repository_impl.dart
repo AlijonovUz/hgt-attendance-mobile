@@ -7,7 +7,7 @@ import '../data_sources/onboarding_remote_data_source.dart';
 /// domen `Failure`lariga aylantiradi.
 class OnboardingRepositoryImpl implements OnboardingRepository {
   const OnboardingRepositoryImpl({required OnboardingRemoteDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   final OnboardingRemoteDataSource _remote;
 

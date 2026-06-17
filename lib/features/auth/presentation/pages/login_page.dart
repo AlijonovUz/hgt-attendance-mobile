@@ -66,17 +66,17 @@ class _LoginViewState extends State<_LoginView> {
               state.accessToken != null) {
             final responseName = state.responseFullName?.trim() ?? '';
             context.read<SessionBloc>().add(
-                  SessionLoginSucceeded(
-                    accessToken: state.accessToken!,
-                    refreshToken: state.refreshToken ?? '',
-                    fullName: responseName.isNotEmpty
-                        ? responseName
-                        : state.fullName.trim(),
-                    loginPassword: state.password,
-                    faceImage: state.faceImage,
-                    isPasswordChanged: state.isPasswordChanged,
-                  ),
-                );
+              SessionLoginSucceeded(
+                accessToken: state.accessToken!,
+                refreshToken: state.refreshToken ?? '',
+                fullName: responseName.isNotEmpty
+                    ? responseName
+                    : state.fullName.trim(),
+                loginPassword: state.password,
+                faceImage: state.faceImage,
+                isPasswordChanged: state.isPasswordChanged,
+              ),
+            );
           }
         },
         child: Stack(
@@ -97,7 +97,9 @@ class _LoginViewState extends State<_LoginView> {
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     padding: EdgeInsets.symmetric(
-                        horizontal: 20.w, vertical: 16.h),
+                      horizontal: 20.w,
+                      vertical: 16.h,
+                    ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight - 32.h,
@@ -157,26 +159,14 @@ class _Brand extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: 8.w,
       children: [
-        SizedBox(
-          width: 34.r,
-          height: 34.r,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.brandNavy,
-              borderRadius: BorderRadius.circular(9.r),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(7.r),
-              child: Assets.icons.icExclude.svg(
-                colorFilter:
-                    ColorFilter.mode(colors.textWhite, BlendMode.srcIn),
-              ),
-            ),
-          ),
+        Assets.icons.icExclude.svg(
+          width: 32.w,
+          height: 32.h,
+          colorFilter: ColorFilter.mode(colors.textWhite, BlendMode.srcIn),
         ),
-        SizedBox(width: 10.w),
-        l10n.appName.s(18.sp).w(700).c(colors.textStrong),
+        l10n.appName.s(18.sp).w(600).c(colors.textStrong),
       ],
     );
   }
@@ -249,7 +239,10 @@ class _Form extends StatelessWidget {
                   keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
                   hasError: hasFieldError,
+                  backgroundColor: colors.backgroundBase,
                   onChanged: (v) => bloc.add(LoginFullNameChanged(v)),
+                  // «Next» → parol maydoniga fokus.
+                  onSubmitted: (_) => FocusScope.of(context).nextFocus(),
                 ),
                 SizedBox(height: 14.h),
                 _Label(l10n.loginPasswordLabel, colors: colors),
@@ -260,8 +253,9 @@ class _Form extends StatelessWidget {
                   obscureText: true,
                   showObscureToggle: true,
                   textInputAction: TextInputAction.done,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.visiblePassword,
                   hasError: hasFieldError,
+                  backgroundColor: colors.backgroundBase,
                   onChanged: (v) => bloc.add(LoginPasswordChanged(v)),
                   onSubmitted: (_) => onSubmit(),
                 ),
@@ -326,11 +320,12 @@ class _ErrorArea extends StatelessWidget {
 
         final text = switch (state.errorKind) {
           LoginErrorKind.network => l10n.networkError,
-          // «*Login yoki parol noto‘g‘ri. Yana N marta urinish mumkin.» —
-          // to‘liq mobil l10n, urinishlar soni har xatoda kamayadi.
+          // Backend `errorMsg`i bo‘lsa to‘g‘ridan-to‘g‘ri ko‘rsatamiz; aks holda
+          // mobil l10n fallback (urinishlar soni bilan).
           LoginErrorKind.invalid =>
-            '*${l10n.loginInvalidCredentials} '
-                '${l10n.loginAttemptsRemaining(state.remainingAttempts)}',
+            state.errorText ??
+                '*${l10n.loginInvalidCredentials} '
+                    '${l10n.loginAttemptsRemaining(state.remainingAttempts)}',
           LoginErrorKind.server => state.errorText ?? l10n.commonError,
           _ => '',
         };
@@ -386,8 +381,10 @@ class _BlockedCard extends StatelessWidget {
                   child: Assets.icons.icLucideShieldAlert.svg(
                     width: 16.r,
                     height: 16.r,
-                    colorFilter:
-                        ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
+                    colorFilter: ColorFilter.mode(
+                      colors.iconStrong,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
@@ -406,7 +403,9 @@ class _BlockedCard extends StatelessWidget {
                   SizedBox(height: 4.h),
                   l10n
                       .loginBlockedBody(
-                          LoginState.maxAttempts, state.blockedMinutes)
+                        LoginState.maxAttempts,
+                        state.blockedMinutes,
+                      )
                       .s(12.sp)
                       .w(400)
                       .c(colors.textSub)

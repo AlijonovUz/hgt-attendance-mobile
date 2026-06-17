@@ -34,6 +34,7 @@ class CustomButton extends StatelessWidget {
     this.trailing,
     this.height,
     this.gradient,
+    this.borderRadius,
   });
 
   final String label;
@@ -53,19 +54,23 @@ class CustomButton extends StatelessWidget {
   final Widget? trailing;
   final double? height;
 
+  /// Burchak radiusi — berilmasa `radius-lg` (10).
+  final double? borderRadius;
+
   bool get _isInteractive => enabled && !isLoading && onPressed != null;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final radius = BorderRadius.circular(10.r);
+    final radius = BorderRadius.circular(borderRadius ?? 10.r);
 
     final (Color background, Color foreground, BorderSide side) = _resolveStyle(
       colors,
     );
 
     // Gradient faqat faol primary tugmada (o‘chirilganda bir rang fon qoladi).
-    final useGradient = gradient != null &&
+    final useGradient =
+        gradient != null &&
         _isInteractive &&
         variant == CustomButtonVariant.primary;
 
@@ -88,10 +93,7 @@ class CustomButton extends StatelessWidget {
                     .s(15.sp)
                     .w(500)
                     .c(foreground)
-                    .copyWith(
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               if (trailing != null) ...[SizedBox(width: 8.w), trailing!],
             ],
@@ -126,8 +128,8 @@ class CustomButton extends StatelessWidget {
     if (!_isInteractive) {
       return switch (variant) {
         CustomButtonVariant.primary => (
-          colors.controlBgDisabled,
-          colors.controlTextDisabled,
+          colors.controlBgDisabledStrong,
+          colors.controlTextDisabledStrong,
           BorderSide.none,
         ),
         CustomButtonVariant.outline => (

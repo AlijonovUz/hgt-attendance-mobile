@@ -129,8 +129,11 @@ class _SwipeActionButtonState extends State<SwipeActionButton> with SingleTicker
     final activeText = widget.activeTextColor ?? colors.white;
 
     final height = widget.height.h;
-    final handle = widget.handleSize.w;
-    final inset = widget.handleInset.w;
+    // Dasta/inset — yo‘lak balandligiga bog‘liq, shuning uchun ham `.h` bilan
+    // shkalalanadi (`.w` bilan aralashtirilsa qurilma nisbati o‘zgarganda dasta
+    // yo‘lakka sig‘maydi yoki chetidan chiqib ketadi).
+    final handle = widget.handleSize.h;
+    final inset = widget.handleInset.h;
     final radius = BorderRadius.circular(22.r);
 
     return LayoutBuilder(
@@ -143,9 +146,10 @@ class _SwipeActionButtonState extends State<SwipeActionButton> with SingleTicker
           builder: (context, _) {
             final t = _controller.value;
             final handleLeft = inset + t * _maxDrag;
-            // To‘ldiruvchi — dasta CHAP chetigacha alohida dumaloq pill
-            // (Figma 301:10143: surilgan qism dastadan ajralib turadi).
-            final fillWidth = handleLeft;
+            // To‘ldiruvchi — faqat surilgan ulush (dastadan `inset` qadar
+            // ajralib turadi). Rest holatda (t=0) eni 0 — Figma'dagidek dasta
+            // chap chetda turadi, gradient umuman ko‘rinmaydi.
+            final fillWidth = t * _maxDrag;
             final textColor = Color.lerp(widget.idleTextColor, activeText, (t * 1.6).clamp(0.0, 1.0))!;
 
             return DecoratedBox(

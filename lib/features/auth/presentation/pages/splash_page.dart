@@ -9,13 +9,14 @@ import '../../../../core/gen/assets.gen.dart';
 
 /// Animated brand splash shown while [SessionBloc] resolves the initial session.
 ///
-/// Picks up seamlessly where the native splash (flutter_native_splash) leaves
-/// off: the same light-blue brand gradient + centered navy logo. The logo stays
-/// fixed in place (no jump from the static native frame), and the «Davomat»
-/// wordmark fades + slides in just beneath it — the only difference between the
-/// two Figma frames (221:689 → 221:814). The router guard moves off this screen
-/// once the session status is known; [SessionBloc] holds it for a minimum so
-/// this reveal can finish.
+/// Theme-aware: light mode shows the light-blue brand background + navy logo
+/// (Figma 221:689 → 221:814), dark mode the dark background + near-white logo
+/// (Figma 296:2865 → 296:2873). The logo stays fixed in place while the
+/// «Davomat» wordmark fades + slides in just beneath it — the only difference
+/// between each pair of frames. The native splash is now a plain brand color,
+/// so this screen owns the full visual. The router guard moves off once the
+/// session status is known; [SessionBloc] holds it briefly so the reveal can
+/// finish.
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -71,26 +72,33 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-swapped assets: dark gets its own background + light logo tint.
+    final background = isDark
+        ? Assets.images.splashBackgroundImageDark
+        : Assets.images.splashBackgroundImage;
+    final logoTint = isDark ? colors.textStrong : AppColors.brandNavy;
+
     return Scaffold(
+      backgroundColor: colors.backgroundBase,
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Logo is centered to match the native splash exactly; the wordmark
-          // is pinned just below it so the logo never shifts as text appears.
+          // Logo is centered; the wordmark is pinned just below it so the logo
+          // never shifts as text appears.
           final centerY = constraints.maxHeight / 2;
-          final logoSize = 60.r;
+          final logoSize = 64.r;
 
           return Stack(
             fit: StackFit.expand,
             children: [
-              Assets.images.splashBackgroundImage.image(
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-              ),
+              background.image(fit: BoxFit.cover, alignment: Alignment.center),
               Center(
-                child: Assets.images.splashLogo.image(
+                child: Assets.icons.icSplashLogoDark.svg(
                   width: logoSize,
                   height: logoSize,
-                  filterQuality: FilterQuality.high,
+                  colorFilter: ColorFilter.mode(logoTint, BlendMode.srcIn),
                 ),
               ),
               Positioned(
@@ -105,7 +113,7 @@ class _SplashPageState extends State<SplashPage>
                       child: _wordmark
                           .s(30.sp)
                           .w(500)
-                          .c(AppColors.authForeground)
+                          .c(colors.textStrong)
                           .copyWith(
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
