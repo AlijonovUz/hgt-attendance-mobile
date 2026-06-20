@@ -6,7 +6,7 @@
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
     <application
-        android:label="Davomat"
+        android:label="HGT Davomat"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

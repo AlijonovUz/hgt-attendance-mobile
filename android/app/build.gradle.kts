@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,10 +8,27 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    namespace = "raqamli.nazorat.hgt_attendance_mobile.hgt_attendance_mobile"
+    namespace = "raqamli.nazorat.hgt_mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+
+    signingConfigs{
+        create("release"){
+            if(keystorePropertiesFile.exists()){
+                keyAlias = keystoreProperties.getProperty("keyAlias")?.trim()
+                keyPassword = keystoreProperties.getProperty("keyPassword")?.trim()
+                storeFile = keystoreProperties.getProperty("storeFile")?.trim()?.let { file(it) }
+                storePassword = keystoreProperties.getProperty("storePassword")?.trim()
+            }
+        }
+    }
 
     compileOptions {
         // camera_android_camerax ships Java 11 nestmate bytecode; core library
@@ -25,7 +45,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "raqamli.nazorat.hgt_attendance_mobile.hgt_attendance_mobile"
+        applicationId = "raqamli.nazorat.hgt_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -38,7 +58,7 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

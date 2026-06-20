@@ -1,4 +1,4 @@
-package raqamli.nazorat.hgt_attendance_mobile.hgt_attendance_mobile
+package raqamli.nazorat.hgt_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

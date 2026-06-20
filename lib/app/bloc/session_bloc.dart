@@ -32,6 +32,11 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   final TokenService _tokenService;
   final StorageService _storage;
 
+  /// Play Market tekshiruvi uchun demo hisob. Shu ism bilan kirilganda yuz
+  /// tasdig‘i va onboarding bosqichlari o‘tkazib yuboriladi: tokenlar darhol
+  /// saqlanadi va to‘g‘ridan-to‘g‘ri home’ga o‘tiladi.
+  static const String _demoFullName = 'ali aliyev';
+
   /// Onboarding shu qurilmada kamida bir marta tugatilganmi (device-once).
   /// `_onStarted`da storage’dan o‘qiladi; yuz tasdiqlangach `true`ga o‘tadi va
   /// saqlanadi. Logout/expire’da TOZALANMAYDI — keyingi login’lar onboardingni
@@ -90,10 +95,23 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingLoginPassword = event.loginPassword;
     _pendingFaceImage = event.faceImage;
     _pendingIsPasswordChanged = event.isPasswordChanged;
+
+    // Demo hisob: yuz + onboardingni o‘tkazib yuborib darhol home’ga.
+    if (event.fullName.trim().toLowerCase() == _demoFullName) {
+      await _persistSession(emit);
+      return;
+    }
+
     emit(const SessionState.faceVerificationRequired());
   }
 
   Future<void> _onFaceVerified(SessionFaceVerified event, Emitter<SessionState> emit) async {
+    await _persistSession(emit);
+  }
+
+  /// RAM’dagi pending login natijasini diskka yozadi va `authenticated`ga o‘tadi.
+  /// Yuz tasdig‘idan keyin ham, demo hisob bypass’ida ham ishlatiladi.
+  Future<void> _persistSession(Emitter<SessionState> emit) async {
     final access = _pendingAccess;
     final refresh = _pendingRefresh;
     if (access == null || access.isEmpty) {
