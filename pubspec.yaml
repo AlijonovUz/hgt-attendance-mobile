@@ -43,6 +43,7 @@ dev_dependencies:
   build_runner: ^2.15.0
   flutter_lints: ^6.0.0
   thunder: ^0.2.5
+  flutter_launcher_icons: ^0.14.4
 
 flutter_gen:
   output: lib/core/gen/
@@ -60,6 +61,12 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app_logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
   # ── Inter (Figma `family/sans`) — lokal statik fontlar (18pt optik o‘lcham).
   # Manrope’dan voz kechildi. Barcha matn shu oila orqali (ThemeData.fontFamily
