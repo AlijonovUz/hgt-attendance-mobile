@@ -21,6 +21,7 @@ class LoginState extends Equatable {
     this.faceImage,
     this.responseFullName,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   /// Blokgacha ruxsat etilgan urinishlar soni (mobil tomonda sanaladi).
@@ -65,6 +66,9 @@ class LoginState extends Equatable {
   /// yangi parol o‘rnatish bosqichi ko‘rsatiladi.
   final bool isPasswordChanged;
 
+  /// Login javobidagi `data.user.offline_secret` — offline imzo kaliti.
+  final String? offlineSecret;
+
   bool get isLoading => status == LoginStatus.loading;
   bool get isBlocked =>
       errorKind == LoginErrorKind.blocked && blockedSeconds > 0;
@@ -100,6 +104,7 @@ class LoginState extends Equatable {
     String? faceImage,
     String? responseFullName,
     bool? isPasswordChanged,
+    String? offlineSecret,
   }) {
     return LoginState(
       fullName: fullName ?? this.fullName,
@@ -116,6 +121,7 @@ class LoginState extends Equatable {
       faceImage: faceImage ?? this.faceImage,
       responseFullName: responseFullName ?? this.responseFullName,
       isPasswordChanged: isPasswordChanged ?? this.isPasswordChanged,
+      offlineSecret: offlineSecret ?? this.offlineSecret,
     );
   }
 
@@ -135,5 +141,6 @@ class LoginState extends Equatable {
         faceImage,
         responseFullName,
         isPasswordChanged,
+        offlineSecret,
       ];
 }

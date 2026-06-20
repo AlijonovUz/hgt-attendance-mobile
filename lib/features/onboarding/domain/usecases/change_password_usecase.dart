@@ -7,13 +7,14 @@ import '../repository/onboarding_repository.dart';
 ///
 /// [ChangePasswordParams.accessToken] berilsa (token hali saqlanmagan bosqich),
 /// manual Bearer sifatida ishlatiladi.
-class ChangePasswordUseCase implements UseCase<void, ChangePasswordParams> {
+class ChangePasswordUseCase implements UseCase<String?, ChangePasswordParams> {
   const ChangePasswordUseCase(this._repository);
 
   final OnboardingRepository _repository;
 
   @override
-  Future<void> call(ChangePasswordParams params) => _repository.changePassword(
+  Future<String?> call(ChangePasswordParams params) =>
+      _repository.changePassword(
     oldPassword: params.oldPassword,
     newPassword: params.newPassword,
     confirmNewPassword: params.confirmNewPassword,

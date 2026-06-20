@@ -9,6 +9,8 @@ import '../../../../core/gen/assets.gen.dart';
 import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../attendance/domain/usecases/cache_geozone_usecase.dart';
+import '../../../attendance/domain/usecases/ensure_reference_embedding_usecase.dart';
 import '../../../attendance/presentation/pages/davomat_tarixi_page.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../profile/presentation/pages/shaxsiy_page.dart';
@@ -49,9 +51,24 @@ class _HomeShell extends StatefulWidget {
 class _HomeShellState extends State<_HomeShell> {
   int _index = 0;
   bool _promptShown = false;
+  bool _offlineCachePrimed = false;
 
   void _openPrompt() {
     showProfilePhotoPrompt(context, context.read<ProfileBloc>());
+  }
+
+  /// Profil yuklangach (online) offline davomat uchun ish hududi (geozone) va
+  /// reference yuz embeddingini lokalga tayyorlaydi. Fire-and-forget — offline
+  /// bo‘lsa jimgina o‘tadi (oldingi cache qoladi).
+  void _primeOfflineCache(ProfileState state) {
+    final profile = state.profile;
+    if (profile == null || _offlineCachePrimed) return;
+    _offlineCachePrimed = true;
+    final branchId = profile.branchId;
+    if (branchId != null && branchId.isNotEmpty) {
+      getIt<CacheGeozoneForBranchUseCase>()(branchId).ignore();
+    }
+    getIt<EnsureReferenceEmbeddingUseCase>()(profile).ignore();
   }
 
   Future<void> _confirmLogout() async {
@@ -87,16 +104,24 @@ class _HomeShellState extends State<_HomeShell> {
 
     return Scaffold(
       backgroundColor: colors.backgroundBase,
-      body: BlocListener<ProfileBloc, ProfileState>(
-        listenWhen: (p, c) => p.needsPhoto != c.needsPhoto,
-        listener: (context, state) {
-          if (state.needsPhoto && !_promptShown) {
-            _promptShown = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _openPrompt();
-            });
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ProfileBloc, ProfileState>(
+            listenWhen: (p, c) => p.needsPhoto != c.needsPhoto,
+            listener: (context, state) {
+              if (state.needsPhoto && !_promptShown) {
+                _promptShown = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _openPrompt();
+                });
+              }
+            },
+          ),
+          BlocListener<ProfileBloc, ProfileState>(
+            listenWhen: (p, c) => p.profile != c.profile,
+            listener: (context, state) => _primeOfflineCache(state),
+          ),
+        ],
         child: IndexedStack(
           index: _index,
           children: [

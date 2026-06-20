@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/image_picker_service.dart';
+import '../../../../core/services/offline_secret_service.dart';
 import '../../../profile/domain/usecases/get_profile_usecase.dart';
 import '../../../profile/domain/usecases/update_face_image_usecase.dart';
 import '../../domain/entities/onboarding_data.dart';
@@ -26,10 +27,12 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     required GetProfileUseCase getProfile,
     required UpdateFaceImageUseCase updateFaceImage,
     required ImagePickerService imagePicker,
+    required OfflineSecretService offlineSecret,
   }) : _changePassword = changePassword,
        _getProfile = getProfile,
        _updateFaceImage = updateFaceImage,
        _imagePicker = imagePicker,
+       _offlineSecret = offlineSecret,
        super(OnboardingState.initial()) {
     on<OnboardingStarted>(_onStarted);
     on<OnboardingRoleLoaded>(_onRoleLoaded);
@@ -48,6 +51,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   final GetProfileUseCase _getProfile;
   final UpdateFaceImageUseCase _updateFaceImage;
   final ImagePickerService _imagePicker;
+  final OfflineSecretService _offlineSecret;
 
   /// Login ma’lumotidan bosqichlar ro‘yxatini tuzadi.
   static List<OnboardingStep> _buildSteps(OnboardingData data) {
@@ -184,7 +188,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
       ),
     );
     try {
-      await _changePassword(
+      final newSecret = await _changePassword(
         ChangePasswordParams(
           oldPassword: state.oldPassword,
           newPassword: state.newPassword,
@@ -192,6 +196,11 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
           accessToken: state.data.accessToken,
         ),
       );
+      // Parol o‘zgarsa backend yangi offline_secret beradi — darhol saqlanadi
+      // (login’dagi eski kalitni almashtiradi; offline imzo uchun).
+      if (newSecret != null && newSecret.isNotEmpty) {
+        await _offlineSecret.save(newSecret);
+      }
       // Yopilgach: belgilab, keyingi bosqichga o‘tamiz.
       emit(
         state.copyWith(

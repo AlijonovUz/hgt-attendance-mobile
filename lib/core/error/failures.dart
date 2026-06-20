@@ -21,6 +21,12 @@ class NetworkFailure extends Failure {
   const NetworkFailure([super.message = 'No internet connection']);
 }
 
+/// Mijoz so‘rovi yaroqsiz (HTTP 400). Offline sinxronda → yozuv navbatdan
+/// o‘chiriladi (retry foydasiz).
+class ValidationFailure extends Failure {
+  const ValidationFailure([super.message = 'Validation error']);
+}
+
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure([super.message = 'Unauthorized', this.attemptsLeft]);
 

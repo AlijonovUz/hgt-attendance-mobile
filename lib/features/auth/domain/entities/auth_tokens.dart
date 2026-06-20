@@ -15,6 +15,7 @@ class AuthTokens extends Equatable {
     this.faceImage,
     this.fullName,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   final String access;
@@ -23,7 +24,10 @@ class AuthTokens extends Equatable {
   final String? fullName;
   final bool isPasswordChanged;
 
+  /// Offline davomat imzo kaliti (`data.user.offline_secret`).
+  final String? offlineSecret;
+
   @override
   List<Object?> get props =>
-      [access, refresh, faceImage, fullName, isPasswordChanged];
+      [access, refresh, faceImage, fullName, isPasswordChanged, offlineSecret];
 }

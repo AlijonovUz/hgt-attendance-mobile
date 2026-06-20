@@ -12,14 +12,14 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   final OnboardingRemoteDataSource _remote;
 
   @override
-  Future<void> changePassword({
+  Future<String?> changePassword({
     required String oldPassword,
     required String newPassword,
     required String confirmNewPassword,
     String? accessToken,
   }) async {
     try {
-      await _remote.changePassword(
+      return await _remote.changePassword(
         oldPassword: oldPassword,
         newPassword: newPassword,
         confirmNewPassword: confirmNewPassword,

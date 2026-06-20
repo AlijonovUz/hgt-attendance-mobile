@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../app/bloc/session_bloc.dart';
+import '../../../../../core/services/location_service.dart';
+import '../../../../../core/widgets/location_service_prompt_dialog.dart';
 import '../../../../../injection_container.dart';
 import '../../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../../profile/presentation/widgets/profile_photo_prompt_sheet.dart';
@@ -49,6 +51,15 @@ class _FaceVerifyGateState extends State<_FaceVerifyGate> {
     final token = session.pendingAccessToken ?? '';
     final fullName = session.pendingFullName ?? '';
     final hasFace = (session.pendingFaceImage ?? '').trim().isNotEmpty;
+
+    // Davomat keyinchalik GPS talab qiladi — qurilmada joylashuv xizmati o‘chiq
+    // bo‘lsa, skandan oldin yoqishni so‘raymiz.
+    final locationEnabled = await getIt<LocationService>().isServiceEnabled();
+    if (!mounted) return;
+    if (!locationEnabled) {
+      await showLocationServicePrompt(context);
+      if (!mounted) return;
+    }
 
     if (!hasFace) {
       final profileBloc = context.read<ProfileBloc>()

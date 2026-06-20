@@ -20,5 +20,10 @@ abstract final class ApiConstants {
   /// Davomat belgilash — `event_type` (check_in/lunch_start/lunch_end/
   /// check_out) + `gps_latitude`/`gps_longitude` + `image` selfie FormData.
   /// Saqlangan token bilan (AuthInterceptor), 401 da refresh ishlaydi.
+  /// Offline sinxronda qo‘shimcha `created_at` + `signature` (HMAC) yuboriladi.
   static const attendance = '/v1/attendance/attendance/';
+
+  /// Ish hududlari (geozonalar) — offline geofence uchun filialga mos
+  /// markaz + radius shu yerdan olinadi (online, profildan keyin cache).
+  static const geozones = '/v1/attendance/geozones/';
 }

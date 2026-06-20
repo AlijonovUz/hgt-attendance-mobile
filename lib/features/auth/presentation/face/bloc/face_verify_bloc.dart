@@ -8,8 +8,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+
 import '../../../../../core/error/failures.dart';
+import '../../../../../core/services/connectivity_service.dart';
+import '../../../../../core/services/face_embedding_service.dart';
 import '../../../../../core/services/location_service.dart';
+import '../../../../../core/services/offline_secret_service.dart';
+import '../../../../../core/utils/attendance_signature.dart';
+import '../../../../attendance/domain/entities/pending_attendance.dart';
+import '../../../../attendance/domain/repository/attendance_repository.dart';
+import '../../../../attendance/domain/repository/face_reference_repository.dart';
+import '../../../../attendance/domain/repository/geozone_repository.dart';
 import '../../../../attendance/domain/usecases/mark_attendance_usecase.dart';
 import '../../../domain/usecases/verify_face_usecase.dart';
 import 'face_flow_mode.dart';
@@ -47,9 +58,21 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     required VerifyFaceUseCase verifyFaceUseCase,
     required MarkAttendanceUseCase markAttendance,
     required LocationService location,
+    required ConnectivityService connectivity,
+    required FaceEmbeddingService embedding,
+    required OfflineSecretService offlineSecret,
+    required AttendanceRepository attendanceRepository,
+    required GeozoneRepository geozoneRepository,
+    required FaceReferenceRepository faceReferenceRepository,
   }) : _verifyFace = verifyFaceUseCase,
        _markAttendance = markAttendance,
        _location = location,
+       _connectivity = connectivity,
+       _embedding = embedding,
+       _offlineSecret = offlineSecret,
+       _attendanceRepo = attendanceRepository,
+       _geozoneRepo = geozoneRepository,
+       _faceRefRepo = faceReferenceRepository,
        super(const FaceVerifyState()) {
     on<FaceStarted>(_onStarted);
     on<FaceDetectionUpdated>(_onDetectionUpdated);
@@ -60,6 +83,13 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   final VerifyFaceUseCase _verifyFace;
   final MarkAttendanceUseCase _markAttendance;
   final LocationService _location;
+  final ConnectivityService _connectivity;
+  final FaceEmbeddingService _embedding;
+  final OfflineSecretService _offlineSecret;
+  final AttendanceRepository _attendanceRepo;
+  final GeozoneRepository _geozoneRepo;
+  final FaceReferenceRepository _faceRefRepo;
+  static const _uuid = Uuid();
 
   CameraController? _controller;
   FaceDetector? _detector;
@@ -247,9 +277,29 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     if (mode is AttendanceFaceMode && (_lat == null || _lng == null)) return;
 
     emit(state.copyWith(status: FaceStatus.verifying));
+
+    final XFile shot;
     try {
       await _stopStream();
-      final XFile shot = await controller.takePicture();
+      shot = await controller.takePicture();
+    } catch (_) {
+      if (emit.isDone) return;
+      emit(state.copyWith(
+        status: FaceStatus.failure,
+        failureKind: FaceFailureKind.verifyFailed,
+        clearFailureMessage: true,
+      ));
+      await _disposeCamera();
+      return;
+    }
+
+    // Davomat + internet yo‘q → on-device tekshiruv + lokal navbat.
+    if (mode is AttendanceFaceMode && !await _connectivity.isConnected()) {
+      await _handleOfflineAttendance(mode, shot.path, emit);
+      return;
+    }
+
+    try {
       if (mode is AttendanceFaceMode) {
         await _markAttendance(
           MarkAttendanceParams(
@@ -302,6 +352,83 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       );
       await _disposeCamera();
     }
+  }
+
+  /// Offline davomat: geofence → on-device yuz moslik → imzo → lokal navbat.
+  /// Har bir darvoza muvaffaqiyatsiz bo‘lsa navbatga saqlanmaydi (failure).
+  Future<void> _handleOfflineAttendance(
+    AttendanceFaceMode mode,
+    String shotPath,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    Future<void> fail(FaceFailureKind kind) async {
+      if (emit.isDone) return;
+      emit(state.copyWith(
+        status: FaceStatus.failure,
+        failureKind: kind,
+        clearFailureMessage: true,
+      ));
+      await _disposeCamera();
+    }
+
+    // 1. Geofence — ish hududi ichidami (GPS yo‘q → tashqarida deb hisoblanadi).
+    final zone = _geozoneRepo.cachedGeozone();
+    if (zone == null || !zone.contains(_lat!, _lng!)) {
+      return fail(FaceFailureKind.outsideZone);
+    }
+
+    // 2. On-device yuz moslik (reference embedding online’da hisoblangan).
+    final reference = _faceRefRepo.cachedEmbedding();
+    if (reference == null) return fail(FaceFailureKind.verifyFailed);
+    List<double>? live;
+    try {
+      live = await _embedding.embed(File(shotPath));
+    } catch (_) {
+      live = null;
+    }
+    if (live == null || !_embedding.matches(reference, live)) {
+      return fail(FaceFailureKind.verifyFailed);
+    }
+
+    // 3. Imzo kaliti (login’da olingan offline_secret).
+    final secret = (await _offlineSecret.read())?.trim() ?? '';
+    if (secret.isEmpty) return fail(FaceFailureKind.secretMissing);
+
+    // 4. Imzolab navbatga saqlash.
+    final createdAtIso = localIso8601(DateTime.now());
+    final signature = signCreatedAt(createdAtIso, secret);
+    final localId = _uuid.v4();
+    final savedPath = await _persistSelfie(shotPath, localId);
+    await _attendanceRepo.enqueue(
+      PendingAttendance(
+        localId: localId,
+        eventType: mode.eventType,
+        latitude: _lat!,
+        longitude: _lng!,
+        createdAtIso: createdAtIso,
+        signature: signature,
+        imagePath: savedPath,
+        enqueuedAt: DateTime.now(),
+      ),
+    );
+
+    if (emit.isDone) return;
+    emit(state.copyWith(
+      status: FaceStatus.success,
+      failureKind: FaceFailureKind.none,
+      clearFailureMessage: true,
+    ));
+  }
+
+  /// Selfie’ni vaqtinchalik kamera fayldan app docs katalogiga ko‘chiradi
+  /// (navbatda saqlanishi uchun — kamera temp tozalanishi mumkin).
+  Future<String> _persistSelfie(String srcPath, String localId) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final folder = Directory('${dir.path}/pending_attendance');
+    if (!folder.existsSync()) folder.createSync(recursive: true);
+    final dest = '${folder.path}/$localId.jpg';
+    await File(srcPath).copy(dest);
+    return dest;
   }
 
   Future<void> _onRetryRequested(

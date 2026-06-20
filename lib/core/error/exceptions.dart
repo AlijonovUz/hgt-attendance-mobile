@@ -42,3 +42,11 @@ class NetworkException implements Exception {
 
   final String message;
 }
+
+/// Mijoz so‘rovi yaroqsiz (HTTP 400) — masalan offline imzo mos kelmadi yoki
+/// vaqt eskirgan. Qayta urinish foydasiz: navbatdan o‘chiriladi.
+class ValidationException implements Exception {
+  const ValidationException([this.message = 'Validation error']);
+
+  final String message;
+}

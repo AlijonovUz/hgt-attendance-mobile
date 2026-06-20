@@ -8,11 +8,15 @@ import '../models/attendance_event_model.dart';
 
 /// `/v1/attendance/attendance/` bilan ishlaydi (POST belgilash + GET bugungilar).
 abstract interface class AttendanceRemoteDataSource {
+  /// Davomat belgilash. Offline sinxronda [createdAtIso] (lokal vaqt, +offset)
+  /// va [signature] (HMAC) ham yuboriladi; online belgilashda ular `null`.
   Future<void> mark({
     required AttendanceEventType eventType,
     required double latitude,
     required double longitude,
     required String imagePath,
+    String? createdAtIso,
+    String? signature,
   });
 
   /// Bugungi yozuvlar (joriy foydalanuvchi, sana oralig‘i bilan filtrlangan).
@@ -30,6 +34,8 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     required double latitude,
     required double longitude,
     required String imagePath,
+    String? createdAtIso,
+    String? signature,
   }) async {
     try {
       final fileName = imagePath.split(RegExp(r'[\\/]')).last;
@@ -37,6 +43,9 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
         'event_type': eventType.apiValue,
         'gps_latitude': latitude.toString(),
         'gps_longitude': longitude.toString(),
+        // Offline sinxron: imzolangan vaqt + imzo (mavjud bo‘lsa).
+        'created_at': ?createdAtIso,
+        'signature': ?signature,
         'image': await MultipartFile.fromFile(
           imagePath,
           filename: fileName.isEmpty ? 'attendance.jpg' : fileName,
@@ -158,6 +167,10 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
 
     if (status == 401) return UnauthorizedException(message ?? 'Unauthorized');
     if (status == 429) return ThrottleException(message ?? 'Too many requests');
+    // 4xx (mas. 400 — imzo mos emas / vaqt eskirgan) — mijoz xatosi, retry foydasiz.
+    if (status != null && status >= 400 && status < 500) {
+      return ValidationException(message ?? 'Validation error');
+    }
     return ServerException(message ?? 'Server xatosi');
   }
 }

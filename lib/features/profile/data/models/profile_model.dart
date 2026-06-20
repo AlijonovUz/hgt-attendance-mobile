@@ -15,6 +15,7 @@ class ProfileModel {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.branchId,
     this.schedule,
     this.kpi,
   });
@@ -26,6 +27,7 @@ class ProfileModel {
   final String? roleName;
   final String? departmentName;
   final String? branchName;
+  final String? branchId;
   final ScheduleInfo? schedule;
   final MonthKpi? kpi;
 
@@ -36,6 +38,14 @@ class ProfileModel {
 
     String? nestedName(Object? node) {
       if (node is Map && node['name'] is String) return node['name'] as String;
+      return null;
+    }
+
+    String? nestedId(Object? node) {
+      if (node is Map && node['id'] != null) {
+        final s = node['id'].toString().trim();
+        return s.isEmpty ? null : s;
+      }
       return null;
     }
 
@@ -85,6 +95,7 @@ class ProfileModel {
           nestedName(src['role_info']) ?? nestedName(src['position_info']),
       departmentName: nestedName(src['department_info']),
       branchName: nestedName(src['branch_info']),
+      branchId: nestedId(src['branch_info']),
       schedule: schedule,
       kpi: kpi,
     );
@@ -98,6 +109,7 @@ class ProfileModel {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    branchId: branchId,
     schedule: schedule,
     kpi: kpi,
   );

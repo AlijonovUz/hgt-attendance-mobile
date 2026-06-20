@@ -7,6 +7,13 @@ import 'package:geolocator/geolocator.dart';
 class LocationService {
   const LocationService();
 
+  /// Qurilmada joylashuv (GPS) xizmati yoqilganmi.
+  Future<bool> isServiceEnabled() => Geolocator.isLocationServiceEnabled();
+
+  /// Qurilmaning joylashuv sozlamalarini ochadi (foydalanuvchi GPS’ni yoqishi
+  /// uchun). Android’da tizim sozlamalari, iOS’da ilova sozlamalari oynasi.
+  Future<bool> openLocationSettings() => Geolocator.openLocationSettings();
+
   /// Joriy koordinata. Ruxsat/xizmat muammosida [LocationException] otadi.
   Future<({double latitude, double longitude})> current() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();

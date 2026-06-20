@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/storage_keys.dart';
+import '../../core/services/offline_secret_service.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/services/token_service.dart';
 
@@ -18,9 +19,14 @@ part 'session_state.dart';
 /// yagona ikkinchi bosqich. Tokenlar yuz tasdiqlangach (`SessionFaceVerified`)
 /// saqlanadi; ungacha RAM’da turadi.
 class SessionBloc extends Bloc<SessionEvent, SessionState> {
-  SessionBloc({required TokenService tokenService, required StorageService storage})
+  SessionBloc({
+    required TokenService tokenService,
+    required StorageService storage,
+    required OfflineSecretService offlineSecret,
+  })
     : _tokenService = tokenService,
       _storage = storage,
+      _offlineSecret = offlineSecret,
       super(const SessionState.unknown()) {
     on<SessionStarted>(_onStarted);
     on<SessionLoginSucceeded>(_onLoginSucceeded);
@@ -31,6 +37,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
 
   final TokenService _tokenService;
   final StorageService _storage;
+  final OfflineSecretService _offlineSecret;
 
   /// Onboarding shu qurilmada kamida bir marta tugatilganmi (device-once).
   /// `_onStarted`da storage’dan o‘qiladi; yuz tasdiqlangach `true`ga o‘tadi va
@@ -49,6 +56,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   String? _pendingLoginPassword;
   String? _pendingFaceImage;
   bool _pendingIsPasswordChanged = true;
+  String? _pendingOfflineSecret;
 
   /// Yuz so‘roviga Bearer sifatida biriktiriladigan, hali saqlanmagan token.
   String? get pendingAccessToken => _pendingAccess;
@@ -90,6 +98,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingLoginPassword = event.loginPassword;
     _pendingFaceImage = event.faceImage;
     _pendingIsPasswordChanged = event.isPasswordChanged;
+    _pendingOfflineSecret = event.offlineSecret;
     emit(const SessionState.faceVerificationRequired());
   }
 
@@ -104,6 +113,15 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     await _tokenService.saveToken(access);
     if (refresh != null && refresh.isNotEmpty) {
       await _tokenService.saveRefreshToken(refresh);
+    }
+    // Offline davomat imzo kaliti — yuz tasdiqlangach saqlanadi. Onboardingda
+    // parol o‘zgartirilgan bo‘lsa, ChangePassword undan yangiroq kalitni allaqachon
+    // saqlagan bo‘ladi — uni ezib yubormaslik uchun faqat bo‘sh bo‘lsa yozamiz
+    // (logout/expire’da kalit tozalanadi, shuning uchun yangi login’da bo‘sh).
+    final secret = _pendingOfflineSecret?.trim() ?? '';
+    if (secret.isNotEmpty) {
+      final existing = (await _offlineSecret.read())?.trim() ?? '';
+      if (existing.isEmpty) await _offlineSecret.save(secret);
     }
     if (_pendingFullName != null) {
       await _storage.setString(StorageKeys.loginUsername, _pendingFullName!);
@@ -134,10 +152,12 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingLoginPassword = null;
     _pendingFaceImage = null;
     _pendingIsPasswordChanged = true;
+    _pendingOfflineSecret = null;
   }
 
   Future<void> _clearAll() async {
     await _tokenService.clearAll();
+    await _offlineSecret.clear();
     await _storage.remove(StorageKeys.cachedUser);
     await _storage.remove(StorageKeys.loginUsername);
   }

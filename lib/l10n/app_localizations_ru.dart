@@ -158,6 +158,36 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось определить местоположение. Проверьте GPS и разрешение.';
 
   @override
+  String get locationServiceTitle => 'Служба геолокации отключена';
+
+  @override
+  String get locationServiceBody =>
+      'Чтобы отметить посещаемость, включите службу геолокации (GPS) на устройстве.';
+
+  @override
+  String get locationServiceEnable => 'Включить';
+
+  @override
+  String get locationServiceLater => 'Позже';
+
+  @override
+  String get attendanceOutsideZone => 'Вы не на рабочей территории';
+
+  @override
+  String get attendanceOfflineQueued =>
+      'Сохранено офлайн — отправится при появлении интернета';
+
+  @override
+  String get faceOfflineSecretMissing =>
+      'Для офлайн-режима войдите в приложение заново';
+
+  @override
+  String get homeOfflineBadge => 'Офлайн';
+
+  @override
+  String get homePendingSync => 'Ожидает отправки';
+
+  @override
   String get homeTodaySchedule => 'Распорядок на сегодня';
 
   @override

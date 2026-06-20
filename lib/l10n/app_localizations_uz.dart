@@ -159,6 +159,36 @@ class AppLocalizationsUz extends AppLocalizations {
       'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.';
 
   @override
+  String get locationServiceTitle => 'Joylashuv xizmati o‘chiq';
+
+  @override
+  String get locationServiceBody =>
+      'Davomatni belgilash uchun qurilmangizda joylashuv (GPS) xizmatini yoqing.';
+
+  @override
+  String get locationServiceEnable => 'Yoqish';
+
+  @override
+  String get locationServiceLater => 'Keyinroq';
+
+  @override
+  String get attendanceOutsideZone => 'Siz ish hududida emassiz';
+
+  @override
+  String get attendanceOfflineQueued =>
+      'Oflayn saqlandi — internet paydo bo‘lganda yuboriladi';
+
+  @override
+  String get faceOfflineSecretMissing =>
+      'Oflayn rejim uchun ilovaga qayta kiring';
+
+  @override
+  String get homeOfflineBadge => 'Oflayn';
+
+  @override
+  String get homePendingSync => 'Yuborilishini kutmoqda';
+
+  @override
   String get homeTodaySchedule => 'Bugungi tartib';
 
   @override
@@ -479,6 +509,36 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
   @override
   String get attendanceLocationError =>
       'Жойлашув аниқланмади. GPS ва рухсатни текширинг.';
+
+  @override
+  String get locationServiceTitle => 'Жойлашув хизмати ўчиқ';
+
+  @override
+  String get locationServiceBody =>
+      'Давоматни белгилаш учун қурилмангизда жойлашув (GPS) хизматини ёқинг.';
+
+  @override
+  String get locationServiceEnable => 'Ёқиш';
+
+  @override
+  String get locationServiceLater => 'Кейинроқ';
+
+  @override
+  String get attendanceOutsideZone => 'Сиз иш ҳудудида эмассиз';
+
+  @override
+  String get attendanceOfflineQueued =>
+      'Офлайн сақланди — интернет пайдо бўлганда юборилади';
+
+  @override
+  String get faceOfflineSecretMissing =>
+      'Офлайн режим учун иловага қайта киринг';
+
+  @override
+  String get homeOfflineBadge => 'Офлайн';
+
+  @override
+  String get homePendingSync => 'Юборилишини кутмоқда';
 
   @override
   String get homeTodaySchedule => 'Бугунги тартиб';

@@ -69,6 +69,7 @@ class Profile extends Equatable {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.branchId,
     this.schedule,
     this.kpi,
   });
@@ -84,6 +85,10 @@ class Profile extends Equatable {
   final String? departmentName;
   final String? branchName;
 
+  /// Filial (geozone) ID’si — offline geofence uchun mos geozone shu bilan
+  /// topiladi (`branch_info.id`).
+  final String? branchId;
+
   final ScheduleInfo? schedule;
   final MonthKpi? kpi;
 
@@ -98,6 +103,7 @@ class Profile extends Equatable {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    branchId: branchId,
     schedule: schedule,
     kpi: kpi,
   );
@@ -111,6 +117,7 @@ class Profile extends Equatable {
     roleName,
     departmentName,
     branchName,
+    branchId,
     schedule,
     kpi,
   ];

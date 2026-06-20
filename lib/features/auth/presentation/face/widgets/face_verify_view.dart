@@ -322,6 +322,8 @@ class _Stage extends StatelessWidget {
           switch (state.failureKind) {
             FaceFailureKind.network => l10n.networkError,
             FaceFailureKind.location => l10n.attendanceLocationError,
+            FaceFailureKind.outsideZone => l10n.attendanceOutsideZone,
+            FaceFailureKind.secretMissing => l10n.faceOfflineSecretMissing,
             FaceFailureKind.noFace => l10n.faceHintNoFace,
             _ => l10n.faceVerifyFailed,
           },

@@ -381,6 +381,60 @@ abstract class AppLocalizations {
   /// **'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.'**
   String get attendanceLocationError;
 
+  /// No description provided for @locationServiceTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Joylashuv xizmati o‘chiq'**
+  String get locationServiceTitle;
+
+  /// No description provided for @locationServiceBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Davomatni belgilash uchun qurilmangizda joylashuv (GPS) xizmatini yoqing.'**
+  String get locationServiceBody;
+
+  /// No description provided for @locationServiceEnable.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yoqish'**
+  String get locationServiceEnable;
+
+  /// No description provided for @locationServiceLater.
+  ///
+  /// In uz, this message translates to:
+  /// **'Keyinroq'**
+  String get locationServiceLater;
+
+  /// No description provided for @attendanceOutsideZone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Siz ish hududida emassiz'**
+  String get attendanceOutsideZone;
+
+  /// No description provided for @attendanceOfflineQueued.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oflayn saqlandi — internet paydo bo‘lganda yuboriladi'**
+  String get attendanceOfflineQueued;
+
+  /// No description provided for @faceOfflineSecretMissing.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oflayn rejim uchun ilovaga qayta kiring'**
+  String get faceOfflineSecretMissing;
+
+  /// No description provided for @homeOfflineBadge.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oflayn'**
+  String get homeOfflineBadge;
+
+  /// No description provided for @homePendingSync.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuborilishini kutmoqda'**
+  String get homePendingSync;
+
   /// No description provided for @homeTodaySchedule.
   ///
   /// In uz, this message translates to:

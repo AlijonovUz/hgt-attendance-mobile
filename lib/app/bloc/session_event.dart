@@ -22,10 +22,15 @@ class SessionLoginSucceeded extends SessionEvent {
     this.loginPassword = '',
     this.faceImage,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   final String accessToken;
   final String refreshToken;
+
+  /// Login javobidagi `offline_secret` — yuz tasdiqlanganda secure storage’ga
+  /// saqlanadi (offline davomat imzosi uchun).
+  final String? offlineSecret;
 
   /// Login’da kiritilgan ism — face ekranidagi karta uchun (profil kelguncha).
   final String fullName;
@@ -49,6 +54,7 @@ class SessionLoginSucceeded extends SessionEvent {
         loginPassword,
         faceImage,
         isPasswordChanged,
+        offlineSecret,
       ];
 }
 

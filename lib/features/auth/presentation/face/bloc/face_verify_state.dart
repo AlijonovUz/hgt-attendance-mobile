@@ -14,8 +14,17 @@ enum FaceStatus {
 }
 
 /// Xato sababi — lokalizatsiya widget qatlamida. [location] faqat davomat
-/// rejimida (GPS olinmasa) uchraydi.
-enum FaceFailureKind { none, noFace, verifyFailed, network, location }
+/// rejimida (GPS olinmasa), [outsideZone] offline’da ish hududidan tashqarida
+/// (yoki GPS yo‘q), [secretMissing] offline imzo kaliti topilmaganda uchraydi.
+enum FaceFailureKind {
+  none,
+  noFace,
+  verifyFailed,
+  network,
+  location,
+  outsideZone,
+  secretMissing,
+}
 
 class FaceVerifyState extends Equatable {
   const FaceVerifyState({
