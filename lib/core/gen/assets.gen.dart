@@ -91,6 +91,10 @@ class $AssetsIconsGen {
   SvgGenImage get icHugeiconsCameraAdd =>
       const SvgGenImage('assets/icons/ic_hugeicons_camera_add.svg');
 
+  /// File path: assets/icons/ic_hugeicons_check_list.svg
+  SvgGenImage get icHugeiconsCheckList =>
+      const SvgGenImage('assets/icons/ic_hugeicons_check_list.svg');
+
   /// File path: assets/icons/ic_hugeicons_checkmark_badge.svg
   SvgGenImage get icHugeiconsCheckmarkBadge =>
       const SvgGenImage('assets/icons/ic_hugeicons_checkmark_badge.svg');
@@ -218,6 +222,7 @@ class $AssetsIconsGen {
     icHugeiconsArrowRightRound,
     icHugeiconsCalendar,
     icHugeiconsCameraAdd,
+    icHugeiconsCheckList,
     icHugeiconsCheckmarkBadge,
     icHugeiconsClock,
     icHugeiconsDashboardSquare,

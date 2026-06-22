@@ -30,6 +30,10 @@ class Routes implements Coordinate {
   /// `AttendanceEventType`). Guard zanjirida emas — authenticated user uchun.
   static const attendanceFace = Routes._(name: 'attendance_face', path: '/attendance_face');
 
+  /// Bildirishnomalar (asosiy ekran bell tugmasidan push qilinadi —
+  /// authenticated user). Guard zanjirida emas.
+  static const notifications = Routes._(name: 'notifications', path: '/notifications');
+
   @override
   String toString() => 'name=$name, path=$path';
 }

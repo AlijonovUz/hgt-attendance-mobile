@@ -11,6 +11,8 @@ import '../../features/auth/presentation/face/pages/face_verify_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/notifications/presentation/bloc/notification_bloc.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/profile/presentation/bloc/change_password_bloc.dart';
 import '../../features/profile/presentation/pages/reset_password_page.dart';
@@ -80,6 +82,14 @@ class AppRouter {
           builder: (context, state) => BlocProvider<ChangePasswordBloc>(
             create: (_) => getIt<ChangePasswordBloc>(),
             child: const ResetPasswordPage(),
+          ),
+        ),
+        GoRoute(
+          name: Routes.notifications.name,
+          path: Routes.notifications.path,
+          builder: (context, state) => BlocProvider<NotificationBloc>(
+            create: (_) => getIt<NotificationBloc>(),
+            child: const NotificationsPage(),
           ),
         ),
       ],

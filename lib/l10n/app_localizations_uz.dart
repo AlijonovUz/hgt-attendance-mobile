@@ -278,6 +278,19 @@ class AppLocalizationsUz extends AppLocalizations {
       'Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.';
 
   @override
+  String get notificationsTitle => 'Bildirishnomalar';
+
+  @override
+  String get notificationsEmpty => 'Hozircha bildirishnomalar yo‘q';
+
+  @override
+  String get notificationsError =>
+      'Bildirishnomalarni yuklab bo‘lmadi. Qayta urinib ko‘ring.';
+
+  @override
+  String get notificationsMarkAllRead => 'Barchasini o‘qilgan deb belgilash';
+
+  @override
   String get profilePhotoPromptTitle =>
       'Iltimos, skanerlashdan o‘tish uchun profilingiz uchun shaxsiy rasmingizni o‘rnating!';
 
@@ -680,6 +693,19 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get historyError => 'Маълумотни юклаб бўлмади. Қайта уриниб кўринг.';
+
+  @override
+  String get notificationsTitle => 'Билдиришномалар';
+
+  @override
+  String get notificationsEmpty => 'Ҳозирча билдиришномалар йўқ';
+
+  @override
+  String get notificationsError =>
+      'Билдиришномаларни юклаб бўлмади. Қайта уриниб кўринг.';
+
+  @override
+  String get notificationsMarkAllRead => 'Барчасини ўқилган деб белгилаш';
 
   @override
   String get profilePhotoPromptTitle =>

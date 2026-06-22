@@ -27,6 +27,10 @@ abstract final class StorageKeys {
   /// Yorug‘/Qorong‘i toggle’i shu yerga yozadi va bootstrap’da o‘qiladi.
   static const themeMode = 'theme_mode';
 
+  /// Barqaror qurilma identifikatori (FCM `device_id`) — bir marta yaratiladi
+  /// va saqlanadi, har bir token ro‘yxatida shu ishlatiladi.
+  static const deviceId = 'device_id';
+
   static const all = <String>{
     authToken,
     refreshToken,
@@ -41,5 +45,6 @@ abstract final class StorageKeys {
     pinLength,
     lastActiveAt,
     themeMode,
+    deviceId,
   };
 }

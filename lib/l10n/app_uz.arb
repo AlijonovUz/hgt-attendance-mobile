@@ -112,6 +112,11 @@
   "historyEventLeft": "Ishdan ketdi",
   "historyError": "Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
 
+  "notificationsTitle": "Bildirishnomalar",
+  "notificationsEmpty": "Hozircha bildirishnomalar yo‘q",
+  "notificationsError": "Bildirishnomalarni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
+  "notificationsMarkAllRead": "Barchasini o‘qilgan deb belgilash",
+
   "profilePhotoPromptTitle": "Iltimos, skanerlashdan o‘tish uchun profilingiz uchun shaxsiy rasmingizni o‘rnating!",
   "profilePhotoUploadLabel": "Rasm yuklash",
   "profilePhotoUploadButton": "Yuklash",
