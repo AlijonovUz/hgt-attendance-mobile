@@ -9,6 +9,7 @@ import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
 import '../../../../core/widgets/swipe_action_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../notifications/presentation/bloc/notification_bloc.dart';
 import '../../../profile/domain/entities/profile.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../bloc/attendance_bloc.dart';
@@ -29,6 +30,14 @@ class AsosiyPage extends StatelessWidget {
 
   final VoidCallback? onAvatarNeedsPhoto;
   final VoidCallback? onLogout;
+
+  /// Bildirishnomalar ekraniga o‘tadi; qaytgach o‘qilmaganlar sonini yangilaydi
+  /// (ekranda o‘qilgan bo‘lishi mumkin).
+  Future<void> _openNotifications(BuildContext context) async {
+    final bloc = context.read<NotificationBloc>();
+    await context.pushNamed(Routes.notifications.name);
+    if (context.mounted) bloc.add(const NotificationCountRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +60,17 @@ class AsosiyPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
               child: BlocBuilder<ProfileBloc, ProfileState>(
-                builder: (context, state) => HomeHeader(
-                  profile: state.profile,
-                  usernameFallback: l10n.profileUsernameFallback,
-                  onAvatarTap: state.needsPhoto ? onAvatarNeedsPhoto : null,
-                  onAvatarLongPress: onLogout,
+                builder: (context, state) =>
+                    BlocBuilder<NotificationBloc, NotificationState>(
+                  buildWhen: (p, c) => p.unreadCount != c.unreadCount,
+                  builder: (context, notifState) => HomeHeader(
+                    profile: state.profile,
+                    usernameFallback: l10n.profileUsernameFallback,
+                    onAvatarTap: state.needsPhoto ? onAvatarNeedsPhoto : null,
+                    onAvatarLongPress: onLogout,
+                    unreadCount: notifState.unreadCount,
+                    onNotificationsTap: () => _openNotifications(context),
+                  ),
                 ),
               ),
             ),

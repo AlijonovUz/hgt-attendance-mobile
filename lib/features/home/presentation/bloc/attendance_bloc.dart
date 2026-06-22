@@ -15,9 +15,7 @@ part 'attendance_state.dart';
 /// boshlanish nuqtasini beradi. Har yuz-tekshiruvdan keyin [AttendanceRefreshed]
 /// qayta yuklaydi.
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
-  AttendanceBloc({required GetTodayAttendanceUseCase getToday})
-    : _getToday = getToday,
-      super(const AttendanceState()) {
+  AttendanceBloc({required GetTodayAttendanceUseCase getToday}) : _getToday = getToday, super(const AttendanceState()) {
     on<AttendanceConfigured>(_onConfigured);
     on<AttendanceRefreshed>(_onRefreshed);
   }
@@ -25,20 +23,14 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final GetTodayAttendanceUseCase _getToday;
   String? _userId;
 
-  Future<void> _onConfigured(
-    AttendanceConfigured event,
-    Emitter<AttendanceState> emit,
-  ) async {
+  Future<void> _onConfigured(AttendanceConfigured event, Emitter<AttendanceState> emit) async {
     _userId = event.userId;
     final steps = event.steps.isEmpty ? kAllSteps : event.steps;
     emit(state.copyWith(steps: steps));
     await _load(emit);
   }
 
-  Future<void> _onRefreshed(
-    AttendanceRefreshed event,
-    Emitter<AttendanceState> emit,
-  ) => _load(emit);
+  Future<void> _onRefreshed(AttendanceRefreshed event, Emitter<AttendanceState> emit) => _load(emit);
 
   /// Bugungi yozuvlarni olib, holatni qayta quradi (xatoda eski holat qoladi).
   Future<void> _load(Emitter<AttendanceState> emit) async {
@@ -72,10 +64,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         }
       }
 
-      final current = state.steps.firstWhere(
-        (s) => !recorded.containsKey(s),
-        orElse: () => AttendanceStep.done,
-      );
+      final current = state.steps.firstWhere((s) => !recorded.containsKey(s), orElse: () => AttendanceStep.done);
 
       emit(
         state.copyWith(

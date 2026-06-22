@@ -15,6 +15,8 @@ class ProfileModel {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.regionName,
+    this.districtName,
     this.schedule,
     this.kpi,
   });
@@ -26,6 +28,8 @@ class ProfileModel {
   final String? roleName;
   final String? departmentName;
   final String? branchName;
+  final String? regionName;
+  final String? districtName;
   final ScheduleInfo? schedule;
   final MonthKpi? kpi;
 
@@ -63,6 +67,11 @@ class ProfileModel {
       );
     }
 
+    // Viloyat/Tuman backend’da `branch_info` ichida keladi (top-level emas);
+    // boshqa endpointlar uchun top-level fallback ham qoldiramiz.
+    final branch = src['branch_info'];
+    final branchMap = branch is Map ? branch.cast<String, dynamic>() : null;
+
     MonthKpi? kpi;
     final k = src['current_month_kpi'];
     if (k is Map) {
@@ -84,7 +93,11 @@ class ProfileModel {
       roleName:
           nestedName(src['role_info']) ?? nestedName(src['position_info']),
       departmentName: nestedName(src['department_info']),
-      branchName: nestedName(src['branch_info']),
+      branchName: nestedName(branch),
+      regionName: nestedName(branchMap?['region_info']) ??
+          nestedName(src['region_info']),
+      districtName: nestedName(branchMap?['district_info']) ??
+          nestedName(src['district_info']),
       schedule: schedule,
       kpi: kpi,
     );
@@ -98,6 +111,8 @@ class ProfileModel {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    regionName: regionName,
+    districtName: districtName,
     schedule: schedule,
     kpi: kpi,
   );

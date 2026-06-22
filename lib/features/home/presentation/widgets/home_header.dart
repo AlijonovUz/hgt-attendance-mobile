@@ -17,6 +17,7 @@ class HomeHeader extends StatelessWidget {
     this.onAvatarTap,
     this.onNotificationsTap,
     this.onAvatarLongPress,
+    this.unreadCount = 0,
   });
 
   final Profile? profile;
@@ -24,6 +25,9 @@ class HomeHeader extends StatelessWidget {
   final VoidCallback? onAvatarTap;
   final VoidCallback? onNotificationsTap;
   final VoidCallback? onAvatarLongPress;
+
+  /// O‘qilmagan bildirishnomalar soni — >0 bo‘lsa bell ustida nuqta/son.
+  final int unreadCount;
 
   @override
   Widget build(BuildContext context) {
@@ -73,21 +77,30 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        _NotificationButton(colors: colors, onTap: onNotificationsTap),
+        _NotificationButton(
+          colors: colors,
+          onTap: onNotificationsTap,
+          unreadCount: unreadCount,
+        ),
       ],
     );
   }
 }
 
 class _NotificationButton extends StatelessWidget {
-  const _NotificationButton({required this.colors, required this.onTap});
+  const _NotificationButton({
+    required this.colors,
+    required this.onTap,
+    required this.unreadCount,
+  });
 
   final AppColors colors;
   final VoidCallback? onTap;
+  final int unreadCount;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    final button = Material(
       color: colors.backgroundElevation2,
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
@@ -106,6 +119,39 @@ class _NotificationButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (unreadCount <= 0) return button;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        button,
+        Positioned(
+          top: -2.r,
+          right: -2.r,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.errorStrong,
+              shape: BoxShape.circle,
+              border: Border.all(color: colors.backgroundBase, width: 1.5),
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: 16.r, minHeight: 16.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Center(
+                  child: (unreadCount > 99 ? '99+' : '$unreadCount')
+                      .s(10.sp)
+                      .w(700)
+                      .c(colors.textWhite)
+                      .h(1),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

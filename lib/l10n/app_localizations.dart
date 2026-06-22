@@ -441,17 +441,203 @@ abstract class AppLocalizations {
   /// **'Bo‘lim'**
   String get profileFieldDepartment;
 
+  /// No description provided for @profileFieldBranch.
+  ///
+  /// In uz, this message translates to:
+  /// **'Filial'**
+  String get profileFieldBranch;
+
+  /// No description provided for @profileFieldRegion.
+  ///
+  /// In uz, this message translates to:
+  /// **'Viloyat'**
+  String get profileFieldRegion;
+
+  /// No description provided for @profileFieldDistrict.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tuman'**
+  String get profileFieldDistrict;
+
   /// No description provided for @profileFieldPhone.
   ///
   /// In uz, this message translates to:
   /// **'Telefon'**
   String get profileFieldPhone;
 
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In uz, this message translates to:
+  /// **'Parol o‘zgartirish'**
+  String get profileChangePassword;
+
+  /// No description provided for @logoutTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Profilingizdan chiqmoqchimisiz?'**
+  String get logoutTitle;
+
+  /// No description provided for @logoutBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Profilingizdan chiqasiz va qayta kirish uchun tizimga yana login qilishingiz kerak bo‘ladi'**
+  String get logoutBody;
+
+  /// No description provided for @logoutBack.
+  ///
+  /// In uz, this message translates to:
+  /// **'Orqaga'**
+  String get logoutBack;
+
+  /// No description provided for @cpwConfirmLabel.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yangi parolni takrorlash'**
+  String get cpwConfirmLabel;
+
+  /// No description provided for @cpwSave.
+  ///
+  /// In uz, this message translates to:
+  /// **'Saqlash'**
+  String get cpwSave;
+
+  /// No description provided for @cpwSuccess.
+  ///
+  /// In uz, this message translates to:
+  /// **'Parol muvaffaqiyatli o‘zgartirildi'**
+  String get cpwSuccess;
+
   /// No description provided for @historyEmpty.
   ///
   /// In uz, this message translates to:
   /// **'Hozircha davomat yozuvlari yo‘q'**
   String get historyEmpty;
+
+  /// No description provided for @historyTabDaily.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kunlik'**
+  String get historyTabDaily;
+
+  /// No description provided for @historyTabWeekly.
+  ///
+  /// In uz, this message translates to:
+  /// **'Haftalik'**
+  String get historyTabWeekly;
+
+  /// No description provided for @historyTabMonthly.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oylik'**
+  String get historyTabMonthly;
+
+  /// No description provided for @historyStatPresent.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga chiqqan'**
+  String get historyStatPresent;
+
+  /// No description provided for @historyStatLate.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga kechikkan'**
+  String get historyStatLate;
+
+  /// No description provided for @historyStatAvgArrival.
+  ///
+  /// In uz, this message translates to:
+  /// **'O‘rtacha kelish'**
+  String get historyStatAvgArrival;
+
+  /// No description provided for @historyStatWorked.
+  ///
+  /// In uz, this message translates to:
+  /// **'Jami ishlagan'**
+  String get historyStatWorked;
+
+  /// No description provided for @historyUnitDays.
+  ///
+  /// In uz, this message translates to:
+  /// **'kun'**
+  String get historyUnitDays;
+
+  /// No description provided for @historyUnitHours.
+  ///
+  /// In uz, this message translates to:
+  /// **'soat'**
+  String get historyUnitHours;
+
+  /// No description provided for @historyUnitMinutes.
+  ///
+  /// In uz, this message translates to:
+  /// **'daqiqa'**
+  String get historyUnitMinutes;
+
+  /// No description provided for @historyToday.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bugun'**
+  String get historyToday;
+
+  /// No description provided for @historyYesterday.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kecha'**
+  String get historyYesterday;
+
+  /// No description provided for @historyEventArrived.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishga keldi'**
+  String get historyEventArrived;
+
+  /// No description provided for @historyEventLunchOut.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikka chiqdi'**
+  String get historyEventLunchOut;
+
+  /// No description provided for @historyEventLunchIn.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tushlikdan qaytdi'**
+  String get historyEventLunchIn;
+
+  /// No description provided for @historyEventLeft.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ishdan ketdi'**
+  String get historyEventLeft;
+
+  /// No description provided for @historyError.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.'**
+  String get historyError;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bildirishnomalar'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In uz, this message translates to:
+  /// **'Hozircha bildirishnomalar yo‘q'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsError.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bildirishnomalarni yuklab bo‘lmadi. Qayta urinib ko‘ring.'**
+  String get notificationsError;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In uz, this message translates to:
+  /// **'Barchasini o‘qilgan deb belgilash'**
+  String get notificationsMarkAllRead;
 
   /// No description provided for @profilePhotoPromptTitle.
   ///

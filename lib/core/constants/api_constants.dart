@@ -21,4 +21,32 @@ abstract final class ApiConstants {
   /// check_out) + `gps_latitude`/`gps_longitude` + `image` selfie FormData.
   /// Saqlangan token bilan (AuthInterceptor), 401 da refresh ishlaydi.
   static const attendance = '/v1/attendance/attendance/';
+
+  /// Shaxsiy davomat statistikasi (sana oralig‘i bo‘yicha) — `start_date` /
+  /// `end_date` (`yyyy-MM-dd`). Javob: `present_days`, `late_days`,
+  /// `avg_check_in`, `total_worked_hours`.
+  static const attendancePersonalStats =
+      '/v1/attendance/attendance/personal-stats/';
+
+  // ── Bildirishnomalar (api/v1/notifications) ───────────────────────────
+  /// GET — sahifalangan ro‘yxat (`page`, `is_read` query). Javob:
+  /// `{ count, next, previous, results: [ { id, title_*, message_*,
+  /// extra_data, is_read, created_at } ] }`.
+  static const notifications = '/v1/notifications/';
+
+  /// GET — o‘qilmagan bildirishnomalar soni (bell badge uchun).
+  static const notificationsCount = '/v1/notifications/count/';
+
+  /// POST — barchasini o‘qilgan deb belgilash (tana yo‘q).
+  static const notificationsReadAll = '/v1/notifications/read-all/';
+
+  /// PATCH — bitta bildirishnomani o‘qilgan deb belgilash. `{id}` o‘rniga
+  /// bildirishnoma UUID’i qo‘yiladi.
+  static String notificationRead(String id) => '/v1/notifications/$id/read/';
+
+  /// POST — FCM qurilma tokenini ro‘yxatdan o‘tkazish. Tana:
+  /// `{ user (UUID), fcm_token, device_type (ios/android/web), device_id }`.
+  /// `user` — JWT `user_id` claimi (profil `id`ga teng), backend majburiy.
+  static const notificationsDeviceRegister =
+      '/v1/notifications/devices/register/';
 }

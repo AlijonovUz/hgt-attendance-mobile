@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "981189585778",
+    "project_id": "hgt-attendance",
+    "storage_bucket": "hgt-attendance.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:981189585778:android:8839e5d53d6af7a0878beb",
+        "android_client_info": {
+          "package_name": "raqamli.nazorat.hgt_attendance_mobile.hgt_attendance_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbQ-AiHS0PJUA8nNmj-5lnjSfry6e64qQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

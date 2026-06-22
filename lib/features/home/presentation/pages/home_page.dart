@@ -1,17 +1,21 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../app/bloc/session_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
-import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/widgets/app_bottom_nav.dart';
+import '../../../../core/widgets/logout_dialog.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../attendance/presentation/pages/davomat_tarixi_page.dart';
+import '../../../attendance/presentation/pages/attendance_page.dart';
+import '../../../notifications/presentation/bloc/notification_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../../../profile/presentation/pages/shaxsiy_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../profile/presentation/widgets/profile_photo_prompt_sheet.dart';
 import '../bloc/attendance_bloc.dart';
 import 'asosiy_page.dart';
@@ -29,10 +33,11 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ProfileBloc>(
-          create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested()),
-        ),
+        BlocProvider<ProfileBloc>(create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested())),
         BlocProvider<AttendanceBloc>(create: (_) => getIt<AttendanceBloc>()),
+        BlocProvider<NotificationBloc>(
+          create: (_) => getIt<NotificationBloc>()..add(const NotificationCountRequested()),
+        ),
       ],
       child: const _HomeShell(),
     );
@@ -49,32 +54,32 @@ class _HomeShell extends StatefulWidget {
 class _HomeShellState extends State<_HomeShell> {
   int _index = 0;
   bool _promptShown = false;
+  StreamSubscription<RemoteMessage>? _pushSub;
+
+  @override
+  void initState() {
+    super.initState();
+    // Old planda push kelganda badge sonini yangilab qo‘yamiz.
+    _pushSub = getIt<PushNotificationService>().messages.listen((_) {
+      if (mounted) {
+        context.read<NotificationBloc>().add(const NotificationCountRequested());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pushSub?.cancel();
+    super.dispose();
+  }
 
   void _openPrompt() {
     showProfilePhotoPrompt(context, context.read<ProfileBloc>());
   }
 
   Future<void> _confirmLogout() async {
-    final l10n = AppLocalizations.of(context);
-    final colors = AppColors.of(context);
     final session = context.read<SessionBloc>();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: colors.backgroundElevation1,
-        title: l10n.homeLogout.s(16.sp).w(700).c(colors.textStrong),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: l10n.commonCancel.s(14.sp).w(500).c(colors.textSub),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: l10n.homeLogout.s(14.sp).w(700).c(colors.errorStrong),
-          ),
-        ],
-      ),
-    );
+    final confirmed = await showLogoutDialog(context);
     if (confirmed == true) {
       session.add(const SessionLogoutRequested());
     }
@@ -100,12 +105,9 @@ class _HomeShellState extends State<_HomeShell> {
         child: IndexedStack(
           index: _index,
           children: [
-            AsosiyPage(
-              onAvatarNeedsPhoto: _openPrompt,
-              onLogout: _confirmLogout,
-            ),
-            const DavomatTarixiPage(),
-            ShaxsiyPage(onLogout: _confirmLogout),
+            AsosiyPage(onAvatarNeedsPhoto: _openPrompt, onLogout: _confirmLogout),
+            const AttendancePage(),
+            ProfilePage(onLogout: _confirmLogout),
           ],
         ),
       ),
@@ -113,18 +115,9 @@ class _HomeShellState extends State<_HomeShell> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: [
-          AppBottomNavItem(
-            icon: Assets.icons.icHugeiconsMenuSquare,
-            label: l10n.navHome,
-          ),
-          AppBottomNavItem(
-            icon: Assets.icons.icHugeiconsClock,
-            label: l10n.navHistory,
-          ),
-          AppBottomNavItem(
-            icon: Assets.icons.icHugeiconsMale,
-            label: l10n.navProfile,
-          ),
+          AppBottomNavItem(icon: Assets.icons.icHugeiconsMenuSquare, label: l10n.navHome),
+          AppBottomNavItem(icon: Assets.icons.icHugeiconsClock, label: l10n.navHistory),
+          AppBottomNavItem(icon: Assets.icons.icHugeiconsMale, label: l10n.navProfile),
         ],
       ),
     );

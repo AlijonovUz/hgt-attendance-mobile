@@ -2,6 +2,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/attendance_event.dart';
 import '../../domain/entities/attendance_event_type.dart';
+import '../../domain/entities/attendance_stats.dart';
 import '../../domain/repository/attendance_repository.dart';
 import '../data_sources/attendance_remote_data_source.dart';
 
@@ -32,6 +33,29 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
         final models = await _remote.getTodayEvents(userId: userId);
         return models.map((m) => m.toEntity()).toList();
       });
+
+  @override
+  Future<List<AttendanceEvent>> rangeEvents({
+    required String userId,
+    required DateTime start,
+    required DateTime end,
+  }) => _guard(() async {
+    final models = await _remote.getEvents(
+      userId: userId,
+      start: start,
+      end: end,
+    );
+    return models.map((m) => m.toEntity()).toList();
+  });
+
+  @override
+  Future<AttendanceStats> personalStats({
+    required DateTime start,
+    required DateTime end,
+  }) => _guard(() async {
+    final model = await _remote.getPersonalStats(start: start, end: end);
+    return model.toEntity();
+  });
 
   Future<T> _guard<T>(Future<T> Function() body) async {
     try {
