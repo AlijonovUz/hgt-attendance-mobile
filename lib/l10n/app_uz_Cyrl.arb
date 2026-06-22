@@ -100,6 +100,11 @@
   "historyEventLeft": "Ишдан кетди",
   "historyError": "Маълумотни юклаб бўлмади. Қайта уриниб кўринг.",
 
+  "notificationsTitle": "Билдиришномалар",
+  "notificationsEmpty": "Ҳозирча билдиришномалар йўқ",
+  "notificationsError": "Билдиришномаларни юклаб бўлмади. Қайта уриниб кўринг.",
+  "notificationsMarkAllRead": "Барчасини ўқилган деб белгилаш",
+
   "profilePhotoPromptTitle": "Илтимос, сканерлашдан ўтиш учун профилингиз учун шахсий расмингизни ўрнатинг!",
   "profilePhotoUploadLabel": "Расм юклаш",
   "profilePhotoUploadButton": "Юклаш",

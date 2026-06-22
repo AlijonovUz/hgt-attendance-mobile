@@ -14,9 +14,9 @@ class LoggerService {
   }
 
   static void _defaultLogSink(String message) {
-    developer.log(message, name: 'Boshqaruv');
+    developer.log(message, name: 'Davomat');
     if (kDebugMode) {
-      debugPrint('[Boshqaruv] $message');
+      debugPrint('[HGT Davomat] $message');
     }
   }
 }

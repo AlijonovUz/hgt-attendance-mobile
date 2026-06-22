@@ -615,6 +615,30 @@ abstract class AppLocalizations {
   /// **'Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.'**
   String get historyError;
 
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bildirishnomalar'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In uz, this message translates to:
+  /// **'Hozircha bildirishnomalar yo‘q'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsError.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bildirishnomalarni yuklab bo‘lmadi. Qayta urinib ko‘ring.'**
+  String get notificationsError;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In uz, this message translates to:
+  /// **'Barchasini o‘qilgan deb belgilash'**
+  String get notificationsMarkAllRead;
+
   /// No description provided for @profilePhotoPromptTitle.
   ///
   /// In uz, this message translates to:

@@ -1,4 +1,4 @@
 abstract final class AppConstants {
-  static const appName = 'Raqamli Boshqaruv';
+  static const appName = 'HGT Davomat';
   static const requestTimeoutSeconds = 30;
 }

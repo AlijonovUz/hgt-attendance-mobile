@@ -276,6 +276,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get historyError => 'Не удалось загрузить данные. Попробуйте ещё раз.';
 
   @override
+  String get notificationsTitle => 'Уведомления';
+
+  @override
+  String get notificationsEmpty => 'Пока нет уведомлений';
+
+  @override
+  String get notificationsError =>
+      'Не удалось загрузить уведомления. Попробуйте ещё раз.';
+
+  @override
+  String get notificationsMarkAllRead => 'Отметить все как прочитанные';
+
+  @override
   String get profilePhotoPromptTitle =>
       'Пожалуйста, установите личное фото профиля, чтобы пройти сканирование!';
 
