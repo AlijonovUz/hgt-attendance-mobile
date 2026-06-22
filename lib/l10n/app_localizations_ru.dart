@@ -188,10 +188,92 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileFieldDepartment => 'Отдел';
 
   @override
+  String get profileFieldBranch => 'Филиал';
+
+  @override
+  String get profileFieldRegion => 'Область';
+
+  @override
+  String get profileFieldDistrict => 'Район';
+
+  @override
   String get profileFieldPhone => 'Телефон';
 
   @override
+  String get profileChangePassword => 'Изменить пароль';
+
+  @override
+  String get logoutTitle => 'Выйти из профиля?';
+
+  @override
+  String get logoutBody =>
+      'Вы выйдете из профиля, и для повторного входа потребуется снова авторизоваться в системе';
+
+  @override
+  String get logoutBack => 'Назад';
+
+  @override
+  String get cpwConfirmLabel => 'Повторите новый пароль';
+
+  @override
+  String get cpwSave => 'Сохранить';
+
+  @override
+  String get cpwSuccess => 'Пароль успешно изменён';
+
+  @override
   String get historyEmpty => 'Пока нет записей о посещаемости';
+
+  @override
+  String get historyTabDaily => 'День';
+
+  @override
+  String get historyTabWeekly => 'Неделя';
+
+  @override
+  String get historyTabMonthly => 'Месяц';
+
+  @override
+  String get historyStatPresent => 'Выходов';
+
+  @override
+  String get historyStatLate => 'Опозданий';
+
+  @override
+  String get historyStatAvgArrival => 'Среднее прибытие';
+
+  @override
+  String get historyStatWorked => 'Всего отработано';
+
+  @override
+  String get historyUnitDays => 'дн.';
+
+  @override
+  String get historyUnitHours => 'ч';
+
+  @override
+  String get historyUnitMinutes => 'мин';
+
+  @override
+  String get historyToday => 'Сегодня';
+
+  @override
+  String get historyYesterday => 'Вчера';
+
+  @override
+  String get historyEventArrived => 'Пришёл на работу';
+
+  @override
+  String get historyEventLunchOut => 'Ушёл на обед';
+
+  @override
+  String get historyEventLunchIn => 'Вернулся с обеда';
+
+  @override
+  String get historyEventLeft => 'Ушёл с работы';
+
+  @override
+  String get historyError => 'Не удалось загрузить данные. Попробуйте ещё раз.';
 
   @override
   String get profilePhotoPromptTitle =>

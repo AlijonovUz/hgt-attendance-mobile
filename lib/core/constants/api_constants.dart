@@ -21,4 +21,10 @@ abstract final class ApiConstants {
   /// check_out) + `gps_latitude`/`gps_longitude` + `image` selfie FormData.
   /// Saqlangan token bilan (AuthInterceptor), 401 da refresh ishlaydi.
   static const attendance = '/v1/attendance/attendance/';
+
+  /// Shaxsiy davomat statistikasi (sana oralig‘i bo‘yicha) — `start_date` /
+  /// `end_date` (`yyyy-MM-dd`). Javob: `present_days`, `late_days`,
+  /// `avg_check_in`, `total_worked_hours`.
+  static const attendancePersonalStats =
+      '/v1/attendance/attendance/personal-stats/';
 }

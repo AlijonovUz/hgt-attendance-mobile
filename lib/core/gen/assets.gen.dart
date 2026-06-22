@@ -79,6 +79,14 @@ class $AssetsIconsGen {
     'assets/icons/ic_hugeicons_arrow_right_double_round.svg',
   );
 
+  /// File path: assets/icons/ic_hugeicons_arrow_right_round.svg
+  SvgGenImage get icHugeiconsArrowRightRound =>
+      const SvgGenImage('assets/icons/ic_hugeicons_arrow_right_round.svg');
+
+  /// File path: assets/icons/ic_hugeicons_calendar.svg
+  SvgGenImage get icHugeiconsCalendar =>
+      const SvgGenImage('assets/icons/ic_hugeicons_calendar.svg');
+
   /// File path: assets/icons/ic_hugeicons_camera_add.svg
   SvgGenImage get icHugeiconsCameraAdd =>
       const SvgGenImage('assets/icons/ic_hugeicons_camera_add.svg');
@@ -90,6 +98,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_hugeicons_clock.svg
   SvgGenImage get icHugeiconsClock =>
       const SvgGenImage('assets/icons/ic_hugeicons_clock.svg');
+
+  /// File path: assets/icons/ic_hugeicons_dashboard_square.svg
+  SvgGenImage get icHugeiconsDashboardSquare =>
+      const SvgGenImage('assets/icons/ic_hugeicons_dashboard_square.svg');
 
   /// File path: assets/icons/ic_hugeicons_data_time.svg
   SvgGenImage get icHugeiconsDataTime =>
@@ -111,9 +123,17 @@ class $AssetsIconsGen {
   SvgGenImage get icHugeiconsLogout =>
       const SvgGenImage('assets/icons/ic_hugeicons_logout.svg');
 
+  /// File path: assets/icons/ic_hugeicons_logout_circle.svg
+  SvgGenImage get icHugeiconsLogoutCircle =>
+      const SvgGenImage('assets/icons/ic_hugeicons_logout_circle.svg');
+
   /// File path: assets/icons/ic_hugeicons_male.svg
   SvgGenImage get icHugeiconsMale =>
       const SvgGenImage('assets/icons/ic_hugeicons_male.svg');
+
+  /// File path: assets/icons/ic_hugeicons_medium.svg
+  SvgGenImage get icHugeiconsMedium =>
+      const SvgGenImage('assets/icons/ic_hugeicons_medium.svg');
 
   /// File path: assets/icons/ic_hugeicons_menu_square.svg
   SvgGenImage get icHugeiconsMenuSquare =>
@@ -127,6 +147,10 @@ class $AssetsIconsGen {
   SvgGenImage get icHugeiconsMoon =>
       const SvgGenImage('assets/icons/ic_hugeicons_moon.svg');
 
+  /// File path: assets/icons/ic_hugeicons_new_job.svg
+  SvgGenImage get icHugeiconsNewJob =>
+      const SvgGenImage('assets/icons/ic_hugeicons_new_job.svg');
+
   /// File path: assets/icons/ic_hugeicons_notification.svg
   SvgGenImage get icHugeiconsNotification =>
       const SvgGenImage('assets/icons/ic_hugeicons_notification.svg');
@@ -138,6 +162,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_hugeicons_pizza.svg
   SvgGenImage get icHugeiconsPizza =>
       const SvgGenImage('assets/icons/ic_hugeicons_pizza.svg');
+
+  /// File path: assets/icons/ic_hugeicons_security.svg
+  SvgGenImage get icHugeiconsSecurity =>
+      const SvgGenImage('assets/icons/ic_hugeicons_security.svg');
 
   /// File path: assets/icons/ic_hugeicons_security_check.svg
   SvgGenImage get icHugeiconsSecurityCheck =>
@@ -187,21 +215,28 @@ class $AssetsIconsGen {
     icGlobe,
     icHugeiconsArrowLeftRound,
     icHugeiconsArrowRightDoubleRound,
+    icHugeiconsArrowRightRound,
+    icHugeiconsCalendar,
     icHugeiconsCameraAdd,
     icHugeiconsCheckmarkBadge,
     icHugeiconsClock,
+    icHugeiconsDashboardSquare,
     icHugeiconsDataTime,
     icHugeiconsLoading,
     icHugeiconsLocationShare,
     icHugeiconsLogin,
     icHugeiconsLogout,
+    icHugeiconsLogoutCircle,
     icHugeiconsMale,
+    icHugeiconsMedium,
     icHugeiconsMenuSquare,
     icHugeiconsMoneyReceiveFlow,
     icHugeiconsMoon,
+    icHugeiconsNewJob,
     icHugeiconsNotification,
     icHugeiconsParty,
     icHugeiconsPizza,
+    icHugeiconsSecurity,
     icHugeiconsSecurityCheck,
     icHugeiconsSun,
     icLucideCheck,

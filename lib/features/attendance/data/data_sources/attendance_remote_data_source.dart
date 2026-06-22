@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/attendance_event_type.dart';
 import '../models/attendance_event_model.dart';
+import '../models/personal_stats_model.dart';
 
 /// `/v1/attendance/attendance/` bilan ishlaydi (POST belgilash + GET bugungilar).
 abstract interface class AttendanceRemoteDataSource {
@@ -17,6 +19,21 @@ abstract interface class AttendanceRemoteDataSource {
 
   /// Bugungi yozuvlar (joriy foydalanuvchi, sana oralig‘i bilan filtrlangan).
   Future<List<AttendanceEventModel>> getTodayEvents({required String userId});
+
+  /// Sana oralig‘idagi yozuvlar (tarix — Kunlik/Haftalik/Oylik/Custom).
+  /// `start_date`/`end_date` = `dd.MM.yyyy`.
+  Future<List<AttendanceEventModel>> getEvents({
+    required String userId,
+    required DateTime start,
+    required DateTime end,
+  });
+
+  /// Sana oralig‘i bo‘yicha shaxsiy statistika. `start_date`/`end_date` =
+  /// `yyyy-MM-dd` (swagger personal-stats kontrakti).
+  Future<PersonalStatsModel> getPersonalStats({
+    required DateTime start,
+    required DateTime end,
+  });
 }
 
 class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
@@ -65,17 +82,17 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     try {
       final now = DateTime.now();
       final start = DateTime(now.year, now.month, now.day);
-      final end = start
-          .add(const Duration(days: 1))
-          .subtract(const Duration(seconds: 1));
+      // final end = start
+      //     .add(const Duration(days: 1))
+      //     .subtract(const Duration(seconds: 1));
 
       final response = await _client.get(
         ApiConstants.attendance,
         queryParameters: {
           'user': userId,
-          'date_from': start.toUtc().toIso8601String(),
-          'date_to': end.toUtc().toIso8601String(),
-          'ordering': 'created_at',
+          'start_date': DateFormat('dd.MM.yyyy').format(start),
+          // 'end_date': end.toUtc().toIso8601String(),
+          // 'ordering': 'created_at',
         },
       );
 
@@ -99,6 +116,70 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     } on DioException catch (e) {
       throw _mapDioException(e);
     }
+  }
+
+  @override
+  Future<List<AttendanceEventModel>> getEvents({
+    required String userId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    try {
+      final fmt = DateFormat('dd.MM.yyyy');
+      final response = await _client.get(
+        ApiConstants.attendance,
+        queryParameters: {
+          'user': userId,
+          'start_date': fmt.format(start),
+          'end_date': fmt.format(end),
+        },
+      );
+      return _eventsFromResponse(response.data);
+    } on DioException catch (e) {
+      throw _mapDioException(e);
+    }
+  }
+
+  @override
+  Future<PersonalStatsModel> getPersonalStats({
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    try {
+      final fmt = DateFormat('yyyy-MM-dd');
+      final response = await _client.get(
+        ApiConstants.attendancePersonalStats,
+        queryParameters: {
+          'start_date': fmt.format(start),
+          'end_date': fmt.format(end),
+        },
+      );
+      final body = (response.data as Map?)?.cast<String, dynamic>() ?? {};
+      if (body['success'] == false) {
+        throw ServerException(_messageFromBody(body));
+      }
+      return PersonalStatsModel.fromJson(body);
+    } on DioException catch (e) {
+      throw _mapDioException(e);
+    }
+  }
+
+  /// Konvert envelope (`{data:{results:[...]}}`) yoki to‘g‘ridan-to‘g‘ri
+  /// `{results:[...]}` / ro‘yxatdan yozuvlarni ajratadi.
+  List<AttendanceEventModel> _eventsFromResponse(dynamic raw) {
+    final body = raw is Map
+        ? raw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final inner = body['data'] is Map
+        ? (body['data'] as Map).cast<String, dynamic>()
+        : body;
+    final List list = inner['results'] is List
+        ? inner['results'] as List
+        : (raw is List ? raw : const []);
+    return list
+        .whereType<Map>()
+        .map((e) => AttendanceEventModel.fromJson(e.cast<String, dynamic>()))
+        .toList();
   }
 
   /// `error.details`dagi maydon xatolari (`non_field_errors`, …) aniqroq sabab

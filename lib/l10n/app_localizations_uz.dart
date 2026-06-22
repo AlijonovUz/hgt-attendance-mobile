@@ -189,10 +189,93 @@ class AppLocalizationsUz extends AppLocalizations {
   String get profileFieldDepartment => 'Bo‘lim';
 
   @override
+  String get profileFieldBranch => 'Filial';
+
+  @override
+  String get profileFieldRegion => 'Viloyat';
+
+  @override
+  String get profileFieldDistrict => 'Tuman';
+
+  @override
   String get profileFieldPhone => 'Telefon';
 
   @override
+  String get profileChangePassword => 'Parol o‘zgartirish';
+
+  @override
+  String get logoutTitle => 'Profilingizdan chiqmoqchimisiz?';
+
+  @override
+  String get logoutBody =>
+      'Profilingizdan chiqasiz va qayta kirish uchun tizimga yana login qilishingiz kerak bo‘ladi';
+
+  @override
+  String get logoutBack => 'Orqaga';
+
+  @override
+  String get cpwConfirmLabel => 'Yangi parolni takrorlash';
+
+  @override
+  String get cpwSave => 'Saqlash';
+
+  @override
+  String get cpwSuccess => 'Parol muvaffaqiyatli o‘zgartirildi';
+
+  @override
   String get historyEmpty => 'Hozircha davomat yozuvlari yo‘q';
+
+  @override
+  String get historyTabDaily => 'Kunlik';
+
+  @override
+  String get historyTabWeekly => 'Haftalik';
+
+  @override
+  String get historyTabMonthly => 'Oylik';
+
+  @override
+  String get historyStatPresent => 'Ishga chiqqan';
+
+  @override
+  String get historyStatLate => 'Ishga kechikkan';
+
+  @override
+  String get historyStatAvgArrival => 'O‘rtacha kelish';
+
+  @override
+  String get historyStatWorked => 'Jami ishlagan';
+
+  @override
+  String get historyUnitDays => 'kun';
+
+  @override
+  String get historyUnitHours => 'soat';
+
+  @override
+  String get historyUnitMinutes => 'daqiqa';
+
+  @override
+  String get historyToday => 'Bugun';
+
+  @override
+  String get historyYesterday => 'Kecha';
+
+  @override
+  String get historyEventArrived => 'Ishga keldi';
+
+  @override
+  String get historyEventLunchOut => 'Tushlikka chiqdi';
+
+  @override
+  String get historyEventLunchIn => 'Tushlikdan qaytdi';
+
+  @override
+  String get historyEventLeft => 'Ishdan ketdi';
+
+  @override
+  String get historyError =>
+      'Ma’lumotni yuklab bo‘lmadi. Qayta urinib ko‘ring.';
 
   @override
   String get profilePhotoPromptTitle =>
@@ -511,10 +594,92 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
   String get profileFieldDepartment => 'Бўлим';
 
   @override
+  String get profileFieldBranch => 'Филиал';
+
+  @override
+  String get profileFieldRegion => 'Вилоят';
+
+  @override
+  String get profileFieldDistrict => 'Туман';
+
+  @override
   String get profileFieldPhone => 'Телефон';
 
   @override
+  String get profileChangePassword => 'Паролни ўзгартириш';
+
+  @override
+  String get logoutTitle => 'Профилингиздан чиқмоқчимисиз?';
+
+  @override
+  String get logoutBody =>
+      'Профилингиздан чиқасиз ва қайта кириш учун тизимга яна логин қилишингиз керак бўлади';
+
+  @override
+  String get logoutBack => 'Орқага';
+
+  @override
+  String get cpwConfirmLabel => 'Янги паролни такрорланг';
+
+  @override
+  String get cpwSave => 'Сақлаш';
+
+  @override
+  String get cpwSuccess => 'Парол муваффақиятли ўзгартирилди';
+
+  @override
   String get historyEmpty => 'Ҳозирча давомат ёзувлари йўқ';
+
+  @override
+  String get historyTabDaily => 'Кунлик';
+
+  @override
+  String get historyTabWeekly => 'Ҳафталик';
+
+  @override
+  String get historyTabMonthly => 'Ойлик';
+
+  @override
+  String get historyStatPresent => 'Ишга чиққан';
+
+  @override
+  String get historyStatLate => 'Ишга кечиккан';
+
+  @override
+  String get historyStatAvgArrival => 'Ўртача келиш';
+
+  @override
+  String get historyStatWorked => 'Жами ишлаган';
+
+  @override
+  String get historyUnitDays => 'кун';
+
+  @override
+  String get historyUnitHours => 'соат';
+
+  @override
+  String get historyUnitMinutes => 'дақиқа';
+
+  @override
+  String get historyToday => 'Бугун';
+
+  @override
+  String get historyYesterday => 'Кеча';
+
+  @override
+  String get historyEventArrived => 'Ишга келди';
+
+  @override
+  String get historyEventLunchOut => 'Тушликка чиқди';
+
+  @override
+  String get historyEventLunchIn => 'Тушликдан қайтди';
+
+  @override
+  String get historyEventLeft => 'Ишдан кетди';
+
+  @override
+  String get historyError => 'Маълумотни юклаб бўлмади. Қайта уриниб кўринг.';
 
   @override
   String get profilePhotoPromptTitle =>

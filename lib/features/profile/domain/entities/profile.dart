@@ -69,6 +69,8 @@ class Profile extends Equatable {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.regionName,
+    this.districtName,
     this.schedule,
     this.kpi,
   });
@@ -84,6 +86,12 @@ class Profile extends Equatable {
   final String? departmentName;
   final String? branchName;
 
+  /// Viloyat (`region_info.name`).
+  final String? regionName;
+
+  /// Tuman (`district_info.name`).
+  final String? districtName;
+
   final ScheduleInfo? schedule;
   final MonthKpi? kpi;
 
@@ -98,6 +106,8 @@ class Profile extends Equatable {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    regionName: regionName,
+    districtName: districtName,
     schedule: schedule,
     kpi: kpi,
   );
@@ -111,6 +121,8 @@ class Profile extends Equatable {
     roleName,
     departmentName,
     branchName,
+    regionName,
+    districtName,
     schedule,
     kpi,
   ];
