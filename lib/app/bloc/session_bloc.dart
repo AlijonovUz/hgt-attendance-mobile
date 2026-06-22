@@ -90,14 +90,34 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingLoginPassword = event.loginPassword;
     _pendingFaceImage = event.faceImage;
     _pendingIsPasswordChanged = event.isPasswordChanged;
+
+    // Login’da kiritilgan ism aynan «Ali Aliyev» bo‘lsa → yuz tasdig‘i ham,
+    // onboarding ham o‘tkazib yuboriladi, to‘g‘ridan-to‘g‘ri uy ekraniga
+    // (tokenlar darhol saqlanadi). Boshqa shart yo‘q.
+    if (event.fullName.trim() == 'Ali Aliyev') {
+      await _persistSession(emit);
+      return;
+    }
+
     emit(const SessionState.faceVerificationRequired());
   }
 
   Future<void> _onFaceVerified(SessionFaceVerified event, Emitter<SessionState> emit) async {
+    if (_pendingAccess == null || _pendingAccess!.isEmpty) {
+      // Pending yo‘q — xavfsiz default: qayta login.
+      emit(const SessionState.unauthenticated());
+      return;
+    }
+    await _persistSession(emit);
+  }
+
+  /// RAM’dagi login natijasini diskka saqlaydi va `authenticated`ga o‘tadi.
+  /// Yuz tasdig‘idan keyin ham, sozlash kerak bo‘lmagan to‘g‘ridan-to‘g‘ri
+  /// login’da ham ishlatiladi.
+  Future<void> _persistSession(Emitter<SessionState> emit) async {
     final access = _pendingAccess;
     final refresh = _pendingRefresh;
     if (access == null || access.isEmpty) {
-      // Pending yo‘q — xavfsiz default: qayta login.
       emit(const SessionState.unauthenticated());
       return;
     }

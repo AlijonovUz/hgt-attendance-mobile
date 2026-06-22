@@ -279,6 +279,11 @@ class AppColors extends ThemeExtension<AppColors> {
   /// «Qayta urinish: MM:SS» vaqti (Figma `orange/10`). Har ikkala rejimda bir xil.
   static const Color warningStrong = Color(0xFFEF5F00);
 
+  /// Davomat tarixi statistika ikonlari uchun yordamchi ranglar (Figma —
+  /// har ikkala rejimda bir xil): «Ishga chiqqan» orange, «O‘rtacha kelish» purple.
+  static const Color statOrange = Color(0xFFEA580C);
+  static const Color statPurple = Color(0xFF7E22CE);
+
   /// Brend logotipi foni (Figma `chart-5` to‘q-ko‘k) — har ikkala rejimda bir xil.
   static const Color brandNavy = Color(0xFF113264);
 

@@ -20,21 +20,15 @@ class Routes implements Coordinate {
   /// onboarding ichidagi bosqich ishlatadi).
   static const faceVerify = Routes._(name: 'face_verify', path: '/face_verify');
 
-  /// Davomat (guard zanjirida emas — mosligi uchun saqlanadi).
-  static const checkCode = Routes._(
-    name: 'check_code_page',
-    path: '/check_code',
-  );
-
   static const root = Routes._(name: 'root', path: '/');
   static const home = Routes._(name: 'home_page', path: '/home_page');
 
+  /// Parol o‘zgartirish (Shaxsiy tabdan push qilinadi — authenticated user).
+  static const changePassword = Routes._(name: 'change_password', path: '/change_password');
+
   /// Davomat yuz-tekshiruvi (asosiy ekrandan push qilinadi, `extra` =
   /// `AttendanceEventType`). Guard zanjirida emas — authenticated user uchun.
-  static const attendanceFace = Routes._(
-    name: 'attendance_face',
-    path: '/attendance_face',
-  );
+  static const attendanceFace = Routes._(name: 'attendance_face', path: '/attendance_face');
 
   @override
   String toString() => 'name=$name, path=$path';

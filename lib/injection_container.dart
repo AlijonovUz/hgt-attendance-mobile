@@ -18,8 +18,11 @@ import 'core/services/token_service.dart';
 import 'features/attendance/data/data_sources/attendance_remote_data_source.dart';
 import 'features/attendance/data/repository/attendance_repository_impl.dart';
 import 'features/attendance/domain/repository/attendance_repository.dart';
+import 'features/attendance/domain/usecases/get_attendance_history_usecase.dart';
+import 'features/attendance/domain/usecases/get_personal_stats_usecase.dart';
 import 'features/attendance/domain/usecases/get_today_attendance_usecase.dart';
 import 'features/attendance/domain/usecases/mark_attendance_usecase.dart';
+import 'features/attendance/presentation/bloc/history/attendance_history_bloc.dart';
 import 'features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'features/auth/data/repository/auth_repository_impl.dart';
 import 'features/auth/domain/repository/auth_repository.dart';
@@ -33,6 +36,7 @@ import 'features/profile/data/repository/profile_repository_impl.dart';
 import 'features/profile/domain/repository/profile_repository.dart';
 import 'features/profile/domain/usecases/get_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_face_image_usecase.dart';
+import 'features/profile/presentation/bloc/change_password_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/onboarding/data/data_sources/onboarding_remote_data_source.dart';
 import 'features/onboarding/data/repository/onboarding_repository_impl.dart';
@@ -111,6 +115,15 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<GetTodayAttendanceUseCase>(
       () => GetTodayAttendanceUseCase(getIt()),
+    )
+    ..registerLazySingleton<GetAttendanceHistoryUseCase>(
+      () => GetAttendanceHistoryUseCase(getIt()),
+    )
+    ..registerLazySingleton<GetPersonalStatsUseCase>(
+      () => GetPersonalStatsUseCase(getIt()),
+    )
+    ..registerFactory<AttendanceHistoryBloc>(
+      () => AttendanceHistoryBloc(getHistory: getIt(), getStats: getIt()),
     );
 
   // ── Home (asosiy ekran davomat holati — backend bugungi yozuvlardan) ────
@@ -136,6 +149,9 @@ Future<void> configureDependencies() async {
         updateFaceImage: getIt(),
         imagePicker: getIt(),
       ),
+    )
+    ..registerFactory<ChangePasswordBloc>(
+      () => ChangePasswordBloc(changePassword: getIt()),
     );
 
   // ── Onboarding feature ────────────────────────────────────────────────

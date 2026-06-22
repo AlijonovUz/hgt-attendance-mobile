@@ -29,7 +29,7 @@ class HomeStatCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.backgroundElevation2,
-        borderRadius: BorderRadius.circular(22.r),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Padding(
         padding: EdgeInsets.all(12.w),
@@ -42,7 +42,7 @@ class HomeStatCard extends StatelessWidget {
                   child: label
                       .s(14.sp)
                       .w(400)
-                      .c(colors.textSub)
+                      .c(colors.textStrong)
                       .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
                 SizedBox(width: 8.w),
