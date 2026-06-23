@@ -8,10 +8,12 @@ class LocationService {
   const LocationService();
 
   /// Joriy koordinata. Ruxsat/xizmat muammosida [LocationException] otadi.
+  /// GPS o‘chiq bo‘lsa `serviceDisabled: true` bilan otiladi — UI yoqish
+  /// dialogini ko‘rsatadi.
   Future<({double latitude, double longitude})> current() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw const LocationException('Joylashuv xizmati o‘chiq');
+      throw const LocationException.serviceDisabled();
     }
 
     var permission = await Geolocator.checkPermission();
@@ -28,10 +30,24 @@ class LocationService {
     );
     return (latitude: position.latitude, longitude: position.longitude);
   }
+
+  /// Qurilma GPS sozlamalarini ochadi (foydalanuvchi yoqishi uchun).
+  /// Sozlama ekrani ochilsa `true` qaytaradi.
+  Future<bool> openSettings() => Geolocator.openLocationSettings();
 }
 
 /// Joylashuvni olishdagi xato (ruxsat/xizmat).
 class LocationException implements Exception {
-  const LocationException([this.message = 'Joylashuv aniqlanmadi']);
+  const LocationException([this.message = 'Joylashuv aniqlanmadi'])
+      : serviceDisabled = false;
+
+  /// GPS xizmati o‘chiq — UI yoqish dialogini ko‘rsatadi.
+  const LocationException.serviceDisabled([
+    this.message = 'Joylashuv xizmati o‘chiq',
+  ]) : serviceDisabled = true;
+
   final String message;
+
+  /// `true` bo‘lsa — sabab GPS o‘chiqligi (ruxsat emas).
+  final bool serviceDisabled;
 }

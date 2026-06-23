@@ -45,6 +45,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get langRussian => 'Русский';
 
   @override
+  String get profileAppLanguage => 'Ilova tili';
+
+  @override
+  String get profileLanguageSheetTitle => 'Ilova tilini tanlang';
+
+  @override
   String get loginInvalidCredentials => 'Login yoki parol noto‘g‘ri.';
 
   @override
@@ -157,6 +163,16 @@ class AppLocalizationsUz extends AppLocalizations {
   @override
   String get attendanceLocationError =>
       'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.';
+
+  @override
+  String get locationServiceOffTitle => 'GPS o‘chiq';
+
+  @override
+  String get locationServiceOffBody =>
+      'Davomatni belgilash uchun joylashuv (GPS) yoqilgan bo‘lishi kerak. Iltimos, GPS’ni yoqing.';
+
+  @override
+  String get locationServiceOffEnable => 'Yoqish';
 
   @override
   String get homeTodaySchedule => 'Bugungi tartib';
@@ -463,6 +479,12 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
   String get langRussian => 'Русский';
 
   @override
+  String get profileAppLanguage => 'Илова тили';
+
+  @override
+  String get profileLanguageSheetTitle => 'Илова тилини танланг';
+
+  @override
   String get loginInvalidCredentials => 'Логин ёки парол нотўғри.';
 
   @override
@@ -575,6 +597,16 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
   @override
   String get attendanceLocationError =>
       'Жойлашув аниқланмади. GPS ва рухсатни текширинг.';
+
+  @override
+  String get locationServiceOffTitle => 'GPS ўчиқ';
+
+  @override
+  String get locationServiceOffBody =>
+      'Давоматни белгилаш учун жойлашув (GPS) ёқилган бўлиши керак. Илтимос, GPS’ни ёқинг.';
+
+  @override
+  String get locationServiceOffEnable => 'Ёқиш';
 
   @override
   String get homeTodaySchedule => 'Бугунги тартиб';

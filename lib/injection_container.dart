@@ -41,6 +41,7 @@ import 'features/profile/domain/usecases/update_face_image_usecase.dart';
 import 'features/profile/presentation/bloc/change_password_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/notifications/data/data_sources/notification_remote_data_source.dart';
+import 'features/notifications/data/data_sources/notification_socket_service.dart';
 import 'features/notifications/data/repository/notification_repository_impl.dart';
 import 'features/notifications/domain/repository/notification_repository.dart';
 import 'features/notifications/domain/usecases/get_notification_count_usecase.dart';
@@ -188,12 +189,17 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<RegisterDeviceUseCase>(
       () => RegisterDeviceUseCase(getIt()),
     )
+    // Real-time WebSocket — ticket olib ulanadi, jonli xabarlarni oqimga uzatadi.
+    ..registerLazySingleton<NotificationSocketService>(
+      () => NotificationSocketService(client: getIt(), session: getIt()),
+    )
     ..registerFactory<NotificationBloc>(
       () => NotificationBloc(
         getNotifications: getIt(),
         markRead: getIt(),
         markAllRead: getIt(),
         getCount: getIt(),
+        socket: getIt(),
       ),
     )
     // Push (FCM) — auth holatini tinglaydi, token sinxronlaydi, bosilganda

@@ -16,6 +16,8 @@
   "langUzbekLatin": "Uzbek",
   "langUzbekCyrillic": "Узбек",
   "langRussian": "Русский",
+  "profileAppLanguage": "Ilova tili",
+  "profileLanguageSheetTitle": "Ilova tilini tanlang",
 
   "loginInvalidCredentials": "Login yoki parol noto‘g‘ri.",
   "loginAttemptsRemaining": "Yana {count} marta urinish mumkin.",
@@ -68,6 +70,9 @@
   "homeSwipeHint": "Belgilash uchun tugmani o‘ngga suring",
   "homeAllDone": "Bugungi davomat belgilandi",
   "attendanceLocationError": "Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.",
+  "locationServiceOffTitle": "GPS o‘chiq",
+  "locationServiceOffBody": "Davomatni belgilash uchun joylashuv (GPS) yoqilgan bo‘lishi kerak. Iltimos, GPS’ni yoqing.",
+  "locationServiceOffEnable": "Yoqish",
   "homeTodaySchedule": "Bugungi tartib",
   "homeScheduleArrive": "Ishga keldim",
   "homeScheduleLunchOut": "Tushlikka chiqdim",

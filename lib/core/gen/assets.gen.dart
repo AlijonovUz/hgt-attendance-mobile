@@ -179,6 +179,10 @@ class $AssetsIconsGen {
   SvgGenImage get icHugeiconsSun =>
       const SvgGenImage('assets/icons/ic_hugeicons_sun.svg');
 
+  /// File path: assets/icons/ic_hugeicons_translate.svg
+  SvgGenImage get icHugeiconsTranslate =>
+      const SvgGenImage('assets/icons/ic_hugeicons_translate.svg');
+
   /// File path: assets/icons/ic_lucide_check.svg
   SvgGenImage get icLucideCheck =>
       const SvgGenImage('assets/icons/ic_lucide_check.svg');
@@ -244,6 +248,7 @@ class $AssetsIconsGen {
     icHugeiconsSecurity,
     icHugeiconsSecurityCheck,
     icHugeiconsSun,
+    icHugeiconsTranslate,
     icLucideCheck,
     icLucideScanFace,
     icLucideShieldAlert,
@@ -255,6 +260,10 @@ class $AssetsIconsGen {
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
+
+  /// File path: assets/images/app_logo.png
+  AssetGenImage get appLogo =>
+      const AssetGenImage('assets/images/app_logo.png');
 
   /// File path: assets/images/cardboard_texture.jpg
   AssetGenImage get cardboardTexture =>
@@ -274,6 +283,7 @@ class $AssetsImagesGen {
 
   /// List of all assets
   List<AssetGenImage> get values => [
+    appLogo,
     cardboardTexture,
     splashBackgroundImage,
     splashBackgroundImageDark,

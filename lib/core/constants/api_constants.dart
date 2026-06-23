@@ -49,4 +49,12 @@ abstract final class ApiConstants {
   /// `user` — JWT `user_id` claimi (profil `id`ga teng), backend majburiy.
   static const notificationsDeviceRegister =
       '/v1/notifications/devices/register/';
+
+  /// POST — WebSocket ulanish uchun bir martalik ticket (60s). Javob:
+  /// `{ ticket, expires_in }`. Bearer (AuthInterceptor) bilan.
+  static const notificationsTicket = '/v1/notifications/tickets/';
+
+  /// Real-time bildirishnoma WebSocket yo‘li (`/api` siz, host root’ida).
+  /// To‘liq URL ticket bilan: `wss://<host>/ws/notifications/?ticket=...`.
+  static const notificationsWsPath = '/ws/notifications/';
 }

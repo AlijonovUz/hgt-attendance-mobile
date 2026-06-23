@@ -101,38 +101,42 @@ class _ScheduleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          spacing: 8,
-          children: [
-            SizedBox(
-              width: 40.r,
-              height: 40.r,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: colors.backgroundElevation1,
-                ),
-                child: Center(
-                  child: _stepIcon(step).svg(
-                    width: 24.r,
-                    height: 24.r,
-                    colorFilter: ColorFilter.mode(
-                      colors.iconStrong,
-                      BlendMode.srcIn,
+        Expanded(
+          child: Row(
+            children: [
+              SizedBox(
+                width: 40.r,
+                height: 40.r,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: colors.backgroundElevation1,
+                  ),
+                  child: Center(
+                    child: _stepIcon(step).svg(
+                      width: 24.r,
+                      height: 24.r,
+                      colorFilter: ColorFilter.mode(
+                        colors.iconStrong,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            _stepLabel(step, l10n)
-                .s(16.sp)
-                .w(500)
-                .c(colors.textStrong)
-                .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
-          ],
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _stepLabel(step, l10n)
+                    .s(16.sp)
+                    .w(500)
+                    .c(colors.textStrong)
+                    .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
         ),
+        SizedBox(width: 8.w),
         _TimePill(time: time, done: done, colors: colors),
       ],
     );

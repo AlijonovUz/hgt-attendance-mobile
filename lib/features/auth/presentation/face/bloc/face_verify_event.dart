@@ -38,3 +38,8 @@ class FaceCaptureRequested extends FaceVerifyEvent {
 class FaceRetryRequested extends FaceVerifyEvent {
   const FaceRetryRequested();
 }
+
+/// GPS o‘chiq dialogidan «Yoqish» bosildi — qurilma joylashuv sozlamasi ochiladi.
+class FaceLocationSettingsRequested extends FaceVerifyEvent {
+  const FaceLocationSettingsRequested();
+}

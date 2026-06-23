@@ -70,6 +70,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '981189585778',
     projectId: 'hgt-attendance',
     storageBucket: 'hgt-attendance.firebasestorage.app',
-    iosBundleId: 'raqamli.nazorat.hgtattendancemobile.hgtAttendanceMobile',
+    iosBundleId: 'raqamli.nazorat.hgt_mobile',
   );
 }

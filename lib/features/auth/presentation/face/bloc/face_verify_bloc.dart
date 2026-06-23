@@ -55,6 +55,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     on<FaceDetectionUpdated>(_onDetectionUpdated);
     on<FaceCaptureRequested>(_onCaptureRequested);
     on<FaceRetryRequested>(_onRetryRequested);
+    on<FaceLocationSettingsRequested>(_onLocationSettingsRequested);
   }
 
   final VerifyFaceUseCase _verifyFace;
@@ -111,11 +112,13 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
         final pos = await _location.current();
         _lat = pos.latitude;
         _lng = pos.longitude;
-      } on LocationException {
+      } on LocationException catch (e) {
         emit(
           state.copyWith(
             status: FaceStatus.failure,
-            failureKind: FaceFailureKind.location,
+            failureKind: e.serviceDisabled
+                ? FaceFailureKind.locationServiceOff
+                : FaceFailureKind.location,
             clearFailureMessage: true,
           ),
         );
@@ -311,6 +314,16 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     // Xatoda kamera bo‘shatilgan — to‘liq oqimni (ruxsat → GPS → kamera) saqlangan
     // rejim bilan qaytadan boshlaymiz.
     add(FaceStarted(_mode));
+  }
+
+  /// GPS o‘chiq dialogidan «Yoqish» bosildi — qurilma joylashuv sozlamalarini
+  /// ochamiz. Sozlama tashqi ekran (settings darhol qaytadi, yopilganda emas),
+  /// shuning uchun foydalanuvchi GPS’ni yoqib qaytgach «Qayta urinish»ni bosadi.
+  Future<void> _onLocationSettingsRequested(
+    FaceLocationSettingsRequested event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    await _location.openSettings();
   }
 
   /// Kamerani to‘liq bo‘shatadi (stream + controller). Detektor saqlanadi —

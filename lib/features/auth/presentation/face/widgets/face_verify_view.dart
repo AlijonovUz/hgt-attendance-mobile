@@ -45,9 +45,14 @@ class FaceVerifyView extends StatelessWidget {
       backgroundColor: colors.backgroundBase,
       body: SafeArea(
         child: BlocListener<FaceVerifyBloc, FaceVerifyState>(
-          listenWhen: (p, c) => p.status != c.status,
+          listenWhen: (p, c) =>
+              p.status != c.status || p.failureKind != c.failureKind,
           listener: (context, state) {
             if (state.status == FaceStatus.success) onSuccess(context);
+            if (state.status == FaceStatus.failure &&
+                state.failureKind == FaceFailureKind.locationServiceOff) {
+              _showEnableGpsDialog(context);
+            }
           },
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -65,6 +70,51 @@ class FaceVerifyView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// GPS o‘chiq — yoqishni so‘rovchi dialog. «Yoqish» qurilma joylashuv
+  /// sozlamasini ochadi; foydalanuvchi yoqib qaytgach «Qayta urinish»ni bosadi.
+  void _showEnableGpsDialog(BuildContext context) {
+    final bloc = context.read<FaceVerifyBloc>();
+    final colors = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: colors.backgroundElevation1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22.r),
+          ),
+          title: l10n.locationServiceOffTitle
+              .s(17.sp)
+              .w(700)
+              .c(colors.textStrong),
+          content: l10n.locationServiceOffBody
+              .s(14.sp)
+              .w(400)
+              .c(colors.textSub)
+              .h(20 / 14),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: l10n.commonCancel.s(14.sp).w(600).c(colors.textSub),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                bloc.add(const FaceLocationSettingsRequested());
+              },
+              child: l10n.locationServiceOffEnable
+                  .s(14.sp)
+                  .w(700)
+                  .c(colors.accentSub),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -321,6 +371,7 @@ class _Stage extends StatelessWidget {
       FaceStatus.failure => state.failureMessage ??
           switch (state.failureKind) {
             FaceFailureKind.network => l10n.networkError,
+            FaceFailureKind.locationServiceOff => l10n.locationServiceOffTitle,
             FaceFailureKind.location => l10n.attendanceLocationError,
             FaceFailureKind.noFace => l10n.faceHintNoFace,
             _ => l10n.faceVerifyFailed,

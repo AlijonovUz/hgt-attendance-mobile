@@ -14,8 +14,9 @@ enum FaceStatus {
 }
 
 /// Xato sababi — lokalizatsiya widget qatlamida. [location] faqat davomat
-/// rejimida (GPS olinmasa) uchraydi.
-enum FaceFailureKind { none, noFace, verifyFailed, network, location }
+/// rejimida (joylashuv aniqlanmasa) uchraydi; [locationServiceOff] — GPS
+/// xizmati o‘chiq (UI yoqish dialogini ko‘rsatadi).
+enum FaceFailureKind { none, noFace, verifyFailed, network, location, locationServiceOff }
 
 class FaceVerifyState extends Equatable {
   const FaceVerifyState({

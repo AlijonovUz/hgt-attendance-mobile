@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
+import '../../../../core/services/push_notification_service.dart';
+import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/notification_bloc.dart';
 import '../widgets/notification_tile.dart';
@@ -24,16 +29,28 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   final _scroll = ScrollController();
+  StreamSubscription<RemoteMessage>? _pushSub;
 
   @override
   void initState() {
     super.initState();
     context.read<NotificationBloc>().add(const NotificationsRequested());
     _scroll.addListener(_onScroll);
+
+    // Yangi xabar signali (FCM old plan) — ro‘yxatni jim yangilaymiz. WS prepend
+    // ham ishlaydi; bu ishonchli zaxira (dublikat id filtrlanadi).
+    _pushSub = getIt<PushNotificationService>().messages.listen((_) {
+      if (mounted) {
+        context
+            .read<NotificationBloc>()
+            .add(const NotificationsSilentRefreshRequested());
+      }
+    });
   }
 
   @override
   void dispose() {
+    _pushSub?.cancel();
     _scroll
       ..removeListener(_onScroll)
       ..dispose();
@@ -60,13 +77,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        leadingWidth: 72.w,
+        // leadingWidth: 72.w,
         leading: Padding(
           padding: EdgeInsets.only(left: 20.w),
           child: _CircleIconButton(
             icon: Assets.icons.icHugeiconsArrowLeftRound,
-            background: colors.foregroundAccent,
-            iconColor: colors.foregroundPrimary,
+            background: colors.backgroundElevation2,
+            iconColor: colors.iconStrong,
+            iconSize: 20.r,
             onTap: () => context.pop(),
           ),
         ),
@@ -203,6 +221,7 @@ class _CircleIconButton extends StatelessWidget {
     required this.iconColor,
     required this.onTap,
     this.tooltip,
+    this.iconSize,
   });
 
   final SvgGenImage icon;
@@ -210,6 +229,7 @@ class _CircleIconButton extends StatelessWidget {
   final Color iconColor;
   final VoidCallback onTap;
   final String? tooltip;
+  final double? iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -224,8 +244,8 @@ class _CircleIconButton extends StatelessWidget {
           height: 40.h,
           child: Center(
             child: icon.svg(
-              width: 24.r,
-              height: 24.r,
+              width: iconSize ?? 24.r,
+              height: iconSize ?? 24.r,
               colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
             ),
           ),

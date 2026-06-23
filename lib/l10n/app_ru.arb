@@ -16,6 +16,8 @@
   "langUzbekLatin": "Uzbek",
   "langUzbekCyrillic": "Узбек",
   "langRussian": "Русский",
+  "profileAppLanguage": "Язык приложения",
+  "profileLanguageSheetTitle": "Выберите язык приложения",
 
   "loginInvalidCredentials": "Неверный логин или пароль.",
   "loginAttemptsRemaining": "Осталось попыток: {count}.",
@@ -56,6 +58,9 @@
   "homeSwipeHint": "Проведите кнопку вправо, чтобы отметить",
   "homeAllDone": "Посещаемость на сегодня отмечена",
   "attendanceLocationError": "Не удалось определить местоположение. Проверьте GPS и разрешение.",
+  "locationServiceOffTitle": "GPS выключен",
+  "locationServiceOffBody": "Для отметки посещаемости необходимо включить геолокацию (GPS). Пожалуйста, включите GPS.",
+  "locationServiceOffEnable": "Включить",
   "homeTodaySchedule": "Распорядок на сегодня",
   "homeScheduleArrive": "Пришёл на работу",
   "homeScheduleLunchOut": "Ушёл на обед",

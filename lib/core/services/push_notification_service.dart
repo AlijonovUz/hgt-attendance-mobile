@@ -61,6 +61,11 @@ class PushNotificationService {
   StreamSubscription<String>? _tokenSub;
   bool _initialized = false;
 
+  /// Oxirgi muvaffaqiyatli ro‘yxatdan o‘tgan FCM token — takroriy POSTlarni
+  /// (start’da `authenticated` bir necha bor emit bo‘lishi) to‘sadi, aks holda
+  /// backend bir qurilma uchun bir nechta token yozib, push dublikat bo‘ladi.
+  String? _lastRegisteredToken;
+
   static const _channel = AndroidNotificationChannel(
     'hgt_default_channel',
     'Bildirishnomalar',
@@ -130,6 +135,9 @@ class PushNotificationService {
       debugPrint('PushNotificationService._register: user_id yo‘q, o‘tkazildi');
       return;
     }
+    // Ayni token allaqachon ro‘yxatdan o‘tgan bo‘lsa — qayta yubormaymiz
+    // (dublikat token/dublikat push oldini olish).
+    if (token == _lastRegisteredToken) return;
     try {
       await _registerDevice(RegisterDeviceParams(
         userId: userId,
@@ -137,6 +145,7 @@ class PushNotificationService {
         deviceType: _deviceType,
         deviceId: _deviceId(),
       ));
+      _lastRegisteredToken = token;
     } catch (e) {
       // Ro‘yxat xatosi — push kritik bo‘lmagani uchun jim qoldiramiz.
       debugPrint('PushNotificationService._register xatosi: $e');
@@ -144,6 +153,7 @@ class PushNotificationService {
   }
 
   Future<void> _deleteToken() async {
+    _lastRegisteredToken = null; // chiqishda — keyingi login qayta ro‘yxatdan o‘tsin.
     try {
       await _messaging.deleteToken();
     } catch (_) {/* e’tiborsiz */}
@@ -182,8 +192,15 @@ class PushNotificationService {
     final notification = message.notification;
     if (notification == null) return; // data-only — tray ko‘rsatmaydi.
 
+    // Bir xil xabar bir nechta token’ga kelsa (backend dublikati) — bir xil
+    // `id` bilan ko‘rsatamiz, shunda OS stack qilmasdan almashtiradi (1 ta).
+    // Kalit: backend `data['id']` bo‘lsa o‘sha, aks holda sarlavha+matn.
+    final dedupKey = message.data['id']?.toString().isNotEmpty == true
+        ? message.data['id'].toString()
+        : '${notification.title}|${notification.body}';
+
     _local.show(
-      id: notification.hashCode,
+      id: dedupKey.hashCode & 0x7fffffff,
       title: notification.title,
       body: notification.body,
       notificationDetails: NotificationDetails(

@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 
 import '../core/services/push_notification_service.dart';
+import '../features/notifications/data/data_sources/notification_socket_service.dart';
 import '../firebase_options.dart';
 import '../injection_container.dart';
 
@@ -21,6 +22,9 @@ Future<void> bootstrap(Widget Function() builder) async {
   // Push xizmatini ishga tushiramiz (ruxsat, listenerlar, token sinxron).
   // Xato bo‘lsa ilova baribir ishlashda davom etadi.
   unawaited(getIt<PushNotificationService>().init());
+
+  // Real-time bildirishnoma WebSocket — auth holatini tinglaydi, kerakda ulanadi.
+  getIt<NotificationSocketService>().start();
 
   // Session stays `unknown` (the router guard holds on the animated SplashPage,
   // which the native splash hands off to). [SplashPage] dispatches

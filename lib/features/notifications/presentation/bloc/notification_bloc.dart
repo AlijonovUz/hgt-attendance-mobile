@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/no_params.dart';
+import '../../data/data_sources/notification_socket_service.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/usecases/get_notification_count_usecase.dart';
 import '../../domain/usecases/get_notifications_usecase.dart';
@@ -22,6 +25,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     required MarkNotificationReadUseCase markRead,
     required MarkAllNotificationsReadUseCase markAllRead,
     required GetNotificationCountUseCase getCount,
+    required NotificationSocketService socket,
   })  : _getNotifications = getNotifications,
         _markRead = markRead,
         _markAllRead = markAllRead,
@@ -32,12 +36,21 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationMarkedRead>(_onMarkedRead);
     on<NotificationsAllRead>(_onAllRead);
     on<NotificationCountRequested>(_onCountRequested);
+    on<NotificationReceived>(_onReceived);
+    on<NotificationsSilentRefreshRequested>(_onSilentRefresh);
+
+    // Real-time WebSocket oqimi — yangi xabar kelsa ro‘yxat + count jonli yangilanadi.
+    _socketSub = socket.notifications.listen(
+      (n) => add(NotificationReceived(n)),
+    );
   }
 
   final GetNotificationsUseCase _getNotifications;
   final MarkNotificationReadUseCase _markRead;
   final MarkAllNotificationsReadUseCase _markAllRead;
   final GetNotificationCountUseCase _getCount;
+
+  StreamSubscription<AppNotification>? _socketSub;
 
   Future<void> _onRequested(
     NotificationsRequested event,
@@ -150,8 +163,57 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
+  /// WebSocket’dan jonli kelgan yangi bildirishnoma — ro‘yxat boshiga qo‘shamiz
+  /// va o‘qilmaganlar sonini oshiramiz. Takror (allaqachon mavjud id) — e’tiborsiz.
+  void _onReceived(
+    NotificationReceived event,
+    Emitter<NotificationState> emit,
+  ) {
+    final n = event.notification;
+    if (state.items.any((e) => e.id == n.id)) return;
+
+    final items = [n, ...state.items];
+    emit(state.copyWith(
+      items: items,
+      unreadCount: state.unreadCount + (n.isRead ? 0 : 1),
+    ));
+  }
+
+  /// Jim (loading’siz) yangilash — backenddan 1-sahifani olib, faqat YANGI
+  /// yozuvlarni ro‘yxat boshiga qo‘shadi. Yuklangan eski sahifalar va scroll
+  /// holati saqlanadi, foydalanuvchiga loading ko‘rsatilmaydi. WS yetib kelmagan
+  /// (yoki to‘liqsiz) holatlar uchun ishonchli zaxira (push signalidan ham
+  /// chaqiriladi). Ro‘yxat hali yuklanmagan bo‘lsa — e’tiborsiz.
+  Future<void> _onSilentRefresh(
+    NotificationsSilentRefreshRequested event,
+    Emitter<NotificationState> emit,
+  ) async {
+    if (state.status != NotificationStatus.loaded || state.isLoadingMore) return;
+    try {
+      final page = await _getNotifications(const GetNotificationsParams(page: 1));
+      final existingIds = state.items.map((e) => e.id).toSet();
+      final fresh =
+          page.items.where((n) => !existingIds.contains(n.id)).toList();
+      if (fresh.isEmpty) return; // yangi narsa yo‘q — tegmaymiz.
+
+      final items = [...fresh, ...state.items];
+      emit(state.copyWith(
+        items: items,
+        unreadCount: items.where((n) => !n.isRead).length,
+      ));
+    } on Failure {
+      // Jim yangilash — xatoni yutamiz, mavjud ro‘yxat saqlanadi.
+    }
+  }
+
   NotificationErrorKind _kindOf(Failure failure) => switch (failure) {
         NetworkFailure() => NotificationErrorKind.network,
         _ => NotificationErrorKind.server,
       };
+
+  @override
+  Future<void> close() {
+    _socketSub?.cancel();
+    return super.close();
+  }
 }

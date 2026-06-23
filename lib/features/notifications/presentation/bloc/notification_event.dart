@@ -36,3 +36,19 @@ class NotificationsAllRead extends NotificationEvent {
 class NotificationCountRequested extends NotificationEvent {
   const NotificationCountRequested();
 }
+
+/// WebSocket’dan jonli yangi bildirishnoma keldi (ichki — socket oqimidan).
+class NotificationReceived extends NotificationEvent {
+  const NotificationReceived(this.notification);
+
+  final AppNotification notification;
+
+  @override
+  List<Object?> get props => [notification];
+}
+
+/// Jim (loading’siz) yangilash — yangi xabar signali kelganda 1-sahifani qayta
+/// olib, faqat yangi yozuvlarni ro‘yxatga qo‘shadi (push/WS zaxirasi).
+class NotificationsSilentRefreshRequested extends NotificationEvent {
+  const NotificationsSilentRefreshRequested();
+}

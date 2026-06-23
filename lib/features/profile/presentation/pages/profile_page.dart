@@ -3,15 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/bloc/locale/locale_bloc.dart';
 import '../../../../app/bloc/theme/theme_bloc.dart';
 import '../../../../config/routes/entity/routes.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/profile.dart';
 import '../bloc/profile_bloc.dart';
+import '../widgets/language_picker_sheet.dart';
 import '../widgets/profile_header_card.dart';
 import '../widgets/profile_photo_prompt_sheet.dart';
 
@@ -76,9 +77,11 @@ class ProfilePage extends StatelessWidget {
                   ),
                   onTap: () => context.pushNamed(Routes.changePassword.name),
                 ),
-                SizedBox(height: 24.h),
-                const _ThemeToggleButton(),
                 SizedBox(height: 12.h),
+                const _ThemeSwitchTile(),
+                SizedBox(height: 12.h),
+                const _LanguageTile(),
+                SizedBox(height: 24.h),
                 _SettingsTile(
                   icon: Assets.icons.icHugeiconsLogoutCircle,
                   iconColor: colors.errorStrong,
@@ -249,14 +252,17 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-/// Tema almashtirish tugmasi — joriy effektiv rejimga qarab Yorug‘ ↔ Qorong‘i.
-class _ThemeToggleButton extends StatelessWidget {
-  const _ThemeToggleButton();
+/// Tema qatori (Figma 958‑23199/958‑23336): oy ikonkasi + «Qorong‘i» yorlig‘i +
+/// Switch. Switch yoqilgan = qorong‘i rejim. Butun qator yoki Switch bosilsa
+/// rejim almashadi.
+class _ThemeSwitchTile extends StatelessWidget {
+  const _ThemeSwitchTile();
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final l10n = AppLocalizations.of(context);
+    final radius = BorderRadius.circular(24.r);
 
     return BlocBuilder<ThemeBloc, ThemeMode>(
       builder: (context, mode) {
@@ -264,20 +270,120 @@ class _ThemeToggleButton extends StatelessWidget {
             (mode == ThemeMode.system &&
                 MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
-        return CustomButton(
-          label: isDark ? l10n.themeLight : l10n.themeDark,
-          variant: CustomButtonVariant.outline,
-          leading: (isDark
-                  ? Assets.icons.icHugeiconsSun
-                  : Assets.icons.icHugeiconsMoon)
-              .svg(
-            width: 20.r,
-            height: 20.r,
-            colorFilter: ColorFilter.mode(colors.accentSub, BlendMode.srcIn),
+        void toggle() => context.read<ThemeBloc>().add(
+              ThemeModeSelected(isDark ? ThemeMode.light : ThemeMode.dark),
+            );
+
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.backgroundElevation2,
+            borderRadius: radius,
           ),
-          onPressed: () => context.read<ThemeBloc>().add(
-                ThemeModeSelected(isDark ? ThemeMode.light : ThemeMode.dark),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: toggle,
+              borderRadius: radius,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                child: Row(
+                  children: [
+                    Assets.icons.icHugeiconsMoon.svg(
+                      width: 24.r,
+                      height: 24.r,
+                      colorFilter:
+                          ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: l10n.themeDark
+                          .s(15.sp)
+                          .w(600)
+                          .c(colors.textStrong)
+                          .copyWith(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Switch(
+                      value: isDark,
+                      onChanged: (_) => toggle(),
+                      activeThumbColor: colors.foregroundPrimary,
+                      activeTrackColor: colors.foregroundAccent,
+                      inactiveThumbColor: colors.white,
+                      inactiveTrackColor: colors.backgroundElevation3,
+                      trackOutlineColor:
+                          WidgetStateProperty.all(Colors.transparent),
+                      materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
+                ),
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Til qatori (Figma 958‑23226/958‑23346): tarjima ikonkasi + «Ilova tili» +
+/// joriy til kodi. Bosilganda til tanlash bottom-sheet’i ochiladi.
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    final radius = BorderRadius.circular(24.r);
+
+    return BlocBuilder<LocaleBloc, AppLanguage>(
+      builder: (context, language) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.backgroundElevation2,
+            borderRadius: radius,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: () => showLanguagePicker(context),
+              borderRadius: radius,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                child: Row(
+                  children: [
+                    Assets.icons.icHugeiconsTranslate.svg(
+                      width: 24.r,
+                      height: 24.r,
+                      colorFilter:
+                          ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: l10n.profileAppLanguage
+                          .s(15.sp)
+                          .w(600)
+                          .c(colors.textStrong)
+                          .copyWith(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    ),
+                    SizedBox(width: 12.w),
+                    language.label
+                        .s(14.sp)
+                        .w(500)
+                        .c(colors.textSub)
+                        .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
     );

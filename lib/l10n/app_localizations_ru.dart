@@ -45,6 +45,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get langRussian => 'Русский';
 
   @override
+  String get profileAppLanguage => 'Язык приложения';
+
+  @override
+  String get profileLanguageSheetTitle => 'Выберите язык приложения';
+
+  @override
   String get loginInvalidCredentials => 'Неверный логин или пароль.';
 
   @override
@@ -156,6 +162,16 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get attendanceLocationError =>
       'Не удалось определить местоположение. Проверьте GPS и разрешение.';
+
+  @override
+  String get locationServiceOffTitle => 'GPS выключен';
+
+  @override
+  String get locationServiceOffBody =>
+      'Для отметки посещаемости необходимо включить геолокацию (GPS). Пожалуйста, включите GPS.';
+
+  @override
+  String get locationServiceOffEnable => 'Включить';
 
   @override
   String get homeTodaySchedule => 'Распорядок на сегодня';

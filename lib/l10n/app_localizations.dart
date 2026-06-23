@@ -171,6 +171,18 @@ abstract class AppLocalizations {
   /// **'Русский'**
   String get langRussian;
 
+  /// No description provided for @profileAppLanguage.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ilova tili'**
+  String get profileAppLanguage;
+
+  /// No description provided for @profileLanguageSheetTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ilova tilini tanlang'**
+  String get profileLanguageSheetTitle;
+
   /// No description provided for @loginInvalidCredentials.
   ///
   /// In uz, this message translates to:
@@ -380,6 +392,24 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Joylashuv aniqlanmadi. GPS va ruxsatni tekshiring.'**
   String get attendanceLocationError;
+
+  /// No description provided for @locationServiceOffTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'GPS o‘chiq'**
+  String get locationServiceOffTitle;
+
+  /// No description provided for @locationServiceOffBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Davomatni belgilash uchun joylashuv (GPS) yoqilgan bo‘lishi kerak. Iltimos, GPS’ni yoqing.'**
+  String get locationServiceOffBody;
+
+  /// No description provided for @locationServiceOffEnable.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yoqish'**
+  String get locationServiceOffEnable;
 
   /// No description provided for @homeTodaySchedule.
   ///
