@@ -17,6 +17,7 @@ import 'core/services/logger_service.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/services/token_service.dart';
+import 'core/services/vpn_detector_service.dart';
 import 'features/attendance/data/data_sources/attendance_remote_data_source.dart';
 import 'features/attendance/data/repository/attendance_repository_impl.dart';
 import 'features/attendance/domain/repository/attendance_repository.dart';
@@ -66,7 +67,8 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<LoggerService>(() => LoggerService())
     ..registerLazySingleton<TokenService>(() => TokenService(getIt()))
     ..registerLazySingleton<ImagePickerService>(() => ImagePickerService())
-    ..registerLazySingleton<LocationService>(() => const LocationService());
+    ..registerLazySingleton<LocationService>(() => const LocationService())
+    ..registerLazySingleton<VpnDetectorService>(() => VpnDetectorService());
 
   // App-level state — singletons so router + UI share one instance each.
   getIt

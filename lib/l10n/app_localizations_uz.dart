@@ -336,6 +336,16 @@ class AppLocalizationsUz extends AppLocalizations {
   String get networkError => 'Internet aloqasi yo‘q. Ulanishni tekshiring.';
 
   @override
+  String get vpnBlockedTitle => 'VPN aniqlandi';
+
+  @override
+  String get vpnBlockedBody =>
+      'Davomat xavfsizligi uchun ilovadan VPN bilan foydalanish mumkin emas. Davom etish uchun VPN’ni o‘chiring.';
+
+  @override
+  String get vpnRecheck => 'Qayta tekshirish';
+
+  @override
   String get onbWelcomeTitle => 'Xush kelibsiz!';
 
   @override
@@ -767,6 +777,16 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get networkError => 'Интернет алоқаси йўқ. Уланишни текширинг.';
+
+  @override
+  String get vpnBlockedTitle => 'VPN аниқланди';
+
+  @override
+  String get vpnBlockedBody =>
+      'Давомат хавфсизлиги учун иловадан VPN билан фойдаланиш мумкин эмас. Давом этиш учун VPN’ни ўчиринг.';
+
+  @override
+  String get vpnRecheck => 'Қайта текшириш';
 
   @override
   String get onbWelcomeTitle => 'Хуш келибсиз!';

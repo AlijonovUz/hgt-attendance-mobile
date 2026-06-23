@@ -335,6 +335,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Нет подключения к интернету. Проверьте соединение.';
 
   @override
+  String get vpnBlockedTitle => 'Обнаружен VPN';
+
+  @override
+  String get vpnBlockedBody =>
+      'В целях безопасности учёта посещаемости использование приложения через VPN недоступно. Отключите VPN, чтобы продолжить.';
+
+  @override
+  String get vpnRecheck => 'Проверить снова';
+
+  @override
   String get onbWelcomeTitle => 'Добро пожаловать!';
 
   @override

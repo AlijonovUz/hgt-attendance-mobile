@@ -10,6 +10,7 @@ import 'package:thunder/thunder.dart';
 import '../config/routes/coordinator.dart';
 import '../config/theme/app_theme.dart';
 import '../core/network/dio_client.dart';
+import '../core/widgets/vpn_blocker.dart';
 import '../injection_container.dart';
 import '../l10n/app_localizations.dart';
 import 'bloc/locale/locale_bloc.dart';
@@ -58,10 +59,14 @@ class App extends StatelessWidget {
                     routerConfig: getIt<AppRouter>().router,
                     // Thunder MaterialApp ichida (builder) joylashadi — debug
                     // tarmoq overlay’i. Release’da `kDebugMode` orqali o‘chadi.
-                    builder: (context, child) => Thunder(
-                      enabled: kDebugMode,
-                      dio: [monitoredDio],
-                      child: child ?? const SizedBox.shrink(),
+                    // VpnBlocker eng ustki qatlam — istalgan ekran/dialog
+                    // ochiq bo‘lsa ham VPN aniqlansa to‘sib turuvchi oyna chiqadi.
+                    builder: (context, child) => VpnBlocker(
+                      child: Thunder(
+                        enabled: kDebugMode,
+                        dio: [monitoredDio],
+                        child: child ?? const SizedBox.shrink(),
+                      ),
                     ),
                   );
                 },
