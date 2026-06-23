@@ -723,6 +723,24 @@ abstract class AppLocalizations {
   /// **'Internet aloqasi yo‘q. Ulanishni tekshiring.'**
   String get networkError;
 
+  /// No description provided for @vpnBlockedTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'VPN aniqlandi'**
+  String get vpnBlockedTitle;
+
+  /// No description provided for @vpnBlockedBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Davomat xavfsizligi uchun ilovadan VPN bilan foydalanish mumkin emas. Davom etish uchun VPN’ni o‘chiring.'**
+  String get vpnBlockedBody;
+
+  /// No description provided for @vpnRecheck.
+  ///
+  /// In uz, this message translates to:
+  /// **'Qayta tekshirish'**
+  String get vpnRecheck;
+
   /// No description provided for @onbWelcomeTitle.
   ///
   /// In uz, this message translates to:
