@@ -15,6 +15,8 @@ dependencies:
   get_it: ^9.2.1
   flutter_svg: ^2.3.0
   cached_network_image: ^3.4.1
+  # Offline yuz reference’i — CachedNetworkImage bilan bir xil kesh (URL kalit).
+  flutter_cache_manager: ^3.4.1
   gap: ^3.0.1
   intl: ^0.20.2
   flutter_gen: ^5.14.1

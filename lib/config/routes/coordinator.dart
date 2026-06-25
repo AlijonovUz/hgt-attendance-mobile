@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/bloc/session_bloc.dart';
 import '../../features/attendance/domain/entities/attendance_event_type.dart';
 import '../../features/attendance/presentation/pages/attendance_face_page.dart';
+import '../../features/attendance/presentation/pages/face_match_diagnostic_page.dart';
 import '../../features/auth/presentation/face/pages/face_verify_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
@@ -102,6 +103,11 @@ class AppRouter {
             create: (_) => getIt<NotificationBloc>(),
             child: const NotificationsPage(),
           ),
+        ),
+        GoRoute(
+          name: Routes.faceMatchDiagnostic.name,
+          path: Routes.faceMatchDiagnostic.path,
+          builder: (context, state) => const FaceMatchDiagnosticPage(),
         ),
       ],
     );

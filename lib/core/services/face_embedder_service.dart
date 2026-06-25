@@ -4,16 +4,23 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
+import 'logger_service.dart';
+
 /// MobileFaceNet (`assets/models/mobilefacenet.tflite`) embedding generatori.
 ///
 /// Kirish: 112×112×3 RGB, `[-1, 1]` ga normalizatsiya (`(p - 127.5) / 128`).
 /// Chiqish: yuz embedding vektori (model 128/192 o‘lchamli bo‘lishi mumkin —
 /// interpreter tensoridan dinamik o‘qiladi). Vektor L2-normalizatsiya qilinadi,
-/// shunda euclid masofa to‘g‘ridan-to‘g‘ri taqqoslanadi.
+/// shunda euclid masofa / cosine o‘xshashlik to‘g‘ridan-to‘g‘ri taqqoslanadi.
 ///
 /// Interpreter bir marta (lazy) yuklanadi va qayta ishlatiladi — og‘ir resurs.
+/// Har bosqich [LoggerService] orqali loglanadi (model yuklash, tensor shakli,
+/// embedding) — offline yuz tasdig‘ini «Davomat» logidan kuzatish uchun.
 class FaceEmbedderService {
-  FaceEmbedderService();
+  FaceEmbedderService([LoggerService? logger])
+      : _logger = logger ?? LoggerService();
+
+  final LoggerService _logger;
 
   Interpreter? _interpreter;
   int _inputSize = 112;
@@ -29,24 +36,41 @@ class FaceEmbedderService {
     if (inShape.length == 4) _inputSize = inShape[1];
     if (outShape.length == 2) _embeddingSize = outShape[1];
     _interpreter = interpreter;
+    _logger.log(
+      '[FaceEmbed] model yuklandi: in=$inShape out=$outShape '
+      'inputSize=$_inputSize embeddingSize=$_embeddingSize '
+      'inType=${interpreter.getInputTensor(0).type} '
+      'outType=${interpreter.getOutputTensor(0).type}',
+    );
   }
 
   /// Berilgan yuz tasviridan (allaqachon kesilgan/yaxshilangan) L2-normalizatsiya
-  /// qilingan embedding qaytaradi.
-  Future<List<double>> embed(img.Image faceCrop) async {
-    await _ensureLoaded();
-    final resized = img.copyResize(
-      faceCrop,
-      width: _inputSize,
-      height: _inputSize,
-    );
-    final input = _toInputTensor(resized);
-    final output = List.generate(
-      1,
-      (_) => List<double>.filled(_embeddingSize, 0),
-    );
-    _interpreter!.run(input, output);
-    return _l2Normalize(output.first);
+  /// qilingan embedding qaytaradi. Xato bo‘lsa loglab `null` qaytaradi (chaqiruvchi
+  /// bloklaydi — yutib yuborilgan istisno o‘rniga).
+  Future<List<double>?> embed(img.Image faceCrop) async {
+    try {
+      await _ensureLoaded();
+      final resized = img.copyResize(
+        faceCrop,
+        width: _inputSize,
+        height: _inputSize,
+      );
+      final input = _toInputTensor(resized);
+      final output = List.generate(
+        1,
+        (_) => List<double>.filled(_embeddingSize, 0),
+      );
+      _interpreter!.run(input, output);
+      final normalized = _l2Normalize(output.first);
+      _logger.log(
+        '[FaceEmbed] embedding tayyor: dim=${normalized.length} '
+        'crop=${faceCrop.width}x${faceCrop.height}',
+      );
+      return normalized;
+    } catch (e, st) {
+      _logger.log('[FaceEmbed] XATO embed: $e\n$st');
+      return null;
+    }
   }
 
   /// `[1, size, size, 3]` float tensor, `[-1, 1]` normalizatsiya.
@@ -84,6 +108,18 @@ class FaceEmbedderService {
       sum += d * d;
     }
     return math.sqrt(sum);
+  }
+
+  /// Ikki embedding orasidagi cosine o‘xshashlik (`[-1, 1]`). L2-normalizatsiya
+  /// qilingan vektorlar uchun bu shunchaki nuqta ko‘paytma. Bir xil odam → 1 ga
+  /// yaqin; turli odam → 0 / manfiy.
+  static double cosineSimilarity(List<double> a, List<double> b) {
+    if (a.length != b.length || a.isEmpty) return -1;
+    var dot = 0.0;
+    for (var i = 0; i < a.length; i++) {
+      dot += a[i] * b[i];
+    }
+    return dot;
   }
 
   void close() {

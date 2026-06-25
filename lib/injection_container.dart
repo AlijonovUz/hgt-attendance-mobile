@@ -11,6 +11,7 @@ import 'core/network/dio_factory.dart';
 import 'core/network/interceptors/auth_interceptor.dart';
 import 'core/network/interceptors/logging_interceptor.dart';
 import 'core/network/interceptors/refresh_interceptor.dart';
+import 'core/services/attendance_cache_store.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/face_embedder_service.dart';
 import 'core/services/face_image_cache_service.dart';
@@ -21,6 +22,7 @@ import 'core/services/hmac_signer.dart';
 import 'core/services/image_picker_service.dart';
 import 'core/services/location_service.dart';
 import 'core/services/offline_attendance_store.dart';
+import 'core/services/profile_cache_store.dart';
 import 'core/services/offline_secret_store.dart';
 import 'core/services/offline_sync_service.dart';
 import 'core/services/logger_service.dart';
@@ -93,9 +95,18 @@ Future<void> configureDependencies() async {
     // Geofence (haversine) + keshlangan geozona (offline ish joyi tekshiruvi).
     ..registerLazySingleton<GeofenceService>(() => const GeofenceService())
     ..registerLazySingleton<GeozoneCacheStore>(() => GeozoneCacheStore(getIt()))
+    // Offline ma’lumot keshi (profil + davomat) — internetsiz ko‘rsatish uchun.
+    ..registerLazySingleton<ProfileCacheStore>(() => ProfileCacheStore(getIt()))
+    ..registerLazySingleton<AttendanceCacheStore>(
+      () => AttendanceCacheStore(getIt()),
+    )
     // Offline yuz moslik (MobileFaceNet embedding + ML Kit bbox).
-    ..registerLazySingleton<FaceEmbedderService>(() => FaceEmbedderService())
-    ..registerLazySingleton<FaceMatchService>(() => FaceMatchService(getIt()))
+    ..registerLazySingleton<FaceEmbedderService>(
+      () => FaceEmbedderService(getIt<LoggerService>()),
+    )
+    ..registerLazySingleton<FaceMatchService>(
+      () => FaceMatchService(getIt(), getIt<LoggerService>()),
+    )
     // Offline navbat (JSON-fayl) + HMAC imzo.
     ..registerLazySingleton<HmacSigner>(() => const HmacSigner())
     ..registerLazySingleton<OfflineAttendanceStore>(
@@ -120,6 +131,7 @@ Future<void> configureDependencies() async {
         tokenService: getIt(),
         storage: getIt(),
         offlineSecretStore: getIt(),
+        faceImageCache: getIt(),
       ),
     )
     ..registerLazySingleton<ThemeBloc>(() => ThemeBloc(storage: getIt()))
@@ -169,6 +181,7 @@ Future<void> configureDependencies() async {
         offlineStore: getIt(),
         faceImageCache: getIt(),
         tokenService: getIt(),
+        logger: getIt<LoggerService>(),
       ),
     );
 
@@ -178,7 +191,7 @@ Future<void> configureDependencies() async {
       () => AttendanceRemoteDataSourceImpl(getIt()),
     )
     ..registerLazySingleton<AttendanceRepository>(
-      () => AttendanceRepositoryImpl(remote: getIt()),
+      () => AttendanceRepositoryImpl(remote: getIt(), cache: getIt()),
     )
     ..registerLazySingleton<MarkAttendanceUseCase>(
       () => MarkAttendanceUseCase(getIt()),
@@ -221,7 +234,7 @@ Future<void> configureDependencies() async {
       () => ProfileRemoteDataSourceImpl(getIt(), getIt()),
     )
     ..registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(remote: getIt()),
+      () => ProfileRepositoryImpl(remote: getIt(), cache: getIt()),
     )
     ..registerLazySingleton<GetProfileUseCase>(() => GetProfileUseCase(getIt()))
     ..registerLazySingleton<UpdateFaceImageUseCase>(

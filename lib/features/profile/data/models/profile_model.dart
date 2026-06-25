@@ -109,6 +109,55 @@ class ProfileModel {
     );
   }
 
+  /// Entity → model (offline keshga yozish uchun).
+  factory ProfileModel.fromEntity(Profile p) => ProfileModel(
+        id: p.id,
+        fullName: p.fullName,
+        phone: p.phone,
+        faceImage: p.faceImage,
+        roleName: p.roleName,
+        departmentName: p.departmentName,
+        branchName: p.branchName,
+        branchId: p.branchId,
+        regionName: p.regionName,
+        districtName: p.districtName,
+        schedule: p.schedule,
+        kpi: p.kpi,
+      );
+
+  /// Backend shakliga mos JSON — shu sabab [ProfileModel.fromJson] uni qaytadan
+  /// to‘g‘ri parslaydi (kesh round-trip’i bitta parser bilan).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'full_name': fullName,
+        'phone': phone,
+        'face_image': faceImage,
+        if (roleName != null) 'role_info': {'name': roleName},
+        if (departmentName != null) 'department_info': {'name': departmentName},
+        'branch_info': {
+          'name': branchName,
+          'id': branchId,
+          if (regionName != null) 'region_info': {'name': regionName},
+          if (districtName != null) 'district_info': {'name': districtName},
+        },
+        if (schedule != null)
+          'schedule_info': {
+            'name': schedule!.name,
+            'work_start_time': schedule!.workStartTime,
+            'work_end_time': schedule!.workEndTime,
+            'lunch_start_time': schedule!.lunchStartTime,
+            'lunch_end_time': schedule!.lunchEndTime,
+          },
+        if (kpi != null)
+          'current_month_kpi': {
+            'attendance_kpi': kpi!.attendanceKpi,
+            'monthly_kpi': kpi!.monthlyKpi,
+            'total_score': kpi!.totalScore,
+            'rating_category': kpi!.ratingCategory,
+            'monthly_attendance': kpi!.monthlyAttendance,
+          },
+      };
+
   Profile toEntity() => Profile(
     id: id,
     fullName: fullName,

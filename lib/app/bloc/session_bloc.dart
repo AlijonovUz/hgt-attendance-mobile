@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/storage_keys.dart';
+import '../../core/services/face_image_cache_service.dart';
 import '../../core/services/offline_secret_store.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/services/token_service.dart';
@@ -23,9 +24,11 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     required TokenService tokenService,
     required StorageService storage,
     required OfflineSecretStore offlineSecretStore,
+    required FaceImageCacheService faceImageCache,
   })  : _tokenService = tokenService,
         _storage = storage,
         _offlineSecretStore = offlineSecretStore,
+        _faceImageCache = faceImageCache,
         super(const SessionState.unknown()) {
     on<SessionStarted>(_onStarted);
     on<SessionLoginSucceeded>(_onLoginSucceeded);
@@ -37,6 +40,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   final TokenService _tokenService;
   final StorageService _storage;
   final OfflineSecretStore _offlineSecretStore;
+  final FaceImageCacheService _faceImageCache;
 
   /// Onboarding shu qurilmada kamida bir marta tugatilganmi (device-once).
   /// `_onStarted`da storage’dan o‘qiladi; yuz tasdiqlangach `true`ga o‘tadi va
@@ -174,5 +178,12 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     await _offlineSecretStore.clear();
     await _storage.remove(StorageKeys.cachedUser);
     await _storage.remove(StorageKeys.loginUsername);
+    // Offline keshlar — boshqa foydalanuvchi kirsa eski ma’lumot ko‘rinmasin.
+    await _storage.remove(StorageKeys.cachedProfile);
+    await _storage.remove(StorageKeys.cachedTodayEvents);
+    await _storage.remove(StorageKeys.cachedRangeEvents);
+    await _storage.remove(StorageKeys.cachedPersonalStats);
+    await _storage.remove(StorageKeys.cachedGeozone);
+    await _faceImageCache.clearAll();
   }
 }

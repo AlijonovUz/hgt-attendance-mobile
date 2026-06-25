@@ -16,6 +16,7 @@ import '../../../../../core/services/geofence_service.dart';
 import '../../../../../core/services/geozone_cache_store.dart';
 import '../../../../../core/services/hmac_signer.dart';
 import '../../../../../core/services/location_service.dart';
+import '../../../../../core/services/logger_service.dart';
 import '../../../../../core/services/offline_attendance_store.dart';
 import '../../../../../core/services/offline_secret_store.dart';
 import '../../../../../core/services/token_service.dart';
@@ -65,6 +66,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     required OfflineAttendanceStore offlineStore,
     required FaceImageCacheService faceImageCache,
     required TokenService tokenService,
+    required LoggerService logger,
   }) : _verifyFace = verifyFaceUseCase,
        _markAttendance = markAttendance,
        _location = location,
@@ -77,6 +79,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
        _offlineStore = offlineStore,
        _faceImageCache = faceImageCache,
        _tokenService = tokenService,
+       _logger = logger,
        super(const FaceVerifyState()) {
     on<FaceStarted>(_onStarted);
     on<FaceDetectionUpdated>(_onDetectionUpdated);
@@ -89,7 +92,11 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   final MarkAttendanceUseCase _markAttendance;
   final LocationService _location;
   final ConnectivityService _connectivity;
+  // Geofence tekshiruvi vaqtincha o‘chirilgan (_enqueueOffline’da izohda) — qayta
+  // yoqilganda bu ignore’lar olib tashlanadi.
+  // ignore: unused_field
   final GeofenceService _geofence;
+  // ignore: unused_field
   final GeozoneCacheStore _geozoneCache;
   final FaceMatchService _faceMatch;
   final OfflineSecretStore _offlineSecret;
@@ -97,6 +104,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   final OfflineAttendanceStore _offlineStore;
   final FaceImageCacheService _faceImageCache;
   final TokenService _tokenService;
+  final LoggerService _logger;
 
   CameraController? _controller;
   FaceDetector? _detector;
@@ -289,8 +297,10 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     try {
       await _stopStream();
       final XFile shot = await controller.takePicture();
+      _logger.log('[FaceVerify] selfie olindi: ${shot.path} mode=$mode');
       if (mode is AttendanceFaceMode) {
         final online = await _connectivity.isConnected();
+        _logger.log('[FaceVerify] davomat — online=$online');
         if (online) {
           // Online — hozirgidek darhol yuboriladi (backend yuz+vaqtni hal qiladi).
           await _markAttendance(
@@ -304,6 +314,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
         } else {
           // Offline — yuz/geofence/secret tekshiriladi, o‘tsa navbatga saqlanadi.
           final blockKind = await _enqueueOffline(mode, shot.path);
+          _logger.log('[FaceVerify] offline natija: blockKind=$blockKind');
           if (emit.isDone) return;
           if (blockKind != FaceFailureKind.none) {
             emit(
@@ -342,6 +353,7 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       );
     } on Failure catch (failure) {
       if (emit.isDone) return;
+      _logger.log('[FaceVerify] Failure: ${failure.runtimeType} ${failure.message}');
       final isNetwork = failure is NetworkFailure;
       emit(
         state.copyWith(
@@ -359,8 +371,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       // Xato → kamerani to‘liq bo‘shatamiz (resurs/performans). Qayta urinishda
       // qaytadan ishga tushadi.
       await _disposeCamera();
-    } catch (_) {
+    } catch (e, st) {
       if (emit.isDone) return;
+      _logger.log('[FaceVerify] XATO (kutilmagan): $e\n$st');
       emit(
         state.copyWith(
           status: FaceStatus.failure,
@@ -387,26 +400,44 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       return FaceFailureKind.offlineNoSecret;
     }
 
-    // 2. Geozona keshi bo‘lishi shart (offline geofence manbasi).
-    final zone = _geozoneCache.read();
-    if (zone == null) return FaceFailureKind.offlineNoGeozone;
-
-    // 3. Ish joyida ekanini tekshiramiz (haversine ≤ radius).
-    final inside = _geofence.isInside(
-      latitude: _lat!,
-      longitude: _lng!,
-      zone: zone,
-    );
-    if (!inside) return FaceFailureKind.outsideGeofence;
+    // 2-3. Geozona/geofence tekshiruvi vaqtincha o‘chirilgan — hozircha ikki
+    // nuqta orasidagi masofa o‘lchanmaydi (validatsiya talab qilinmaydi).
+    // Qayta yoqilganda quyidagi blok izohdan chiqariladi.
+    // // 2. Geozona keshi bo‘lishi shart (offline geofence manbasi).
+    // final zone = _geozoneCache.read();
+    // if (zone == null) return FaceFailureKind.offlineNoGeozone;
+    //
+    // // 3. Ish joyida ekanini tekshiramiz (haversine ≤ radius).
+    // final inside = _geofence.isInside(
+    //   latitude: _lat!,
+    //   longitude: _lng!,
+    //   zone: zone,
+    // );
+    // if (!inside) return FaceFailureKind.outsideGeofence;
 
     // 4. Yuz moslik — keshlangan profil rasmi reference.
     final userId = _tokenService.getUserId() ?? '';
-    final refPath = await _faceImageCache.cachedPathFor(userId);
-    if (refPath == null) return FaceFailureKind.faceMismatch;
+    // Avval userId kaliti bo‘yicha; topilmasa (JWT claim/profil id nomutanosib
+    // bo‘lsa) eng oxirgi keshlangan yuz rasmi zaxira sifatida olinadi.
+    var refPath = await _faceImageCache.cachedPathFor(userId);
+    if (refPath == null) {
+      refPath = await _faceImageCache.anyCachedPath();
+      _logger.log(
+        '[FaceVerify] reference userId="$userId" keshda yo‘q → '
+        'zaxira(anyCached)=$refPath',
+      );
+    } else {
+      _logger.log('[FaceVerify] reference: userId="$userId" path=$refPath');
+    }
+    if (refPath == null) {
+      _logger.log('[FaceVerify] reference rasm umuman yo‘q → faceMismatch');
+      return FaceFailureKind.faceMismatch;
+    }
     final matches = await _faceMatch.matches(
       selfiePath: selfiePath,
       referencePath: refPath,
     );
+    _logger.log('[FaceVerify] yuz moslik natijasi: match=$matches');
     if (!matches) return FaceFailureKind.faceMismatch;
 
     // 5. Hammasi o‘tdi — imzolab navbatga saqlaymiz.

@@ -46,6 +46,13 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    lint {
+        // Release APK build'da lintVital ishlamasin — minimal-xotira mashinada
+        // metaspace OOM beradi (ResourceCycleDetector). Sifat lintini alohida
+        // `flutter analyze` / `./gradlew lint` orqali yuritamiz.
+        checkReleaseBuilds = false
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "raqamli.nazorat.hgt_mobile"
@@ -62,6 +69,12 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("release")
+            // tflite_flutter GPU delegate klassi yo'q (CPU-only) — R8 shu sabab
+            // "missing class" deb yiqilmasligi uchun custom -dontwarn rule kerak.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

@@ -34,6 +34,11 @@ class Routes implements Coordinate {
   /// authenticated user). Guard zanjirida emas.
   static const notifications = Routes._(name: 'notifications', path: '/notifications');
 
+  /// Debug: offline yuz moslik diagnostika (ikki rasm → cosine sim + log).
+  /// Faqat `kDebugMode` entry’sidan ochiladi; guard zanjirida emas.
+  static const faceMatchDiagnostic =
+      Routes._(name: 'face_match_diagnostic', path: '/face_match_diagnostic');
+
   @override
   String toString() => 'name=$name, path=$path';
 }

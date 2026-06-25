@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../constants/api_constants.dart';
@@ -31,6 +32,30 @@ class FaceImageCacheService {
     if (userId.isEmpty) return null;
     final file = await _fileFor(userId);
     return await file.exists() ? file.path : null;
+  }
+
+  /// Kesh papkasidagi **eng oxirgi yangilangan** yuz rasmini qaytaradi (yo‘q
+  /// bo‘lsa `null`). `cachedPathFor(userId)` null bo‘lganida zaxira sifatida
+  /// ishlatiladi — JWT `user_id` claim profil `id`ga to‘liq mos kelmagan
+  /// (yoki bo‘sh) holatda ham offline reference topiladi. Logout’da papka
+  /// tozalanadi ([clearAll]) — shu sabab eng oxirgi fayl = joriy foydalanuvchi.
+  Future<String?> anyCachedPath() async {
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final dir = Directory('${docs.path}${Platform.pathSeparator}$_dirName');
+      if (!await dir.exists()) return null;
+      final files = <File>[
+        for (final e in dir.listSync())
+          if (e is File && e.path.toLowerCase().endsWith('.jpg')) e,
+      ];
+      if (files.isEmpty) return null;
+      files.sort(
+        (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+      );
+      return files.first.path;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Rasm URL’ini bayt‑bayt yuklab olib, lokalga JPG sifatida yozadi.
@@ -63,6 +88,19 @@ class FaceImageCacheService {
     }
 
     final url = src.startsWith('http') ? src : _mediaUrl(src);
+
+    // 1) Avatar (CachedNetworkImage) bilan bir xil kesh — URL kalit. Online:
+    //    yuklab oladi va keshlaydi; offline: keshdagi faylni beradi. Avatar shu
+    //    keshdan offline ko‘ringani uchun bu manba ishonchli (auth talab qilmaydi).
+    try {
+      final file = await DefaultCacheManager().getSingleFile(url);
+      final bytes = await file.readAsBytes();
+      if (bytes.isNotEmpty) return _storeBytes(userId, bytes);
+    } catch (_) {
+      // keshda yo‘q / offline yuklab bo‘lmadi — quyidagi Dio zaxirasiga o‘tamiz.
+    }
+
+    // 2) Zaxira — to‘g‘ridan-to‘g‘ri yuklab olish.
     try {
       final response = await _dio.get<List<int>>(
         url,
@@ -98,6 +136,16 @@ class FaceImageCacheService {
     if (await file.exists()) {
       await file.delete();
     }
+  }
+
+  /// Butun yuz-rasm keshini tozalaydi (logout) — boshqa foydalanuvchi kirsa
+  /// [anyCachedPath] eski rasmni qaytarmasligi uchun.
+  Future<void> clearAll() async {
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final dir = Directory('${docs.path}${Platform.pathSeparator}$_dirName');
+      if (await dir.exists()) await dir.delete(recursive: true);
+    } catch (_) {}
   }
 
   Future<String> _storeBytes(String userId, Uint8List bytes) async {

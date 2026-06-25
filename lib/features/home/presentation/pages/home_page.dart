@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,6 +14,7 @@ import '../../../../core/widgets/logout_dialog.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../attendance/presentation/pages/attendance_page.dart';
+import '../../../attendance/presentation/pages/face_match_diagnostic_page.dart';
 import '../../../notifications/presentation/bloc/notification_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
@@ -111,6 +113,20 @@ class _HomeShellState extends State<_HomeShell> {
           ],
         ),
       ),
+      // Debug: yuz moslik diagnostika sahifasi (ikki rasm → cosine sim + log).
+      // Faqat debug build’da ko‘rinadi; relizda yo‘q.
+      floatingActionButton: kDebugMode
+          ? FloatingActionButton.small(
+              heroTag: 'face_match_diag',
+              backgroundColor: colors.accentStrong,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const FaceMatchDiagnosticPage(),
+                ),
+              ),
+              child: Icon(Icons.face_retouching_natural, color: colors.iconWhite),
+            )
+          : null,
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
