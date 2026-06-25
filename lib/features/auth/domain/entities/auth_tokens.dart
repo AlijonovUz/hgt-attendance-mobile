@@ -15,6 +15,7 @@ class AuthTokens extends Equatable {
     this.faceImage,
     this.fullName,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   final String access;
@@ -23,7 +24,11 @@ class AuthTokens extends Equatable {
   final String? fullName;
   final bool isPasswordChanged;
 
+  /// `data.user.offline_secret` — offline davomat vaqtini HMAC bilan imzolash
+  /// kaliti. `null`/bo‘sh bo‘lsa offline rejim ishlamaydi (faqat online).
+  final String? offlineSecret;
+
   @override
   List<Object?> get props =>
-      [access, refresh, faceImage, fullName, isPasswordChanged];
+      [access, refresh, faceImage, fullName, isPasswordChanged, offlineSecret];
 }

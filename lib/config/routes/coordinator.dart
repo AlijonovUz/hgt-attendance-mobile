@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/bloc/session_bloc.dart';
 import '../../features/attendance/domain/entities/attendance_event_type.dart';
 import '../../features/attendance/presentation/pages/attendance_face_page.dart';
+import '../../features/attendance/presentation/pages/face_match_diagnostic_page.dart';
 import '../../features/auth/presentation/face/pages/face_verify_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
@@ -73,8 +74,19 @@ class AppRouter {
         GoRoute(
           name: Routes.attendanceFace.name,
           path: Routes.attendanceFace.path,
-          builder: (context, state) =>
-              AttendanceFacePage(eventType: state.extra as AttendanceEventType),
+          builder: (context, state) {
+            // extra = (eventType, swipeTime) — swipe momenti offline created_at.
+            final extra = state.extra;
+            if (extra is (AttendanceEventType, DateTime)) {
+              return AttendanceFacePage(
+                eventType: extra.$1,
+                swipeTime: extra.$2,
+              );
+            }
+            return AttendanceFacePage(
+              eventType: extra as AttendanceEventType,
+            );
+          },
         ),
         GoRoute(
           name: Routes.changePassword.name,
@@ -91,6 +103,11 @@ class AppRouter {
             create: (_) => getIt<NotificationBloc>(),
             child: const NotificationsPage(),
           ),
+        ),
+        GoRoute(
+          name: Routes.faceMatchDiagnostic.name,
+          path: Routes.faceMatchDiagnostic.path,
+          builder: (context, state) => const FaceMatchDiagnosticPage(),
         ),
       ],
     );

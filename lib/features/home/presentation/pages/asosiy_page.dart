@@ -14,6 +14,7 @@ import '../../../profile/domain/entities/profile.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../bloc/attendance_bloc.dart';
 import '../bloc/attendance_step.dart';
+import '../widgets/asosiy_skeleton.dart';
 import '../widgets/attendance_ring_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_stat_card.dart';
@@ -37,6 +38,15 @@ class AsosiyPage extends StatelessWidget {
     final bloc = context.read<NotificationBloc>();
     await context.pushNamed(Routes.notifications.name);
     if (context.mounted) bloc.add(const NotificationCountRequested());
+  }
+
+  /// Pull-to-refresh — profil (KPI/davomat) + bugungi yozuvlarni qayta yuklaydi;
+  /// profil yuklash tugaguncha kutadi (spinner shu davrgacha aylanadi).
+  Future<void> _onRefresh(BuildContext context) async {
+    final profile = context.read<ProfileBloc>();
+    context.read<AttendanceBloc>().add(const AttendanceRefreshed());
+    profile.add(const ProfileRequested());
+    await profile.stream.firstWhere((s) => s.status != ProfileStatus.loading);
   }
 
   @override
@@ -75,50 +85,83 @@ class AsosiyPage extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
-                children: [
-                  BlocBuilder<ProfileBloc, ProfileState>(
-                    builder: (context, profileState) {
-                      final schedule = profileState.profile?.schedule;
-                      return BlocBuilder<AttendanceBloc, AttendanceState>(
-                        builder: (context, state) {
-                          final phase = _ringPhase(state, schedule, l10n);
-                          return Column(
-                            spacing: 20,
-                            children: [
-                              AttendanceRingCard(
-                                start: phase.start,
-                                end: phase.end,
-                                countingLabel: phase.countingLabel,
-                                overdueLabel: phase.overdueLabel,
-                                rangeText: phase.rangeText,
-                                idle: phase.idle,
-                                idleLabel: phase.idleLabel,
-                                done: phase.done,
-                                worked: phase.worked,
-                                doneLabel: phase.doneLabel,
-                              ),
-                              Visibility(
-                                visible: !state.isComplete,
-                                child: _SwipeSection(state: state, colors: colors, l10n: l10n),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                  const TodayScheduleCard(),
-                  SizedBox(height: 16.h),
-                  _StatRow(colors: colors, l10n: l10n),
-                ],
+              child: RefreshIndicator(
+                onRefresh: () => _onRefresh(context),
+                color: colors.accentStrong,
+                backgroundColor: colors.backgroundElevation2,
+                child: BlocBuilder<ProfileBloc, ProfileState>(
+                  // Faqat birinchi yuklash (profil hali yo‘q) → skelet. Refresh
+                  // paytida (profil bor) skelet ko‘rsatilmaydi.
+                  buildWhen: (p, c) =>
+                      p.status != c.status ||
+                      (p.profile == null) != (c.profile == null),
+                  builder: (context, profileState) {
+                    final loadingFirst = profileState.profile == null &&
+                        (profileState.status == ProfileStatus.initial ||
+                            profileState.status == ProfileStatus.loading);
+                    if (loadingFirst) return const AsosiySkeleton();
+                    return _AsosiyContent(colors: colors, l10n: l10n);
+                  },
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Asosiy tab asosiy kontenti (skelet emas) — halqa + surish + bugungi tartib
+/// + statistika. Pull-to-refresh ishlashi uchun ro‘yxat doim scrollable.
+class _AsosiyContent extends StatelessWidget {
+  const _AsosiyContent({required this.colors, required this.l10n});
+
+  final AppColors colors;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, profileState) {
+            final schedule = profileState.profile?.schedule;
+            return BlocBuilder<AttendanceBloc, AttendanceState>(
+              builder: (context, state) {
+                final phase = _ringPhase(state, schedule, l10n);
+                return Column(
+                  spacing: 20,
+                  children: [
+                    AttendanceRingCard(
+                      start: phase.start,
+                      end: phase.end,
+                      countingLabel: phase.countingLabel,
+                      overdueLabel: phase.overdueLabel,
+                      rangeText: phase.rangeText,
+                      idle: phase.idle,
+                      idleLabel: phase.idleLabel,
+                      done: phase.done,
+                      worked: phase.worked,
+                      doneLabel: phase.doneLabel,
+                    ),
+                    Visibility(
+                      visible: !state.isComplete,
+                      child: _SwipeSection(state: state, colors: colors, l10n: l10n),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+        SizedBox(height: 20.h),
+        const TodayScheduleCard(),
+        SizedBox(height: 16.h),
+        _StatRow(colors: colors, l10n: l10n),
+      ],
     );
   }
 }
@@ -178,7 +221,11 @@ class _SwipeSection extends StatelessWidget {
   /// Swipe → yuz-tekshiruvi → muvaffaqiyatda backenddan qayta yuklash + profil
   /// re-GET (KPI/davomat yangilanadi). Vaqtlar backend `created_at` dan keladi.
   Future<void> _onCompleted(BuildContext context) async {
-    final ok = await context.pushNamed<bool>(Routes.attendanceFace.name, extra: state.current.eventType);
+    // Swipe momenti — offline `created_at` (imzolanadigan vaqt) shu bo‘ladi.
+    final ok = await context.pushNamed<bool>(
+      Routes.attendanceFace.name,
+      extra: (state.current.eventType, DateTime.now()),
+    );
     if (ok == true && context.mounted) {
       context.read<AttendanceBloc>().add(const AttendanceRefreshed());
       context.read<ProfileBloc>().add(const ProfileRequested());
@@ -211,6 +258,10 @@ class _SwipeSection extends StatelessWidget {
     final cfg = _swipeConfig(state.current, l10n);
     return Column(
       children: [
+        if (state.hasPending) ...[
+          _OfflinePendingBanner(count: state.pendingCount, colors: colors, l10n: l10n),
+          SizedBox(height: 12.h),
+        ],
         SwipeActionButton(
           key: ValueKey(state.current),
           label: cfg.label,
@@ -224,6 +275,53 @@ class _SwipeSection extends StatelessWidget {
         SizedBox(height: 8.h),
         Center(child: l10n.homeSwipeHint.s(14.sp).w(400).c(colors.textSub).a(TextAlign.center)),
       ],
+    );
+  }
+}
+
+/// Offline navbatda kutayotgan davomatlar soni — sinxron bo‘lguncha ko‘rinadi.
+class _OfflinePendingBanner extends StatelessWidget {
+  const _OfflinePendingBanner({
+    required this.count,
+    required this.colors,
+    required this.l10n,
+  });
+
+  final int count;
+  final AppColors colors;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.backgroundElevation2,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: colors.strokeSoft),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Assets.icons.icHugeiconsDataTime.svg(
+              width: 18.r,
+              height: 18.r,
+              colorFilter: ColorFilter.mode(colors.accentStrong, BlendMode.srcIn),
+            ),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: l10n
+                  .offlinePendingCount(count)
+                  .s(13.sp)
+                  .w(500)
+                  .c(colors.textSub)
+                  .a(TextAlign.center)
+                  .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

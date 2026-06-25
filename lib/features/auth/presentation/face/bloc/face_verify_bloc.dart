@@ -9,7 +9,17 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../core/error/failures.dart';
+import '../../../../../core/services/connectivity_service.dart';
+import '../../../../../core/services/face_image_cache_service.dart';
+import '../../../../../core/services/face_match_service.dart';
+import '../../../../../core/services/geofence_service.dart';
+import '../../../../../core/services/geozone_cache_store.dart';
+import '../../../../../core/services/hmac_signer.dart';
 import '../../../../../core/services/location_service.dart';
+import '../../../../../core/services/logger_service.dart';
+import '../../../../../core/services/offline_attendance_store.dart';
+import '../../../../../core/services/offline_secret_store.dart';
+import '../../../../../core/services/token_service.dart';
 import '../../../../attendance/domain/usecases/mark_attendance_usecase.dart';
 import '../../../domain/usecases/verify_face_usecase.dart';
 import 'face_flow_mode.dart';
@@ -47,20 +57,56 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     required VerifyFaceUseCase verifyFaceUseCase,
     required MarkAttendanceUseCase markAttendance,
     required LocationService location,
+    required ConnectivityService connectivity,
+    required GeofenceService geofence,
+    required GeozoneCacheStore geozoneCache,
+    required FaceMatchService faceMatch,
+    required OfflineSecretStore offlineSecret,
+    required HmacSigner hmacSigner,
+    required OfflineAttendanceStore offlineStore,
+    required FaceImageCacheService faceImageCache,
+    required TokenService tokenService,
+    required LoggerService logger,
   }) : _verifyFace = verifyFaceUseCase,
        _markAttendance = markAttendance,
        _location = location,
+       _connectivity = connectivity,
+       _geofence = geofence,
+       _geozoneCache = geozoneCache,
+       _faceMatch = faceMatch,
+       _offlineSecret = offlineSecret,
+       _hmac = hmacSigner,
+       _offlineStore = offlineStore,
+       _faceImageCache = faceImageCache,
+       _tokenService = tokenService,
+       _logger = logger,
        super(const FaceVerifyState()) {
     on<FaceStarted>(_onStarted);
     on<FaceDetectionUpdated>(_onDetectionUpdated);
     on<FaceCaptureRequested>(_onCaptureRequested);
     on<FaceRetryRequested>(_onRetryRequested);
     on<FaceLocationSettingsRequested>(_onLocationSettingsRequested);
+    on<FaceAppPaused>(_onAppPaused);
+    on<FaceAppResumed>(_onAppResumed);
   }
 
   final VerifyFaceUseCase _verifyFace;
   final MarkAttendanceUseCase _markAttendance;
   final LocationService _location;
+  final ConnectivityService _connectivity;
+  // Geofence tekshiruvi vaqtincha o‘chirilgan (_enqueueOffline’da izohda) — qayta
+  // yoqilganda bu ignore’lar olib tashlanadi.
+  // ignore: unused_field
+  final GeofenceService _geofence;
+  // ignore: unused_field
+  final GeozoneCacheStore _geozoneCache;
+  final FaceMatchService _faceMatch;
+  final OfflineSecretStore _offlineSecret;
+  final HmacSigner _hmac;
+  final OfflineAttendanceStore _offlineStore;
+  final FaceImageCacheService _faceImageCache;
+  final TokenService _tokenService;
+  final LoggerService _logger;
 
   CameraController? _controller;
   FaceDetector? _detector;
@@ -71,6 +117,10 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   bool _detectorBusy = false;
   DateTime _lastDetect = DateTime.fromMillisecondsSinceEpoch(0);
   int _positiveStreak = 0;
+
+  /// Ilova fonga o‘tganda kamera tirik edimi — qaytganda tiklash kerakligini
+  /// bildiradi.
+  bool _resumeCamera = false;
 
   /// Preview widgeti uchun — tirik kamera kontrolleri (yoki null).
   CameraController? get cameraController => _controller;
@@ -150,6 +200,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   }
 
   Future<bool> _initCamera() async {
+    // Avvalgi kontroller qolgan bo‘lsa (resume/retry) — «camera in use» xatosini
+    // oldini olish uchun avval to‘liq bo‘shatamiz.
+    await _disposeCamera();
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) return false;
@@ -253,15 +306,46 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     try {
       await _stopStream();
       final XFile shot = await controller.takePicture();
+      _logger.log('[FaceVerify] selfie olindi: ${shot.path} mode=$mode');
       if (mode is AttendanceFaceMode) {
-        await _markAttendance(
-          MarkAttendanceParams(
-            eventType: mode.eventType,
-            latitude: _lat!,
-            longitude: _lng!,
-            imagePath: shot.path,
-          ),
-        );
+        final online = await _connectivity.isConnected();
+        _logger.log('[FaceVerify] davomat — online=$online');
+        if (online) {
+          // Online — hozirgidek darhol yuboriladi (backend yuz+vaqtni hal qiladi).
+          await _markAttendance(
+            MarkAttendanceParams(
+              eventType: mode.eventType,
+              latitude: _lat!,
+              longitude: _lng!,
+              imagePath: shot.path,
+            ),
+          );
+        } else {
+          // Offline — yuz/geofence/secret tekshiriladi, o‘tsa navbatga saqlanadi.
+          final blockKind = await _enqueueOffline(mode, shot.path);
+          _logger.log('[FaceVerify] offline natija: blockKind=$blockKind');
+          if (emit.isDone) return;
+          if (blockKind != FaceFailureKind.none) {
+            emit(
+              state.copyWith(
+                status: FaceStatus.failure,
+                failureKind: blockKind,
+                clearFailureMessage: true,
+              ),
+            );
+            await _disposeCamera();
+            return;
+          }
+          emit(
+            state.copyWith(
+              status: FaceStatus.success,
+              failureKind: FaceFailureKind.none,
+              offlineQueued: true,
+              clearFailureMessage: true,
+            ),
+          );
+          return;
+        }
       } else if (mode is LoginFaceMode) {
         await _verifyFace(
           VerifyFaceParams(imagePath: shot.path, accessToken: mode.accessToken),
@@ -272,11 +356,13 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
         state.copyWith(
           status: FaceStatus.success,
           failureKind: FaceFailureKind.none,
+          offlineQueued: false,
           clearFailureMessage: true,
         ),
       );
     } on Failure catch (failure) {
       if (emit.isDone) return;
+      _logger.log('[FaceVerify] Failure: ${failure.runtimeType} ${failure.message}');
       final isNetwork = failure is NetworkFailure;
       emit(
         state.copyWith(
@@ -294,8 +380,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       // Xato → kamerani to‘liq bo‘shatamiz (resurs/performans). Qayta urinishda
       // qaytadan ishga tushadi.
       await _disposeCamera();
-    } catch (_) {
+    } catch (e, st) {
       if (emit.isDone) return;
+      _logger.log('[FaceVerify] XATO (kutilmagan): $e\n$st');
       emit(
         state.copyWith(
           status: FaceStatus.failure,
@@ -305,6 +392,81 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
       );
       await _disposeCamera();
     }
+  }
+
+  /// Offline davomatni tekshirib navbatga saqlaydi. Muvaffaqiyatda
+  /// [FaceFailureKind.none], aks holda bloklash sababini qaytaradi.
+  ///
+  /// Tartib: offline_secret → geozona keshi → geofence → yuz moslik → navbat.
+  /// «swipe vaqti» (`mode.swipeTime`) imzolanadi; GPS yuz tasdig‘i momentidan.
+  Future<FaceFailureKind> _enqueueOffline(
+    AttendanceFaceMode mode,
+    String selfiePath,
+  ) async {
+    // 1. HMAC kaliti bo‘lishi shart.
+    final secret = await _offlineSecret.read();
+    if (secret == null || secret.isEmpty) {
+      return FaceFailureKind.offlineNoSecret;
+    }
+
+    // 2-3. Geozona/geofence tekshiruvi vaqtincha o‘chirilgan — hozircha ikki
+    // nuqta orasidagi masofa o‘lchanmaydi (validatsiya talab qilinmaydi).
+    // Qayta yoqilganda quyidagi blok izohdan chiqariladi.
+    // // 2. Geozona keshi bo‘lishi shart (offline geofence manbasi).
+    // final zone = _geozoneCache.read();
+    // if (zone == null) return FaceFailureKind.offlineNoGeozone;
+    //
+    // // 3. Ish joyida ekanini tekshiramiz (haversine ≤ radius).
+    // final inside = _geofence.isInside(
+    //   latitude: _lat!,
+    //   longitude: _lng!,
+    //   zone: zone,
+    // );
+    // if (!inside) return FaceFailureKind.outsideGeofence;
+
+    // 4. Yuz moslik — keshlangan profil rasmi reference.
+    final userId = _tokenService.getUserId() ?? '';
+    // Avval userId kaliti bo‘yicha; topilmasa (JWT claim/profil id nomutanosib
+    // bo‘lsa) eng oxirgi keshlangan yuz rasmi zaxira sifatida olinadi.
+    var refPath = await _faceImageCache.cachedPathFor(userId);
+    if (refPath == null) {
+      refPath = await _faceImageCache.anyCachedPath();
+      _logger.log(
+        '[FaceVerify] reference userId="$userId" keshda yo‘q → '
+        'zaxira(anyCached)=$refPath',
+      );
+    } else {
+      _logger.log('[FaceVerify] reference: userId="$userId" path=$refPath');
+    }
+    if (refPath == null) {
+      _logger.log('[FaceVerify] reference rasm umuman yo‘q → faceMismatch');
+      return FaceFailureKind.faceMismatch;
+    }
+    final matches = await _faceMatch.matches(
+      selfiePath: selfiePath,
+      referencePath: refPath,
+    );
+    _logger.log('[FaceVerify] yuz moslik natijasi: match=$matches');
+    if (!matches) return FaceFailureKind.faceMismatch;
+
+    // 5. Hammasi o‘tdi — imzolab navbatga saqlaymiz.
+    final id = _offlineStore.newId();
+    final imagePath = await _offlineStore.persistImage(selfiePath, id);
+    final createdAt = HmacSigner.formatLocalIso(mode.swipeTime);
+    final signature = _hmac.sign(createdAt, secret);
+    await _offlineStore.enqueue(
+      PendingAttendance(
+        id: id,
+        eventType: mode.eventType.apiValue,
+        latitude: _lat!,
+        longitude: _lng!,
+        imagePath: imagePath,
+        createdAt: createdAt,
+        signature: signature,
+        queuedAt: HmacSigner.formatLocalIso(DateTime.now()),
+      ),
+    );
+    return FaceFailureKind.none;
   }
 
   Future<void> _onRetryRequested(
@@ -324,6 +486,49 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     Emitter<FaceVerifyState> emit,
   ) async {
     await _location.openSettings();
+  }
+
+  /// Ilova fonga o‘tdi — kamerani bo‘shatamiz (Android baribir background’da
+  /// kamerani tortib oladi; stale kontroller qaytishda qora ekran beradi).
+  /// Tirik skan holatida edik bo‘lsa, qaytishda tiklashni belgilaymiz.
+  Future<void> _onAppPaused(
+    FaceAppPaused event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    _resumeCamera = state.status == FaceStatus.scanning ||
+        state.status == FaceStatus.detecting ||
+        state.status == FaceStatus.initializing;
+    _positiveStreak = 0;
+    await _disposeCamera();
+    if (_resumeCamera && !emit.isDone) {
+      // Preview yo‘qoldi — qaytib tiklanguncha loader ko‘rinadi.
+      emit(state.copyWith(status: FaceStatus.initializing));
+    }
+  }
+
+  /// Ilova qaytib keldi — kamera tirik bo‘lishi kerak edi bo‘lsa qayta ishga
+  /// tushiramiz (ruxsat allaqachon bor; GPS davomatda start’da olingan).
+  Future<void> _onAppResumed(
+    FaceAppResumed event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    if (!_resumeCamera) return;
+    _resumeCamera = false;
+
+    final ok = await _initCamera();
+    if (!ok) {
+      if (!emit.isDone) emit(state.copyWith(status: FaceStatus.cameraError));
+      return;
+    }
+    _detector ??= FaceDetector(
+      options: FaceDetectorOptions(
+        performanceMode: FaceDetectorMode.fast,
+        minFaceSize: 0.15,
+      ),
+    );
+    await _startStream();
+    if (emit.isDone) return;
+    emit(state.copyWith(status: FaceStatus.scanning));
   }
 
   /// Kamerani to‘liq bo‘shatadi (stream + controller). Detektor saqlanadi —

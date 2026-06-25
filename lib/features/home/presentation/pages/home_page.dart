@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,7 +13,9 @@ import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../core/widgets/logout_dialog.dart';
 import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../attendance/presentation/bloc/history/attendance_history_bloc.dart';
 import '../../../attendance/presentation/pages/attendance_page.dart';
+import '../../../attendance/presentation/pages/face_match_diagnostic_page.dart';
 import '../../../notifications/presentation/bloc/notification_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
@@ -35,6 +38,12 @@ class HomePage extends StatelessWidget {
       providers: [
         BlocProvider<ProfileBloc>(create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested())),
         BlocProvider<AttendanceBloc>(create: (_) => getIt<AttendanceBloc>()),
+        // Davomat tarixi bloci shu yerda — shell pastki-nav almashtirilganda
+        // qayta GET (`HistoryRefreshed`) yuborishi uchun (tab IndexedStack’da
+        // bir marta quriladi, shuning uchun sahifa o‘zi qayta yuklamaydi).
+        BlocProvider<AttendanceHistoryBloc>(
+          create: (_) => getIt<AttendanceHistoryBloc>(),
+        ),
         BlocProvider<NotificationBloc>(
           create: (_) => getIt<NotificationBloc>()..add(const NotificationCountRequested()),
         ),
@@ -77,6 +86,23 @@ class _HomeShellState extends State<_HomeShell> {
     showProfilePhotoPrompt(context, context.read<ProfileBloc>());
   }
 
+  /// Pastki-nav tab almashganda — tegishli blocga qayta GET yuboramiz, shunda
+  /// tabga o‘tilganda doim yangi ma’lumot keladi (IndexedStack sahifani tirik
+  /// saqlagani sababli sahifaning o‘zi qayta yuklamasdi). Avval yuklanmagan
+  /// bloclar (`userId` yo‘q) so‘rovni e’tiborsiz qoldiradi — konfiguratsiya
+  /// listener’lari boshlang‘ich yuklashni baribir bajaradi.
+  void _onTabChanged(int index) {
+    if (index == _index) return;
+    setState(() => _index = index);
+    switch (index) {
+      case 0:
+        context.read<ProfileBloc>().add(const ProfileRequested());
+        context.read<AttendanceBloc>().add(const AttendanceRefreshed());
+      case 1:
+        context.read<AttendanceHistoryBloc>().add(const HistoryRefreshed());
+    }
+  }
+
   Future<void> _confirmLogout() async {
     final session = context.read<SessionBloc>();
     final confirmed = await showLogoutDialog(context);
@@ -111,9 +137,23 @@ class _HomeShellState extends State<_HomeShell> {
           ],
         ),
       ),
+      // Debug: yuz moslik diagnostika sahifasi (ikki rasm → cosine sim + log).
+      // Faqat debug build’da ko‘rinadi; relizda yo‘q.
+      floatingActionButton: kDebugMode
+          ? FloatingActionButton.small(
+              heroTag: 'face_match_diag',
+              backgroundColor: colors.accentStrong,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const FaceMatchDiagnosticPage(),
+                ),
+              ),
+              child: Icon(Icons.face_retouching_natural, color: colors.iconWhite),
+            )
+          : null,
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: _onTabChanged,
         items: [
           AppBottomNavItem(icon: Assets.icons.icHugeiconsMenuSquare, label: l10n.navHome),
           AppBottomNavItem(icon: Assets.icons.icHugeiconsClock, label: l10n.navHistory),

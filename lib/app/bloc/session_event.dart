@@ -22,6 +22,7 @@ class SessionLoginSucceeded extends SessionEvent {
     this.loginPassword = '',
     this.faceImage,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   final String accessToken;
@@ -41,6 +42,10 @@ class SessionLoginSucceeded extends SessionEvent {
   /// yangi parol o‘rnatish bosqichi ko‘rsatiladi.
   final bool isPasswordChanged;
 
+  /// Login javobidagi `offline_secret` — yuz tasdig‘idan keyin xavfsiz xotiraga
+  /// yoziladi (offline davomat HMAC kaliti).
+  final String? offlineSecret;
+
   @override
   List<Object?> get props => [
         accessToken,
@@ -49,6 +54,7 @@ class SessionLoginSucceeded extends SessionEvent {
         loginPassword,
         faceImage,
         isPasswordChanged,
+        offlineSecret,
       ];
 }
 

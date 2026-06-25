@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/services/offline_secret_store.dart';
 import '../models/profile_model.dart';
 
 /// Profil backend bilan to‘g‘ridan-to‘g‘ri muloqot (`/v1/users/auth/profile/`).
@@ -21,9 +22,10 @@ abstract interface class ProfileRemoteDataSource {
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-  const ProfileRemoteDataSourceImpl(this._client);
+  const ProfileRemoteDataSourceImpl(this._client, this._offlineSecretStore);
 
   final DioClient _client;
+  final OfflineSecretStore _offlineSecretStore;
 
   @override
   Future<ProfileModel> getProfile({String? accessToken}) async {
@@ -42,9 +44,28 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (body['success'] == false) {
         throw ServerException(_messageFromBody(body));
       }
+      // offline_secret profil javobida ham kelishi mumkin — har home kirishda
+      // (online) yangilab qo‘yamiz. Bu allaqachon login bo‘lgan (token saqlangan)
+      // foydalanuvchilar uchun ham offline kalitni ta’minlaydi.
+      await _persistOfflineSecret(body);
       return ProfileModel.fromJson(body);
     } on DioException catch (e) {
       throw _mapDioException(e);
+    }
+  }
+
+  /// Javob tanasidan `offline_secret`ni (xom yoki `data`/`user` ichida) topib
+  /// xavfsiz xotiraga yozadi. Topilmasa hech narsa qilmaydi (regressiya yo‘q).
+  Future<void> _persistOfflineSecret(Map<String, dynamic> body) async {
+    final data = body['data'] is Map
+        ? (body['data'] as Map).cast<String, dynamic>()
+        : body;
+    final user = data['user'] is Map
+        ? (data['user'] as Map).cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final secret = user['offline_secret'] ?? data['offline_secret'];
+    if (secret is String && secret.trim().isNotEmpty) {
+      await _offlineSecretStore.write(secret.trim());
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 
+import '../core/services/offline_sync_service.dart';
 import '../core/services/push_notification_service.dart';
 import '../features/notifications/data/data_sources/notification_socket_service.dart';
 import '../firebase_options.dart';
@@ -25,6 +26,9 @@ Future<void> bootstrap(Widget Function() builder) async {
 
   // Real-time bildirishnoma WebSocket — auth holatini tinglaydi, kerakda ulanadi.
   getIt<NotificationSocketService>().start();
+
+  // Offline davomat sinxroni — connectivity + session’ni tinglab navbatni yuboradi.
+  getIt<OfflineSyncService>().start();
 
   // Session stays `unknown` (the router guard holds on the animated SplashPage,
   // which the native splash hands off to). [SplashPage] dispatches

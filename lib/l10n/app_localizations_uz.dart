@@ -446,6 +446,30 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get onbDoneStart => 'Ishni boshlash';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Internet yo‘q. Davomat saqlandi, ulanish tiklanganda yuboriladi.';
+
+  @override
+  String get offlineOutsideGeofence =>
+      'Siz ish joyida emassiz. Davomat saqlanmadi.';
+
+  @override
+  String get offlineFaceMismatch => 'Yuz mos kelmadi. Davomat saqlanmadi.';
+
+  @override
+  String get offlineNoGeozone =>
+      'Ish joyi ma’lumoti yuklanmagan. Avval internetga ulaning.';
+
+  @override
+  String get offlineNoSecret =>
+      'Oflayn rejim sozlanmagan. Avval internetga ulaning.';
+
+  @override
+  String offlinePendingCount(int count) {
+    return '$count ta davomat yuborilmadi';
+  }
 }
 
 /// The translations for Uzbek, using the Cyrillic script (`uz_Cyrl`).
@@ -888,4 +912,28 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get onbDoneStart => 'Ишни бошлаш';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Интернет йўқ. Давомат сақланди, уланиш тикланганда юборилади.';
+
+  @override
+  String get offlineOutsideGeofence =>
+      'Сиз иш жойида эмассиз. Давомат сақланмади.';
+
+  @override
+  String get offlineFaceMismatch => 'Юз мос келмади. Давомат сақланмади.';
+
+  @override
+  String get offlineNoGeozone =>
+      'Иш жойи маълумоти юкланмаган. Аввал интернетга уланинг.';
+
+  @override
+  String get offlineNoSecret =>
+      'Офлайн режим созланмаган. Аввал интернетга уланинг.';
+
+  @override
+  String offlinePendingCount(int count) {
+    return '$count та давомат юборилмади';
+  }
 }

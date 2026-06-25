@@ -59,6 +59,9 @@ class MonthKpi extends Equatable {
 /// Joriy foydalanuvchi profili (GET `/v1/users/auth/profile/`).
 ///
 /// [faceImage] — profil/yuz rasmi URL’i; bo‘sh bo‘lsa rasm o‘rnatish so‘raladi.
+/// [localFaceImagePath] — qurilma xotirasiga (path_provider docs dir) baytlar
+/// shaklida saqlangan nusxa yo‘li. Offline yuz tasdig‘i va internet yo‘qligida
+/// avatar render qilish uchun ishlatiladi.
 /// [schedule] va [kpi] — asosiy ekran jadvali/halqasi/statistikasi manbai.
 class Profile extends Equatable {
   const Profile({
@@ -66,9 +69,11 @@ class Profile extends Equatable {
     required this.fullName,
     this.phone,
     this.faceImage,
+    this.localFaceImagePath,
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.branchId,
     this.regionName,
     this.districtName,
     this.schedule,
@@ -82,9 +87,17 @@ class Profile extends Equatable {
   /// Profil rasmi (URI). `null`/bo‘sh → rasm hali yuklanmagan.
   final String? faceImage;
 
+  /// Lokal fayl yo‘li (`<docs>/face_images/<id>.jpg`) — bayt-bayt yuklab
+  /// olingan nusxa. `null` → hali keshlanmagan.
+  final String? localFaceImagePath;
+
   final String? roleName;
   final String? departmentName;
   final String? branchName;
+
+  /// Filial UUID (`branch_info.id`) — geozona moslashtirish kaliti (offline
+  /// geofence uchun `/v1/attendance/geozones/` `branch` maydoniga solishtiriladi).
+  final String? branchId;
 
   /// Viloyat (`region_info.name`).
   final String? regionName;
@@ -96,16 +109,21 @@ class Profile extends Equatable {
   final MonthKpi? kpi;
 
   /// Profil rasmi mavjudligi — modal so‘rovni shu hal qiladi.
-  bool get hasFaceImage => faceImage != null && faceImage!.trim().isNotEmpty;
+  /// Lokal kesh ham yetarli (offline holatda URL bo‘sh, lekin fayl mavjud).
+  bool get hasFaceImage =>
+      (faceImage != null && faceImage!.trim().isNotEmpty) ||
+      (localFaceImagePath != null && localFaceImagePath!.trim().isNotEmpty);
 
-  Profile copyWith({String? faceImage}) => Profile(
+  Profile copyWith({String? faceImage, String? localFaceImagePath}) => Profile(
     id: id,
     fullName: fullName,
     phone: phone,
     faceImage: faceImage ?? this.faceImage,
+    localFaceImagePath: localFaceImagePath ?? this.localFaceImagePath,
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    branchId: branchId,
     regionName: regionName,
     districtName: districtName,
     schedule: schedule,
@@ -118,9 +136,11 @@ class Profile extends Equatable {
     fullName,
     phone,
     faceImage,
+    localFaceImagePath,
     roleName,
     departmentName,
     branchName,
+    branchId,
     regionName,
     districtName,
     schedule,

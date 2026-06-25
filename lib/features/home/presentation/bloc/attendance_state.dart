@@ -9,6 +9,7 @@ class AttendanceState extends Equatable {
     this.departureAt,
     this.lunchOutAt,
     this.lunchInAt,
+    this.pendingCount = 0,
   });
 
   /// Faol bosqichlar (profil schedule’iga mos, tartiblangan).
@@ -31,6 +32,12 @@ class AttendanceState extends Equatable {
   final DateTime? lunchOutAt;
   final DateTime? lunchInAt;
 
+  /// Hali serverga yuborilmagan (offline navbatdagi) yozuvlar soni — home’dagi
+  /// offline indikator/badge uchun.
+  final int pendingCount;
+
+  bool get hasPending => pendingCount > 0;
+
   bool get isComplete => current == AttendanceStep.done;
 
   /// Belgilangan (haqiqiy) vaqt — yo‘q bo‘lsa null (widget schedule’dan oladi).
@@ -46,6 +53,7 @@ class AttendanceState extends Equatable {
     DateTime? departureAt,
     DateTime? lunchOutAt,
     DateTime? lunchInAt,
+    int? pendingCount,
   }) => AttendanceState(
     steps: steps ?? this.steps,
     current: current ?? this.current,
@@ -54,6 +62,7 @@ class AttendanceState extends Equatable {
     departureAt: departureAt ?? this.departureAt,
     lunchOutAt: lunchOutAt ?? this.lunchOutAt,
     lunchInAt: lunchInAt ?? this.lunchInAt,
+    pendingCount: pendingCount ?? this.pendingCount,
   );
 
   @override
@@ -65,5 +74,6 @@ class AttendanceState extends Equatable {
     departureAt,
     lunchOutAt,
     lunchInAt,
+    pendingCount,
   ];
 }

@@ -11,20 +11,36 @@ import 'core/network/dio_factory.dart';
 import 'core/network/interceptors/auth_interceptor.dart';
 import 'core/network/interceptors/logging_interceptor.dart';
 import 'core/network/interceptors/refresh_interceptor.dart';
+import 'core/services/attendance_cache_store.dart';
+import 'core/services/connectivity_service.dart';
+import 'core/services/face_embedder_service.dart';
+import 'core/services/face_image_cache_service.dart';
+import 'core/services/face_match_service.dart';
+import 'core/services/geofence_service.dart';
+import 'core/services/geozone_cache_store.dart';
+import 'core/services/hmac_signer.dart';
 import 'core/services/image_picker_service.dart';
 import 'core/services/location_service.dart';
+import 'core/services/offline_attendance_store.dart';
+import 'core/services/profile_cache_store.dart';
+import 'core/services/offline_secret_store.dart';
+import 'core/services/offline_sync_service.dart';
 import 'core/services/logger_service.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/services/token_service.dart';
 import 'core/services/vpn_detector_service.dart';
 import 'features/attendance/data/data_sources/attendance_remote_data_source.dart';
+import 'features/attendance/data/data_sources/geozone_remote_data_source.dart';
 import 'features/attendance/data/repository/attendance_repository_impl.dart';
+import 'features/attendance/data/repository/geozone_repository_impl.dart';
 import 'features/attendance/domain/repository/attendance_repository.dart';
+import 'features/attendance/domain/repository/geozone_repository.dart';
 import 'features/attendance/domain/usecases/get_attendance_history_usecase.dart';
 import 'features/attendance/domain/usecases/get_personal_stats_usecase.dart';
 import 'features/attendance/domain/usecases/get_today_attendance_usecase.dart';
 import 'features/attendance/domain/usecases/mark_attendance_usecase.dart';
+import 'features/attendance/domain/usecases/sync_user_geozone_usecase.dart';
 import 'features/attendance/presentation/bloc/history/attendance_history_bloc.dart';
 import 'features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'features/auth/data/repository/auth_repository_impl.dart';
@@ -68,12 +84,55 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<TokenService>(() => TokenService(getIt()))
     ..registerLazySingleton<ImagePickerService>(() => ImagePickerService())
     ..registerLazySingleton<LocationService>(() => const LocationService())
-    ..registerLazySingleton<VpnDetectorService>(() => VpnDetectorService());
+    ..registerLazySingleton<VpnDetectorService>(() => VpnDetectorService())
+    ..registerLazySingleton<ConnectivityService>(() => ConnectivityService())
+    // Yuz rasmini lokal xotiraga keshlash (offline yuz tasdig‘i + avatar).
+    ..registerLazySingleton<FaceImageCacheService>(
+      () => FaceImageCacheService(DioFactory.create()),
+    )
+    // offline_secret xavfsiz xotirasi (HMAC kaliti).
+    ..registerLazySingleton<OfflineSecretStore>(() => OfflineSecretStore())
+    // Geofence (haversine) + keshlangan geozona (offline ish joyi tekshiruvi).
+    ..registerLazySingleton<GeofenceService>(() => const GeofenceService())
+    ..registerLazySingleton<GeozoneCacheStore>(() => GeozoneCacheStore(getIt()))
+    // Offline ma’lumot keshi (profil + davomat) — internetsiz ko‘rsatish uchun.
+    ..registerLazySingleton<ProfileCacheStore>(() => ProfileCacheStore(getIt()))
+    ..registerLazySingleton<AttendanceCacheStore>(
+      () => AttendanceCacheStore(getIt()),
+    )
+    // Offline yuz moslik (MobileFaceNet embedding + ML Kit bbox).
+    ..registerLazySingleton<FaceEmbedderService>(
+      () => FaceEmbedderService(getIt<LoggerService>()),
+    )
+    ..registerLazySingleton<FaceMatchService>(
+      () => FaceMatchService(getIt(), getIt<LoggerService>()),
+    )
+    // Offline navbat (JSON-fayl) + HMAC imzo.
+    ..registerLazySingleton<HmacSigner>(() => const HmacSigner())
+    ..registerLazySingleton<OfflineAttendanceStore>(
+      () => OfflineAttendanceStore(),
+    );
+
+  // Offline davomat sinxron dvigateli — connectivity + session’ni tinglaydi.
+  getIt.registerLazySingleton<OfflineSyncService>(
+    () => OfflineSyncService(
+      store: getIt(),
+      repository: getIt(),
+      connectivity: getIt(),
+      session: getIt(),
+      logger: getIt(),
+    ),
+  );
 
   // App-level state — singletons so router + UI share one instance each.
   getIt
     ..registerLazySingleton<SessionBloc>(
-      () => SessionBloc(tokenService: getIt(), storage: getIt()),
+      () => SessionBloc(
+        tokenService: getIt(),
+        storage: getIt(),
+        offlineSecretStore: getIt(),
+        faceImageCache: getIt(),
+      ),
     )
     ..registerLazySingleton<ThemeBloc>(() => ThemeBloc(storage: getIt()))
     ..registerLazySingleton<LocaleBloc>(() => LocaleBloc(storage: getIt()));
@@ -113,6 +172,16 @@ Future<void> configureDependencies() async {
         verifyFaceUseCase: getIt(),
         markAttendance: getIt(),
         location: getIt(),
+        connectivity: getIt(),
+        geofence: getIt(),
+        geozoneCache: getIt(),
+        faceMatch: getIt(),
+        offlineSecret: getIt(),
+        hmacSigner: getIt(),
+        offlineStore: getIt(),
+        faceImageCache: getIt(),
+        tokenService: getIt(),
+        logger: getIt<LoggerService>(),
       ),
     );
 
@@ -122,7 +191,7 @@ Future<void> configureDependencies() async {
       () => AttendanceRemoteDataSourceImpl(getIt()),
     )
     ..registerLazySingleton<AttendanceRepository>(
-      () => AttendanceRepositoryImpl(remote: getIt()),
+      () => AttendanceRepositoryImpl(remote: getIt(), cache: getIt()),
     )
     ..registerLazySingleton<MarkAttendanceUseCase>(
       () => MarkAttendanceUseCase(getIt()),
@@ -138,20 +207,34 @@ Future<void> configureDependencies() async {
     )
     ..registerFactory<AttendanceHistoryBloc>(
       () => AttendanceHistoryBloc(getHistory: getIt(), getStats: getIt()),
+    )
+    // Geozona (filial geofence) — online olib lokalga keshlanadi.
+    ..registerLazySingleton<GeozoneRemoteDataSource>(
+      () => GeozoneRemoteDataSourceImpl(getIt()),
+    )
+    ..registerLazySingleton<GeozoneRepository>(
+      () => GeozoneRepositoryImpl(remote: getIt()),
+    )
+    ..registerLazySingleton<SyncUserGeozoneUseCase>(
+      () => SyncUserGeozoneUseCase(getIt(), getIt()),
     );
 
   // ── Home (asosiy ekran davomat holati — backend bugungi yozuvlardan) ────
   getIt.registerFactory<AttendanceBloc>(
-    () => AttendanceBloc(getToday: getIt()),
+    () => AttendanceBloc(
+      getToday: getIt(),
+      offlineStore: getIt(),
+      syncService: getIt(),
+    ),
   );
 
   // ── Profile feature ───────────────────────────────────────────────────
   getIt
     ..registerLazySingleton<ProfileRemoteDataSource>(
-      () => ProfileRemoteDataSourceImpl(getIt()),
+      () => ProfileRemoteDataSourceImpl(getIt(), getIt()),
     )
     ..registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(remote: getIt()),
+      () => ProfileRepositoryImpl(remote: getIt(), cache: getIt()),
     )
     ..registerLazySingleton<GetProfileUseCase>(() => GetProfileUseCase(getIt()))
     ..registerLazySingleton<UpdateFaceImageUseCase>(
@@ -162,6 +245,8 @@ Future<void> configureDependencies() async {
         getProfile: getIt(),
         updateFaceImage: getIt(),
         imagePicker: getIt(),
+        faceImageCache: getIt(),
+        syncGeozone: getIt(),
       ),
     )
     ..registerFactory<ChangePasswordBloc>(
@@ -220,7 +305,7 @@ Future<void> configureDependencies() async {
   // ── Onboarding feature ────────────────────────────────────────────────
   getIt
     ..registerLazySingleton<OnboardingRemoteDataSource>(
-      () => OnboardingRemoteDataSourceImpl(getIt()),
+      () => OnboardingRemoteDataSourceImpl(getIt(), getIt()),
     )
     ..registerLazySingleton<OnboardingRepository>(
       () => OnboardingRepositoryImpl(remote: getIt()),

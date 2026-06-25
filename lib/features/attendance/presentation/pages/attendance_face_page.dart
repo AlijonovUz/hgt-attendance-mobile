@@ -16,9 +16,12 @@ import '../../domain/entities/attendance_event_type.dart';
 /// selfie olinib `POST /v1/attendance/attendance/` yuboriladi; 2xx →
 /// `Navigator.pop(true)` (asosiy ekran bosqichni belgilab profilni qayta GET).
 class AttendanceFacePage extends StatelessWidget {
-  const AttendanceFacePage({super.key, required this.eventType});
+  const AttendanceFacePage({super.key, required this.eventType, this.swipeTime});
 
   final AttendanceEventType eventType;
+
+  /// Surish momenti — offline `created_at` (imzolanadigan vaqt).
+  final DateTime? swipeTime;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,9 @@ class AttendanceFacePage extends StatelessWidget {
       providers: [
         BlocProvider<FaceVerifyBloc>(
           create: (_) => getIt<FaceVerifyBloc>()
-            ..add(FaceStarted(AttendanceFaceMode(eventType))),
+            ..add(FaceStarted(
+              AttendanceFaceMode(eventType, swipeTime: swipeTime),
+            )),
         ),
         BlocProvider<ProfileBloc>(
           create: (_) => getIt<ProfileBloc>()..add(const ProfileRequested()),

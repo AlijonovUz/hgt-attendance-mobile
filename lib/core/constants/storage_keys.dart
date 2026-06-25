@@ -31,6 +31,26 @@ abstract final class StorageKeys {
   /// va saqlanadi, har bir token ro‘yxatida shu ishlatiladi.
   static const deviceId = 'device_id';
 
+  /// Foydalanuvchi filialiga mos keshlangan geozona (JSON) — offline geofence
+  /// tekshiruvi shu yerdan o‘qiydi. Online holatda profil yuklangach yangilanadi.
+  static const cachedGeozone = 'cached_geozone';
+
+  /// Keshlangan profil (JSON) — offline holatda ism/jadval/KPI/filial ko‘rsatish
+  /// uchun. Online profil GET muvaffaqiyatida yangilanadi.
+  static const cachedProfile = 'cached_profile';
+
+  /// Keshlangan bugungi davomat yozuvlari (JSON: sana+userId+events) — offline
+  /// kelib-ketish/tushlik bosqichlarini ko‘rsatish uchun.
+  static const cachedTodayEvents = 'cached_today_events';
+
+  /// Keshlangan sana-oralig‘i davomat yozuvlari (JSON: key→events map) —
+  /// «Davomat tarixi» ro‘yxati offline ko‘rinishi uchun.
+  static const cachedRangeEvents = 'cached_range_events';
+
+  /// Keshlangan shaxsiy statistika (JSON: key→stats map) — tarix kartalari
+  /// offline ko‘rinishi uchun.
+  static const cachedPersonalStats = 'cached_personal_stats';
+
   static const all = <String>{
     authToken,
     refreshToken,
@@ -46,5 +66,10 @@ abstract final class StorageKeys {
     lastActiveAt,
     themeMode,
     deviceId,
+    cachedGeozone,
+    cachedProfile,
+    cachedTodayEvents,
+    cachedRangeEvents,
+    cachedPersonalStats,
   };
 }

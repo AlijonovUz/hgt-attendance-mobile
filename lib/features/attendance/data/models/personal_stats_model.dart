@@ -38,6 +38,22 @@ class PersonalStatsModel {
     );
   }
 
+  /// Entity → model (offline keshga yozish uchun).
+  factory PersonalStatsModel.fromEntity(AttendanceStats s) => PersonalStatsModel(
+        presentDays: s.presentDays,
+        lateDays: s.lateDays,
+        avgCheckIn: s.avgCheckIn,
+        totalWorkedHours: s.totalWorkedHours,
+      );
+
+  /// [PersonalStatsModel.fromJson] qaytadan parslaydigan JSON.
+  Map<String, dynamic> toJson() => {
+        'present_days': presentDays,
+        'late_days': lateDays,
+        'avg_check_in': avgCheckIn,
+        'total_worked_hours': totalWorkedHours,
+      };
+
   AttendanceStats toEntity() => AttendanceStats(
     presentDays: presentDays,
     lateDays: lateDays,

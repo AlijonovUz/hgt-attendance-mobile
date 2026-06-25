@@ -87,6 +87,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           faceImage: tokens.faceImage,
           responseFullName: tokens.fullName,
           isPasswordChanged: tokens.isPasswordChanged,
+          offlineSecret: tokens.offlineSecret,
         ),
       );
     } on Failure catch (failure) {

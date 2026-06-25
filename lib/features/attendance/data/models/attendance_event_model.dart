@@ -23,6 +23,21 @@ class AttendanceEventModel {
     );
   }
 
+  /// Entity → model (offline keshga yozish uchun).
+  factory AttendanceEventModel.fromEntity(AttendanceEvent e) =>
+      AttendanceEventModel(
+        eventType: e.eventType,
+        createdAt: e.createdAt,
+        faceVerify: e.faceVerify,
+      );
+
+  /// [AttendanceEventModel.fromJson] qaytadan parslaydigan JSON.
+  Map<String, dynamic> toJson() => {
+        'event_type': eventType?.apiValue,
+        'created_at': createdAt.toUtc().toIso8601String(),
+        'face_verify': faceVerify,
+      };
+
   AttendanceEvent toEntity() => AttendanceEvent(
     eventType: eventType,
     createdAt: createdAt,

@@ -15,6 +15,7 @@ class ProfileModel {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.branchId,
     this.regionName,
     this.districtName,
     this.schedule,
@@ -28,6 +29,7 @@ class ProfileModel {
   final String? roleName;
   final String? departmentName;
   final String? branchName;
+  final String? branchId;
   final String? regionName;
   final String? districtName;
   final ScheduleInfo? schedule;
@@ -71,6 +73,9 @@ class ProfileModel {
     // boshqa endpointlar uchun top-level fallback ham qoldiramiz.
     final branch = src['branch_info'];
     final branchMap = branch is Map ? branch.cast<String, dynamic>() : null;
+    // Geozona moslashtirish uchun branch UUID — `branch_info.id` yoki top-level
+    // `branch` (geozones endpoint’dagi `branch` maydoniga teng).
+    final branchId = asString(branchMap?['id']) ?? asString(src['branch']);
 
     MonthKpi? kpi;
     final k = src['current_month_kpi'];
@@ -94,6 +99,7 @@ class ProfileModel {
           nestedName(src['role_info']) ?? nestedName(src['position_info']),
       departmentName: nestedName(src['department_info']),
       branchName: nestedName(branch),
+      branchId: branchId,
       regionName: nestedName(branchMap?['region_info']) ??
           nestedName(src['region_info']),
       districtName: nestedName(branchMap?['district_info']) ??
@@ -103,6 +109,55 @@ class ProfileModel {
     );
   }
 
+  /// Entity → model (offline keshga yozish uchun).
+  factory ProfileModel.fromEntity(Profile p) => ProfileModel(
+        id: p.id,
+        fullName: p.fullName,
+        phone: p.phone,
+        faceImage: p.faceImage,
+        roleName: p.roleName,
+        departmentName: p.departmentName,
+        branchName: p.branchName,
+        branchId: p.branchId,
+        regionName: p.regionName,
+        districtName: p.districtName,
+        schedule: p.schedule,
+        kpi: p.kpi,
+      );
+
+  /// Backend shakliga mos JSON — shu sabab [ProfileModel.fromJson] uni qaytadan
+  /// to‘g‘ri parslaydi (kesh round-trip’i bitta parser bilan).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'full_name': fullName,
+        'phone': phone,
+        'face_image': faceImage,
+        if (roleName != null) 'role_info': {'name': roleName},
+        if (departmentName != null) 'department_info': {'name': departmentName},
+        'branch_info': {
+          'name': branchName,
+          'id': branchId,
+          if (regionName != null) 'region_info': {'name': regionName},
+          if (districtName != null) 'district_info': {'name': districtName},
+        },
+        if (schedule != null)
+          'schedule_info': {
+            'name': schedule!.name,
+            'work_start_time': schedule!.workStartTime,
+            'work_end_time': schedule!.workEndTime,
+            'lunch_start_time': schedule!.lunchStartTime,
+            'lunch_end_time': schedule!.lunchEndTime,
+          },
+        if (kpi != null)
+          'current_month_kpi': {
+            'attendance_kpi': kpi!.attendanceKpi,
+            'monthly_kpi': kpi!.monthlyKpi,
+            'total_score': kpi!.totalScore,
+            'rating_category': kpi!.ratingCategory,
+            'monthly_attendance': kpi!.monthlyAttendance,
+          },
+      };
+
   Profile toEntity() => Profile(
     id: id,
     fullName: fullName,
@@ -111,6 +166,7 @@ class ProfileModel {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    branchId: branchId,
     regionName: regionName,
     districtName: districtName,
     schedule: schedule,

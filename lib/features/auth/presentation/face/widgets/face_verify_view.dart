@@ -8,6 +8,7 @@ import '../../../../../app/bloc/session_bloc.dart';
 import '../../../../../app/bloc/theme/theme_bloc.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../core/extentions/text_extensions.dart';
+import '../../../../../core/extentions/toast_extension.dart';
 import '../../../../../core/gen/assets.gen.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/user_avatar.dart';
@@ -22,7 +23,7 @@ import '../bloc/face_verify_bloc.dart';
 /// [onSuccess] — 2xx’da chaqiriladi (login → `SessionFaceVerified`, davomat →
 /// `Navigator.pop(true)`). [nameSection] berilsa karta ismi o‘rniga ishlatiladi
 /// (davomat `ProfileBloc`dan o‘qiydi); aks holda bloc holatidagi ism ko‘rsatiladi.
-class FaceVerifyView extends StatelessWidget {
+class FaceVerifyView extends StatefulWidget {
   const FaceVerifyView({
     super.key,
     required this.onSuccess,
@@ -38,6 +39,44 @@ class FaceVerifyView extends StatelessWidget {
   final Widget? imageSection;
 
   @override
+  State<FaceVerifyView> createState() => _FaceVerifyViewState();
+}
+
+class _FaceVerifyViewState extends State<FaceVerifyView>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Ilova fonga o‘tib qaytganida (masalan GPS sozlamasini ochib) kamerani
+  /// to‘g‘ri boshqaramiz: `paused`/`hidden`da bo‘shatamiz, `resumed`da tiklaymiz.
+  /// (GPS dialogi `showDialog` — lifecycle’ni o‘zgartirmaydi, faqat haqiqiy
+  /// background o‘zgaradi.)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    final bloc = context.read<FaceVerifyBloc>();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        bloc.add(const FaceAppPaused());
+      case AppLifecycleState.resumed:
+        bloc.add(const FaceAppResumed());
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
@@ -48,10 +87,27 @@ class FaceVerifyView extends StatelessWidget {
           listenWhen: (p, c) =>
               p.status != c.status || p.failureKind != c.failureKind,
           listener: (context, state) {
-            if (state.status == FaceStatus.success) onSuccess(context);
-            if (state.status == FaceStatus.failure &&
-                state.failureKind == FaceFailureKind.locationServiceOff) {
-              _showEnableGpsDialog(context);
+            final l10n = AppLocalizations.of(context);
+            if (state.status == FaceStatus.success) {
+              if (state.offlineQueued) {
+                context.showSuccessToast(l10n.offlineAttendanceQueued);
+              }
+              widget.onSuccess(context);
+            }
+            if (state.status == FaceStatus.failure) {
+              if (state.failureKind == FaceFailureKind.locationServiceOff) {
+                _showEnableGpsDialog(context);
+              }
+              final toastMessage = switch (state.failureKind) {
+                FaceFailureKind.outsideGeofence => l10n.offlineOutsideGeofence,
+                FaceFailureKind.faceMismatch => l10n.offlineFaceMismatch,
+                FaceFailureKind.offlineNoGeozone => l10n.offlineNoGeozone,
+                FaceFailureKind.offlineNoSecret => l10n.offlineNoSecret,
+                _ => null,
+              };
+              if (toastMessage != null) {
+                context.showErrorToast(toastMessage);
+              }
             }
           },
           child: Padding(
@@ -59,7 +115,10 @@ class FaceVerifyView extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: 8.h),
-                _UserCard(nameSection: nameSection, imageSection: imageSection),
+                _UserCard(
+                  nameSection: widget.nameSection,
+                  imageSection: widget.imageSection,
+                ),
                 SizedBox(height: 20.h),
                 const _Controls(),
                 const Spacer(),
@@ -366,7 +425,8 @@ class _Stage extends StatelessWidget {
   /// aks holda xato turiga mos localized fallback.
   String _hintText(FaceVerifyState state, AppLocalizations l10n) {
     return switch (state.status) {
-      FaceStatus.success => l10n.faceHintSuccess,
+      FaceStatus.success =>
+        state.offlineQueued ? l10n.offlineAttendanceQueued : l10n.faceHintSuccess,
       FaceStatus.verifying || FaceStatus.detecting => l10n.faceHintScanning,
       FaceStatus.failure => state.failureMessage ??
           switch (state.failureKind) {
@@ -374,6 +434,10 @@ class _Stage extends StatelessWidget {
             FaceFailureKind.locationServiceOff => l10n.locationServiceOffTitle,
             FaceFailureKind.location => l10n.attendanceLocationError,
             FaceFailureKind.noFace => l10n.faceHintNoFace,
+            FaceFailureKind.outsideGeofence => l10n.offlineOutsideGeofence,
+            FaceFailureKind.faceMismatch => l10n.offlineFaceMismatch,
+            FaceFailureKind.offlineNoGeozone => l10n.offlineNoGeozone,
+            FaceFailureKind.offlineNoSecret => l10n.offlineNoSecret,
             _ => l10n.faceVerifyFailed,
           },
       _ => l10n.faceHintDefault,
@@ -564,6 +628,17 @@ class _ErrorState extends StatelessWidget {
             child: CustomButton(
               label: l10n.facePermissionOpenSettings,
               onPressed: openAppSettings,
+            ),
+          ),
+        ] else ...[
+          // Kamera xatosi — qayta urinish (to‘liq oqim qaytadan ishga tushadi).
+          SizedBox(height: 20.h),
+          SizedBox(
+            width: 200.w,
+            child: CustomButton(
+              label: l10n.faceRetry,
+              onPressed: () =>
+                  context.read<FaceVerifyBloc>().add(const FaceRetryRequested()),
             ),
           ),
         ],

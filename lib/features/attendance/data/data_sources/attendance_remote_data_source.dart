@@ -10,11 +10,15 @@ import '../models/personal_stats_model.dart';
 
 /// `/v1/attendance/attendance/` bilan ishlaydi (POST belgilash + GET bugungilar).
 abstract interface class AttendanceRemoteDataSource {
+  /// [createdAt] + [signature] berilsa (offline navbatdan yuborish) form-data’ga
+  /// qo‘shiladi — backend offline vaqtni HMAC bilan tekshiradi.
   Future<void> mark({
     required AttendanceEventType eventType,
     required double latitude,
     required double longitude,
     required String imagePath,
+    String? createdAt,
+    String? signature,
   });
 
   /// Bugungi yozuvlar (joriy foydalanuvchi, sana oralig‘i bilan filtrlangan).
@@ -47,6 +51,8 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     required double latitude,
     required double longitude,
     required String imagePath,
+    String? createdAt,
+    String? signature,
   }) async {
     try {
       final fileName = imagePath.split(RegExp(r'[\\/]')).last;
@@ -54,6 +60,9 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
         'event_type': eventType.apiValue,
         'gps_latitude': latitude.toString(),
         'gps_longitude': longitude.toString(),
+        // Offline yuborishda imzolangan vaqt + signature qo‘shiladi.
+        if (createdAt != null && createdAt.isNotEmpty) 'created_at': createdAt,
+        if (signature != null && signature.isNotEmpty) 'signature': signature,
         'image': await MultipartFile.fromFile(
           imagePath,
           filename: fileName.isEmpty ? 'attendance.jpg' : fileName,

@@ -43,3 +43,15 @@ class FaceRetryRequested extends FaceVerifyEvent {
 class FaceLocationSettingsRequested extends FaceVerifyEvent {
   const FaceLocationSettingsRequested();
 }
+
+/// Ilova fonga o‘tdi (masalan GPS sozlamasini ochish uchun) — OS kamerani
+/// baribir tortib oladi, shuning uchun kontrollerni o‘zimiz bo‘shatamiz.
+class FaceAppPaused extends FaceVerifyEvent {
+  const FaceAppPaused();
+}
+
+/// Ilova fonga o‘tib qaytib keldi — agar kamera tirik bo‘lishi kerak bo‘lsa
+/// (skan/aniqlash holatida edi) qayta ishga tushiramiz.
+class FaceAppResumed extends FaceVerifyEvent {
+  const FaceAppResumed();
+}

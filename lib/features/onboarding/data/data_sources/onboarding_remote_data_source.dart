@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/services/offline_secret_store.dart';
 
 /// Onboarding backend muloqoti.
 abstract interface class OnboardingRemoteDataSource {
@@ -18,9 +19,10 @@ abstract interface class OnboardingRemoteDataSource {
 }
 
 class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
-  const OnboardingRemoteDataSourceImpl(this._client);
+  const OnboardingRemoteDataSourceImpl(this._client, this._offlineSecretStore);
 
   final DioClient _client;
+  final OfflineSecretStore _offlineSecretStore;
 
   @override
   Future<void> changePassword({
@@ -51,8 +53,27 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
       if (body != null && body['success'] == false) {
         throw ServerException(_messageFromBody(body));
       }
+      // ChangePassword 200 javobida yangi `offline_secret` kelishi mumkin —
+      // xavfsiz xotiraga yozib qo‘yamiz (offline davomat HMAC kaliti yangilanadi).
+      await _persistOfflineSecret(body);
     } on DioException catch (e) {
       throw _mapDioException(e);
+    }
+  }
+
+  /// Javob tanasidan `offline_secret`ni topib (xom yoki `data`/`user` ichida)
+  /// xavfsiz xotiraga yozadi. Topilmasa — hech narsa qilmaydi.
+  Future<void> _persistOfflineSecret(Map<String, dynamic>? body) async {
+    if (body == null) return;
+    final data = body['data'] is Map
+        ? (body['data'] as Map).cast<String, dynamic>()
+        : body;
+    final user = data['user'] is Map
+        ? (data['user'] as Map).cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final secret = user['offline_secret'] ?? data['offline_secret'];
+    if (secret is String && secret.trim().isNotEmpty) {
+      await _offlineSecretStore.write(secret.trim());
     }
   }
 

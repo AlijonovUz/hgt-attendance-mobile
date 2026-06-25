@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/storage_keys.dart';
+import '../../core/services/face_image_cache_service.dart';
+import '../../core/services/offline_secret_store.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/services/token_service.dart';
 
@@ -18,10 +20,16 @@ part 'session_state.dart';
 /// yagona ikkinchi bosqich. Tokenlar yuz tasdiqlangach (`SessionFaceVerified`)
 /// saqlanadi; ungacha RAM’da turadi.
 class SessionBloc extends Bloc<SessionEvent, SessionState> {
-  SessionBloc({required TokenService tokenService, required StorageService storage})
-    : _tokenService = tokenService,
-      _storage = storage,
-      super(const SessionState.unknown()) {
+  SessionBloc({
+    required TokenService tokenService,
+    required StorageService storage,
+    required OfflineSecretStore offlineSecretStore,
+    required FaceImageCacheService faceImageCache,
+  })  : _tokenService = tokenService,
+        _storage = storage,
+        _offlineSecretStore = offlineSecretStore,
+        _faceImageCache = faceImageCache,
+        super(const SessionState.unknown()) {
     on<SessionStarted>(_onStarted);
     on<SessionLoginSucceeded>(_onLoginSucceeded);
     on<SessionFaceVerified>(_onFaceVerified);
@@ -31,6 +39,8 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
 
   final TokenService _tokenService;
   final StorageService _storage;
+  final OfflineSecretStore _offlineSecretStore;
+  final FaceImageCacheService _faceImageCache;
 
   /// Onboarding shu qurilmada kamida bir marta tugatilganmi (device-once).
   /// `_onStarted`da storage’dan o‘qiladi; yuz tasdiqlangach `true`ga o‘tadi va
@@ -48,6 +58,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
   String? _pendingFullName;
   String? _pendingLoginPassword;
   String? _pendingFaceImage;
+  String? _pendingOfflineSecret;
   bool _pendingIsPasswordChanged = true;
 
   /// Yuz so‘roviga Bearer sifatida biriktiriladigan, hali saqlanmagan token.
@@ -89,6 +100,7 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingFullName = event.fullName;
     _pendingLoginPassword = event.loginPassword;
     _pendingFaceImage = event.faceImage;
+    _pendingOfflineSecret = event.offlineSecret;
     _pendingIsPasswordChanged = event.isPasswordChanged;
 
     // Login’da kiritilgan ism aynan «Ali Aliyev» bo‘lsa → yuz tasdig‘i ham,
@@ -128,6 +140,10 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     if (_pendingFullName != null) {
       await _storage.setString(StorageKeys.loginUsername, _pendingFullName!);
     }
+    // offline_secret’ni xavfsiz xotiraga yozamiz (offline davomat HMAC kaliti).
+    if (_pendingOfflineSecret != null && _pendingOfflineSecret!.isNotEmpty) {
+      await _offlineSecretStore.write(_pendingOfflineSecret!);
+    }
     // Onboarding/yuz tasdig‘i kamida bir marta tugadi — device-once flag.
     await _storage.setString(StorageKeys.onboardingCompleted, '1');
     _onboardingCompleted = true;
@@ -153,12 +169,21 @@ class SessionBloc extends Bloc<SessionEvent, SessionState> {
     _pendingFullName = null;
     _pendingLoginPassword = null;
     _pendingFaceImage = null;
+    _pendingOfflineSecret = null;
     _pendingIsPasswordChanged = true;
   }
 
   Future<void> _clearAll() async {
     await _tokenService.clearAll();
+    await _offlineSecretStore.clear();
     await _storage.remove(StorageKeys.cachedUser);
     await _storage.remove(StorageKeys.loginUsername);
+    // Offline keshlar — boshqa foydalanuvchi kirsa eski ma’lumot ko‘rinmasin.
+    await _storage.remove(StorageKeys.cachedProfile);
+    await _storage.remove(StorageKeys.cachedTodayEvents);
+    await _storage.remove(StorageKeys.cachedRangeEvents);
+    await _storage.remove(StorageKeys.cachedPersonalStats);
+    await _storage.remove(StorageKeys.cachedGeozone);
+    await _faceImageCache.clearAll();
   }
 }
