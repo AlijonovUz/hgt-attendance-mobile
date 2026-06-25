@@ -5,26 +5,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../core/extentions/text_extensions.dart';
 import '../../../../core/gen/assets.gen.dart';
-import '../../../../injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/presentation/widgets/home_stat_card.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../bloc/history/attendance_history_bloc.dart';
 import '../widgets/attendance_day_card.dart';
+import '../widgets/attendance_history_skeleton.dart';
 import '../widgets/date_range_calendar.dart';
 import '../widgets/history_filter_tabs.dart';
 
 /// «Davomat tarixi» tab — Kunlik/Haftalik/Oylik + custom oraliq kalendar.
+///
+/// [AttendanceHistoryBloc] shell ([HomePage]) darajasida taqdim etiladi — pastki
+/// nav tabga o‘tilganda qayta GET (`HistoryRefreshed`) yuborilishi uchun.
 class AttendancePage extends StatelessWidget {
   const AttendancePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<AttendanceHistoryBloc>(
-      create: (_) => getIt<AttendanceHistoryBloc>(),
-      child: const _AttendanceHistoryView(),
-    );
-  }
+  Widget build(BuildContext context) => const _AttendanceHistoryView();
 }
 
 class _AttendanceHistoryView extends StatefulWidget {
@@ -50,6 +48,16 @@ class _AttendanceHistoryViewState extends State<_AttendanceHistoryView> {
     if (profile == null || profile.id.isEmpty) return;
     context.read<AttendanceHistoryBloc>().add(
       HistoryConfigured(userId: profile.id, schedule: profile.schedule),
+    );
+  }
+
+  /// Pull-to-refresh — joriy oraliqni qayta yuklaydi; yuklash tugaguncha kutadi
+  /// (spinner shu davrgacha aylanadi).
+  Future<void> _onRefresh() async {
+    final bloc = context.read<AttendanceHistoryBloc>();
+    bloc.add(const HistoryRefreshed());
+    await bloc.stream.firstWhere(
+      (s) => s.status != AttendanceHistoryStatus.loading,
     );
   }
 
@@ -127,8 +135,14 @@ class _AttendanceHistoryViewState extends State<_AttendanceHistoryView> {
               ),
             ),
             Expanded(
-              child: BlocBuilder<AttendanceHistoryBloc, AttendanceHistoryState>(
-                builder: (context, state) => _Body(state: state, l10n: l10n),
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                color: colors.accentStrong,
+                backgroundColor: colors.backgroundElevation2,
+                child:
+                    BlocBuilder<AttendanceHistoryBloc, AttendanceHistoryState>(
+                  builder: (context, state) => _Body(state: state, l10n: l10n),
+                ),
               ),
             ),
           ],
@@ -144,44 +158,55 @@ class _Body extends StatelessWidget {
   final AttendanceHistoryState state;
   final AppLocalizations l10n;
 
+  /// Markazlangan holatni (xato/bo‘sh) scrollable qiladi — RefreshIndicator
+  /// «pull» imkoni shu holatlarda ham ishlasin.
+  Widget _scrollableCenter(Widget child) => LayoutBuilder(
+        builder: (_, c) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: c.maxHeight),
+            child: Center(child: child),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    if (state.status == AttendanceHistoryStatus.loading ||
-        state.status == AttendanceHistoryStatus.initial) {
-      return Center(
-        child: SizedBox(
-          width: 28.r,
-          height: 28.r,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5.r,
-            valueColor: AlwaysStoppedAnimation<Color>(colors.accentSub),
-          ),
+    // Boshlang‘ich/yuklanish + hali ma’lumot yo‘q → skelet. Refresh paytida
+    // (eski kunlar bor) skelet ko‘rsatilmaydi — eski ro‘yxat turaveradi.
+    final loading = state.status == AttendanceHistoryStatus.loading ||
+        state.status == AttendanceHistoryStatus.initial;
+    if (loading && state.days.isEmpty) {
+      return AttendanceHistorySkeleton(showStats: state.showStats);
+    }
+
+    if (state.status == AttendanceHistoryStatus.failure) {
+      return _scrollableCenter(
+        _Centered(
+          icon: Assets.icons.icHugeiconsClock,
+          text: state.errorKind == AttendanceHistoryError.network
+              ? l10n.networkError
+              : l10n.historyError,
+          colors: colors,
         ),
       );
     }
 
-    if (state.status == AttendanceHistoryStatus.failure) {
-      return _Centered(
-        icon: Assets.icons.icHugeiconsClock,
-        text: state.errorKind == AttendanceHistoryError.network
-            ? l10n.networkError
-            : l10n.historyError,
-        colors: colors,
-      );
-    }
-
     if (state.days.isEmpty) {
-      return _Centered(
-        icon: Assets.icons.icHugeiconsClock,
-        text: l10n.historyEmpty,
-        colors: colors,
+      return _scrollableCenter(
+        _Centered(
+          icon: Assets.icons.icHugeiconsClock,
+          text: l10n.historyEmpty,
+          colors: colors,
+        ),
       );
     }
 
     return ListView(
       padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         if (state.showStats && state.stats != null) ...[
           _StatsGrid(state: state, l10n: l10n, colors: colors),

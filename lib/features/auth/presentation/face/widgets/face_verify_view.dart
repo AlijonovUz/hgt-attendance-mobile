@@ -23,7 +23,7 @@ import '../bloc/face_verify_bloc.dart';
 /// [onSuccess] — 2xx’da chaqiriladi (login → `SessionFaceVerified`, davomat →
 /// `Navigator.pop(true)`). [nameSection] berilsa karta ismi o‘rniga ishlatiladi
 /// (davomat `ProfileBloc`dan o‘qiydi); aks holda bloc holatidagi ism ko‘rsatiladi.
-class FaceVerifyView extends StatelessWidget {
+class FaceVerifyView extends StatefulWidget {
   const FaceVerifyView({
     super.key,
     required this.onSuccess,
@@ -37,6 +37,44 @@ class FaceVerifyView extends StatelessWidget {
   /// Karta avatari — berilsa o‘rin egasi o‘rniga ishlatiladi (davomat
   /// `ProfileBloc`dan). Aks holda login’ning RAM’dagi `pendingFaceImage`i.
   final Widget? imageSection;
+
+  @override
+  State<FaceVerifyView> createState() => _FaceVerifyViewState();
+}
+
+class _FaceVerifyViewState extends State<FaceVerifyView>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Ilova fonga o‘tib qaytganida (masalan GPS sozlamasini ochib) kamerani
+  /// to‘g‘ri boshqaramiz: `paused`/`hidden`da bo‘shatamiz, `resumed`da tiklaymiz.
+  /// (GPS dialogi `showDialog` — lifecycle’ni o‘zgartirmaydi, faqat haqiqiy
+  /// background o‘zgaradi.)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    final bloc = context.read<FaceVerifyBloc>();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+        bloc.add(const FaceAppPaused());
+      case AppLifecycleState.resumed:
+        bloc.add(const FaceAppResumed());
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +92,7 @@ class FaceVerifyView extends StatelessWidget {
               if (state.offlineQueued) {
                 context.showSuccessToast(l10n.offlineAttendanceQueued);
               }
-              onSuccess(context);
+              widget.onSuccess(context);
             }
             if (state.status == FaceStatus.failure) {
               if (state.failureKind == FaceFailureKind.locationServiceOff) {
@@ -77,7 +115,10 @@ class FaceVerifyView extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: 8.h),
-                _UserCard(nameSection: nameSection, imageSection: imageSection),
+                _UserCard(
+                  nameSection: widget.nameSection,
+                  imageSection: widget.imageSection,
+                ),
                 SizedBox(height: 20.h),
                 const _Controls(),
                 const Spacer(),
@@ -587,6 +628,17 @@ class _ErrorState extends StatelessWidget {
             child: CustomButton(
               label: l10n.facePermissionOpenSettings,
               onPressed: openAppSettings,
+            ),
+          ),
+        ] else ...[
+          // Kamera xatosi — qayta urinish (to‘liq oqim qaytadan ishga tushadi).
+          SizedBox(height: 20.h),
+          SizedBox(
+            width: 200.w,
+            child: CustomButton(
+              label: l10n.faceRetry,
+              onPressed: () =>
+                  context.read<FaceVerifyBloc>().add(const FaceRetryRequested()),
             ),
           ),
         ],

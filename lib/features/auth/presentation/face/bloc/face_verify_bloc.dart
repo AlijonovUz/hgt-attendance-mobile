@@ -86,6 +86,8 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     on<FaceCaptureRequested>(_onCaptureRequested);
     on<FaceRetryRequested>(_onRetryRequested);
     on<FaceLocationSettingsRequested>(_onLocationSettingsRequested);
+    on<FaceAppPaused>(_onAppPaused);
+    on<FaceAppResumed>(_onAppResumed);
   }
 
   final VerifyFaceUseCase _verifyFace;
@@ -115,6 +117,10 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   bool _detectorBusy = false;
   DateTime _lastDetect = DateTime.fromMillisecondsSinceEpoch(0);
   int _positiveStreak = 0;
+
+  /// Ilova fonga o‘tganda kamera tirik edimi — qaytganda tiklash kerakligini
+  /// bildiradi.
+  bool _resumeCamera = false;
 
   /// Preview widgeti uchun — tirik kamera kontrolleri (yoki null).
   CameraController? get cameraController => _controller;
@@ -194,6 +200,9 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
   }
 
   Future<bool> _initCamera() async {
+    // Avvalgi kontroller qolgan bo‘lsa (resume/retry) — «camera in use» xatosini
+    // oldini olish uchun avval to‘liq bo‘shatamiz.
+    await _disposeCamera();
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) return false;
@@ -477,6 +486,49 @@ class FaceVerifyBloc extends Bloc<FaceVerifyEvent, FaceVerifyState> {
     Emitter<FaceVerifyState> emit,
   ) async {
     await _location.openSettings();
+  }
+
+  /// Ilova fonga o‘tdi — kamerani bo‘shatamiz (Android baribir background’da
+  /// kamerani tortib oladi; stale kontroller qaytishda qora ekran beradi).
+  /// Tirik skan holatida edik bo‘lsa, qaytishda tiklashni belgilaymiz.
+  Future<void> _onAppPaused(
+    FaceAppPaused event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    _resumeCamera = state.status == FaceStatus.scanning ||
+        state.status == FaceStatus.detecting ||
+        state.status == FaceStatus.initializing;
+    _positiveStreak = 0;
+    await _disposeCamera();
+    if (_resumeCamera && !emit.isDone) {
+      // Preview yo‘qoldi — qaytib tiklanguncha loader ko‘rinadi.
+      emit(state.copyWith(status: FaceStatus.initializing));
+    }
+  }
+
+  /// Ilova qaytib keldi — kamera tirik bo‘lishi kerak edi bo‘lsa qayta ishga
+  /// tushiramiz (ruxsat allaqachon bor; GPS davomatda start’da olingan).
+  Future<void> _onAppResumed(
+    FaceAppResumed event,
+    Emitter<FaceVerifyState> emit,
+  ) async {
+    if (!_resumeCamera) return;
+    _resumeCamera = false;
+
+    final ok = await _initCamera();
+    if (!ok) {
+      if (!emit.isDone) emit(state.copyWith(status: FaceStatus.cameraError));
+      return;
+    }
+    _detector ??= FaceDetector(
+      options: FaceDetectorOptions(
+        performanceMode: FaceDetectorMode.fast,
+        minFaceSize: 0.15,
+      ),
+    );
+    await _startStream();
+    if (emit.isDone) return;
+    emit(state.copyWith(status: FaceStatus.scanning));
   }
 
   /// Kamerani to‘liq bo‘shatadi (stream + controller). Detektor saqlanadi —
