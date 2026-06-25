@@ -932,6 +932,42 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Ishni boshlash'**
   String get onbDoneStart;
+
+  /// No description provided for @offlineAttendanceQueued.
+  ///
+  /// In uz, this message translates to:
+  /// **'Internet yo‘q. Davomat saqlandi, ulanish tiklanganda yuboriladi.'**
+  String get offlineAttendanceQueued;
+
+  /// No description provided for @offlineOutsideGeofence.
+  ///
+  /// In uz, this message translates to:
+  /// **'Siz ish joyida emassiz. Davomat saqlanmadi.'**
+  String get offlineOutsideGeofence;
+
+  /// No description provided for @offlineFaceMismatch.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuz mos kelmadi. Davomat saqlanmadi.'**
+  String get offlineFaceMismatch;
+
+  /// No description provided for @offlineNoGeozone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ish joyi ma’lumoti yuklanmagan. Avval internetga ulaning.'**
+  String get offlineNoGeozone;
+
+  /// No description provided for @offlineNoSecret.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oflayn rejim sozlanmagan. Avval internetga ulaning.'**
+  String get offlineNoSecret;
+
+  /// No description provided for @offlinePendingCount.
+  ///
+  /// In uz, this message translates to:
+  /// **'{count} ta davomat yuborilmadi'**
+  String offlinePendingCount(int count);
 }
 
 class _AppLocalizationsDelegate

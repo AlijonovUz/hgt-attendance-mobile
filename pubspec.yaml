@@ -40,6 +40,12 @@ dependencies:
   flutter_local_notifications: ^22.0.1
   change_app_package_name: ^1.5.0
   vpn_connection_detector: ^2.0.3
+  path_provider: ^2.1.5
+  connectivity_plus: ^7.1.1
+  crypto: ^3.0.6
+  tflite_flutter: ^0.11.0
+  flutter_secure_storage: ^9.2.4
+  image: ^4.3.0
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +73,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/models/
 
 flutter_launcher_icons:
   android: "launcher_icon"

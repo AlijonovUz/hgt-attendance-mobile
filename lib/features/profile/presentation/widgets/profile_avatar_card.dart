@@ -55,7 +55,11 @@ class ProfileAvatarCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             child: Row(
               children: [
-                _Avatar(faceImage: profile?.faceImage, colors: colors),
+                _Avatar(
+                  faceImage:
+                      profile?.localFaceImagePath ?? profile?.faceImage,
+                  colors: colors,
+                ),
                 SizedBox(width: 16.w),
                 Expanded(
                   child: Column(

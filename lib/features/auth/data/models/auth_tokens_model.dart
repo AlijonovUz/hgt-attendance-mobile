@@ -12,6 +12,7 @@ class AuthTokensModel {
     this.faceImage,
     this.fullName,
     this.isPasswordChanged = true,
+    this.offlineSecret,
   });
 
   final String access;
@@ -19,6 +20,7 @@ class AuthTokensModel {
   final String? faceImage;
   final String? fullName;
   final bool isPasswordChanged;
+  final String? offlineSecret;
 
   factory AuthTokensModel.fromJson(Map<String, dynamic> json) {
     final src = json['data'] is Map
@@ -31,6 +33,8 @@ class AuthTokensModel {
     final name = user['full_name'] ?? src['full_name'];
     // `is_password_changed` yo‘q bo‘lsa — parol bosqichini majburlamaymiz (true).
     final changed = user['is_password_changed'] ?? src['is_password_changed'];
+    // `offline_secret` — HMAC kaliti (offline davomat imzosi uchun).
+    final secret = user['offline_secret'] ?? src['offline_secret'];
     return AuthTokensModel(
       access: src['access'] as String? ?? '',
       refresh: src['refresh'] as String? ?? '',
@@ -39,6 +43,8 @@ class AuthTokensModel {
       fullName:
           name is String && name.trim().isNotEmpty ? name.trim() : null,
       isPasswordChanged: changed is bool ? changed : true,
+      offlineSecret:
+          secret is String && secret.trim().isNotEmpty ? secret.trim() : null,
     );
   }
 
@@ -48,5 +54,6 @@ class AuthTokensModel {
         faceImage: faceImage,
         fullName: fullName,
         isPasswordChanged: isPasswordChanged,
+        offlineSecret: offlineSecret,
       );
 }

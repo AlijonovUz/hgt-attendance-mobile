@@ -28,6 +28,12 @@ abstract final class ApiConstants {
   static const attendancePersonalStats =
       '/v1/attendance/attendance/personal-stats/';
 
+  /// GET — geozonalar ro‘yxati (filial geofence markazi + radiusi). Javob:
+  /// `{ data: { results: [ { id, name, latitude, longitude, radius, branch } ] } }`.
+  /// Online holatda olib, foydalanuvchi `branch`iga mosi lokalga keshlanadi
+  /// (offline geofence tekshiruvi uchun).
+  static const geozones = '/v1/attendance/geozones/';
+
   // ── Bildirishnomalar (api/v1/notifications) ───────────────────────────
   /// GET — sahifalangan ro‘yxat (`page`, `is_read` query). Javob:
   /// `{ count, next, previous, results: [ { id, title_*, message_*,

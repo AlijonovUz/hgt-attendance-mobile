@@ -40,7 +40,11 @@ class ProfileHeaderCard extends StatelessWidget {
             GestureDetector(
               onTap: onTap,
               behavior: HitTestBehavior.opaque,
-              child: _Avatar(faceImage: profile?.faceImage, colors: colors),
+              child: _Avatar(
+                faceImage:
+                    profile?.localFaceImagePath ?? profile?.faceImage,
+                colors: colors,
+              ),
             ),
             SizedBox(height: 8.h),
             name.s(18.sp).w(700).c(colors.textStrong).h(24 / 18).a(TextAlign.center).copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),

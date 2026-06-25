@@ -156,5 +156,17 @@
   "onbFaceStart": "Сканерлашни бошлаш",
   "onbDoneTitle": "Ҳаммаси тайёр!",
   "onbDoneSubtitle": "Энди давоматингизни қайд этишингиз мумкин. Ҳар куни ишга келганда «Ишга келдим» тугмасини суринг.",
-  "onbDoneStart": "Ишни бошлаш"
+  "onbDoneStart": "Ишни бошлаш",
+
+  "offlineAttendanceQueued": "Интернет йўқ. Давомат сақланди, уланиш тикланганда юборилади.",
+  "offlineOutsideGeofence": "Сиз иш жойида эмассиз. Давомат сақланмади.",
+  "offlineFaceMismatch": "Юз мос келмади. Давомат сақланмади.",
+  "offlineNoGeozone": "Иш жойи маълумоти юкланмаган. Аввал интернетга уланинг.",
+  "offlineNoSecret": "Офлайн режим созланмаган. Аввал интернетга уланинг.",
+  "offlinePendingCount": "{count} та давомат юборилмади",
+  "@offlinePendingCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

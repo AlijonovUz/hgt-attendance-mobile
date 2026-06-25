@@ -73,8 +73,19 @@ class AppRouter {
         GoRoute(
           name: Routes.attendanceFace.name,
           path: Routes.attendanceFace.path,
-          builder: (context, state) =>
-              AttendanceFacePage(eventType: state.extra as AttendanceEventType),
+          builder: (context, state) {
+            // extra = (eventType, swipeTime) — swipe momenti offline created_at.
+            final extra = state.extra;
+            if (extra is (AttendanceEventType, DateTime)) {
+              return AttendanceFacePage(
+                eventType: extra.$1,
+                swipeTime: extra.$2,
+              );
+            }
+            return AttendanceFacePage(
+              eventType: extra as AttendanceEventType,
+            );
+          },
         ),
         GoRoute(
           name: Routes.changePassword.name,

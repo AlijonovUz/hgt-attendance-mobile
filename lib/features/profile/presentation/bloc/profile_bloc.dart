@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/services/face_image_cache_service.dart';
 import '../../../../core/services/image_picker_service.dart';
+import '../../../attendance/domain/usecases/sync_user_geozone_usecase.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
 import '../../domain/usecases/update_face_image_usecase.dart';
@@ -16,14 +21,22 @@ part 'profile_state.dart';
 /// home modal so‘rovni ko‘rsatadi. Foydalanuvchi qurilmadan rasm tanlaydi
 /// ([ProfilePhotoPickRequested]) → ko‘rib chiqadi → yuklaydi
 /// ([ProfilePhotoSubmitted]) → PATCH `face_image`.
+///
+/// Offline‑first kesh: profil URL bilan kelsa [FaceImageCacheService] orqali
+/// bayt‑bayt yuklab olinadi va `<docs>/face_images/<id>.jpg`ga yoziladi;
+/// natija [Profile.localFaceImagePath]ga qo‘yiladi (avatar lokaldan render).
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc({
     required GetProfileUseCase getProfile,
     required UpdateFaceImageUseCase updateFaceImage,
     required ImagePickerService imagePicker,
+    required FaceImageCacheService faceImageCache,
+    required SyncUserGeozoneUseCase syncGeozone,
   })  : _getProfile = getProfile,
         _updateFaceImage = updateFaceImage,
         _imagePicker = imagePicker,
+        _faceImageCache = faceImageCache,
+        _syncGeozone = syncGeozone,
         super(const ProfileState()) {
     on<ProfileRequested>(_onRequested);
     on<ProfileUploadAuthProvided>(_onAuthProvided);
@@ -35,6 +48,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetProfileUseCase _getProfile;
   final UpdateFaceImageUseCase _updateFaceImage;
   final ImagePickerService _imagePicker;
+  final FaceImageCacheService _faceImageCache;
+  final SyncUserGeozoneUseCase _syncGeozone;
 
   /// Yuzdan oldingi bosqich uchun manual access token (saqlanmagan).
   String? _uploadAccessToken;
@@ -56,7 +71,31 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ));
     try {
       final profile = await _getProfile(const GetProfileParams());
-      emit(state.copyWith(status: ProfileStatus.loaded, profile: profile));
+      // Avval mavjud keshni biriktiramiz (offline kirishda darhol ko‘rinadi),
+      // keyin URL bo‘lsa fonda yangilab qo‘yamiz.
+      final cachedPath = await _faceImageCache.cachedPathFor(profile.id);
+      final initial = cachedPath != null
+          ? profile.copyWith(localFaceImagePath: cachedPath)
+          : profile;
+      emit(state.copyWith(status: ProfileStatus.loaded, profile: initial));
+
+      // Geozonani fonda yangilaymiz (online bo‘lsa) — offline geofence keshi.
+      // Xato (offline/server) → eski kesh saqlanadi, profil oqimi buzilmaydi.
+      if (profile.branchId != null && profile.branchId!.isNotEmpty) {
+        unawaited(_syncGeozone(profile.branchId!).catchError((_) => null));
+      }
+
+      if (profile.faceImage != null && profile.faceImage!.trim().isNotEmpty) {
+        final stored = await _faceImageCache.downloadAndStore(
+          userId: profile.id,
+          faceImage: profile.faceImage!,
+        );
+        if (stored != null && !emit.isDone) {
+          emit(state.copyWith(
+            profile: initial.copyWith(localFaceImagePath: stored),
+          ));
+        }
+      }
     } on Failure catch (failure) {
       emit(state.copyWith(
         status: ProfileStatus.failure,
@@ -107,8 +146,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile = updated.hasFaceImage
           ? updated
           : (state.profile ?? updated).copyWith(faceImage: path);
+      // Tanlangan rasmni darhol kanonik kesh joyiga yozib qo‘yamiz (offline
+      // davomat uchun): server URL’ini keyin tortib olishga muhtoj emasmiz.
+      String? localPath;
+      try {
+        final bytes = await File(path).readAsBytes();
+        localPath = await _faceImageCache.storeFromBytes(profile.id, bytes);
+      } catch (_) {
+        localPath = null;
+      }
       emit(state.copyWith(
-        profile: profile,
+        profile: localPath != null
+            ? profile.copyWith(localFaceImagePath: localPath)
+            : profile,
         uploadStatus: ProfileUploadStatus.success,
         clearPickedImage: true,
       ));

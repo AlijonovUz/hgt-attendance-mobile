@@ -31,6 +31,10 @@ abstract final class StorageKeys {
   /// va saqlanadi, har bir token ro‘yxatida shu ishlatiladi.
   static const deviceId = 'device_id';
 
+  /// Foydalanuvchi filialiga mos keshlangan geozona (JSON) — offline geofence
+  /// tekshiruvi shu yerdan o‘qiydi. Online holatda profil yuklangach yangilanadi.
+  static const cachedGeozone = 'cached_geozone';
+
   static const all = <String>{
     authToken,
     refreshToken,
@@ -46,5 +50,6 @@ abstract final class StorageKeys {
     lastActiveAt,
     themeMode,
     deviceId,
+    cachedGeozone,
   };
 }

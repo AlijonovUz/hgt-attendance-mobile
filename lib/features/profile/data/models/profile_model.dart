@@ -15,6 +15,7 @@ class ProfileModel {
     this.roleName,
     this.departmentName,
     this.branchName,
+    this.branchId,
     this.regionName,
     this.districtName,
     this.schedule,
@@ -28,6 +29,7 @@ class ProfileModel {
   final String? roleName;
   final String? departmentName;
   final String? branchName;
+  final String? branchId;
   final String? regionName;
   final String? districtName;
   final ScheduleInfo? schedule;
@@ -71,6 +73,9 @@ class ProfileModel {
     // boshqa endpointlar uchun top-level fallback ham qoldiramiz.
     final branch = src['branch_info'];
     final branchMap = branch is Map ? branch.cast<String, dynamic>() : null;
+    // Geozona moslashtirish uchun branch UUID — `branch_info.id` yoki top-level
+    // `branch` (geozones endpoint’dagi `branch` maydoniga teng).
+    final branchId = asString(branchMap?['id']) ?? asString(src['branch']);
 
     MonthKpi? kpi;
     final k = src['current_month_kpi'];
@@ -94,6 +99,7 @@ class ProfileModel {
           nestedName(src['role_info']) ?? nestedName(src['position_info']),
       departmentName: nestedName(src['department_info']),
       branchName: nestedName(branch),
+      branchId: branchId,
       regionName: nestedName(branchMap?['region_info']) ??
           nestedName(src['region_info']),
       districtName: nestedName(branchMap?['district_info']) ??
@@ -111,6 +117,7 @@ class ProfileModel {
     roleName: roleName,
     departmentName: departmentName,
     branchName: branchName,
+    branchId: branchId,
     regionName: regionName,
     districtName: districtName,
     schedule: schedule,

@@ -446,4 +446,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onbDoneStart => 'Начать работу';
+
+  @override
+  String get offlineAttendanceQueued =>
+      'Нет интернета. Посещение сохранено и будет отправлено при подключении.';
+
+  @override
+  String get offlineOutsideGeofence =>
+      'Вы не на рабочем месте. Посещение не сохранено.';
+
+  @override
+  String get offlineFaceMismatch => 'Лицо не совпало. Посещение не сохранено.';
+
+  @override
+  String get offlineNoGeozone =>
+      'Данные рабочего места не загружены. Сначала подключитесь к интернету.';
+
+  @override
+  String get offlineNoSecret =>
+      'Офлайн-режим не настроен. Сначала подключитесь к интернету.';
+
+  @override
+  String offlinePendingCount(int count) {
+    return '$count посещений не отправлено';
+  }
 }

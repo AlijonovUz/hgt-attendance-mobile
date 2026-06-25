@@ -178,7 +178,11 @@ class _SwipeSection extends StatelessWidget {
   /// Swipe → yuz-tekshiruvi → muvaffaqiyatda backenddan qayta yuklash + profil
   /// re-GET (KPI/davomat yangilanadi). Vaqtlar backend `created_at` dan keladi.
   Future<void> _onCompleted(BuildContext context) async {
-    final ok = await context.pushNamed<bool>(Routes.attendanceFace.name, extra: state.current.eventType);
+    // Swipe momenti — offline `created_at` (imzolanadigan vaqt) shu bo‘ladi.
+    final ok = await context.pushNamed<bool>(
+      Routes.attendanceFace.name,
+      extra: (state.current.eventType, DateTime.now()),
+    );
     if (ok == true && context.mounted) {
       context.read<AttendanceBloc>().add(const AttendanceRefreshed());
       context.read<ProfileBloc>().add(const ProfileRequested());
@@ -211,6 +215,10 @@ class _SwipeSection extends StatelessWidget {
     final cfg = _swipeConfig(state.current, l10n);
     return Column(
       children: [
+        if (state.hasPending) ...[
+          _OfflinePendingBanner(count: state.pendingCount, colors: colors, l10n: l10n),
+          SizedBox(height: 12.h),
+        ],
         SwipeActionButton(
           key: ValueKey(state.current),
           label: cfg.label,
@@ -224,6 +232,53 @@ class _SwipeSection extends StatelessWidget {
         SizedBox(height: 8.h),
         Center(child: l10n.homeSwipeHint.s(14.sp).w(400).c(colors.textSub).a(TextAlign.center)),
       ],
+    );
+  }
+}
+
+/// Offline navbatda kutayotgan davomatlar soni — sinxron bo‘lguncha ko‘rinadi.
+class _OfflinePendingBanner extends StatelessWidget {
+  const _OfflinePendingBanner({
+    required this.count,
+    required this.colors,
+    required this.l10n,
+  });
+
+  final int count;
+  final AppColors colors;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.backgroundElevation2,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: colors.strokeSoft),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Assets.icons.icHugeiconsDataTime.svg(
+              width: 18.r,
+              height: 18.r,
+              colorFilter: ColorFilter.mode(colors.accentStrong, BlendMode.srcIn),
+            ),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: l10n
+                  .offlinePendingCount(count)
+                  .s(13.sp)
+                  .w(500)
+                  .c(colors.textSub)
+                  .a(TextAlign.center)
+                  .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

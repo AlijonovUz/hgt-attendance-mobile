@@ -8,6 +8,7 @@ import '../../../../../app/bloc/session_bloc.dart';
 import '../../../../../app/bloc/theme/theme_bloc.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../core/extentions/text_extensions.dart';
+import '../../../../../core/extentions/toast_extension.dart';
 import '../../../../../core/gen/assets.gen.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/user_avatar.dart';
@@ -48,10 +49,27 @@ class FaceVerifyView extends StatelessWidget {
           listenWhen: (p, c) =>
               p.status != c.status || p.failureKind != c.failureKind,
           listener: (context, state) {
-            if (state.status == FaceStatus.success) onSuccess(context);
-            if (state.status == FaceStatus.failure &&
-                state.failureKind == FaceFailureKind.locationServiceOff) {
-              _showEnableGpsDialog(context);
+            final l10n = AppLocalizations.of(context);
+            if (state.status == FaceStatus.success) {
+              if (state.offlineQueued) {
+                context.showSuccessToast(l10n.offlineAttendanceQueued);
+              }
+              onSuccess(context);
+            }
+            if (state.status == FaceStatus.failure) {
+              if (state.failureKind == FaceFailureKind.locationServiceOff) {
+                _showEnableGpsDialog(context);
+              }
+              final toastMessage = switch (state.failureKind) {
+                FaceFailureKind.outsideGeofence => l10n.offlineOutsideGeofence,
+                FaceFailureKind.faceMismatch => l10n.offlineFaceMismatch,
+                FaceFailureKind.offlineNoGeozone => l10n.offlineNoGeozone,
+                FaceFailureKind.offlineNoSecret => l10n.offlineNoSecret,
+                _ => null,
+              };
+              if (toastMessage != null) {
+                context.showErrorToast(toastMessage);
+              }
             }
           },
           child: Padding(
@@ -366,7 +384,8 @@ class _Stage extends StatelessWidget {
   /// aks holda xato turiga mos localized fallback.
   String _hintText(FaceVerifyState state, AppLocalizations l10n) {
     return switch (state.status) {
-      FaceStatus.success => l10n.faceHintSuccess,
+      FaceStatus.success =>
+        state.offlineQueued ? l10n.offlineAttendanceQueued : l10n.faceHintSuccess,
       FaceStatus.verifying || FaceStatus.detecting => l10n.faceHintScanning,
       FaceStatus.failure => state.failureMessage ??
           switch (state.failureKind) {
@@ -374,6 +393,10 @@ class _Stage extends StatelessWidget {
             FaceFailureKind.locationServiceOff => l10n.locationServiceOffTitle,
             FaceFailureKind.location => l10n.attendanceLocationError,
             FaceFailureKind.noFace => l10n.faceHintNoFace,
+            FaceFailureKind.outsideGeofence => l10n.offlineOutsideGeofence,
+            FaceFailureKind.faceMismatch => l10n.offlineFaceMismatch,
+            FaceFailureKind.offlineNoGeozone => l10n.offlineNoGeozone,
+            FaceFailureKind.offlineNoSecret => l10n.offlineNoSecret,
             _ => l10n.faceVerifyFailed,
           },
       _ => l10n.faceHintDefault,

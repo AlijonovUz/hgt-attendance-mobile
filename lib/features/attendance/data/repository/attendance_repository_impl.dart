@@ -18,12 +18,16 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     required double latitude,
     required double longitude,
     required String imagePath,
+    String? createdAt,
+    String? signature,
   }) => _guard(
     () => _remote.mark(
       eventType: eventType,
       latitude: latitude,
       longitude: longitude,
       imagePath: imagePath,
+      createdAt: createdAt,
+      signature: signature,
     ),
   );
 

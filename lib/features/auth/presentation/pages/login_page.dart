@@ -75,6 +75,7 @@ class _LoginViewState extends State<_LoginView> {
                 loginPassword: state.password,
                 faceImage: state.faceImage,
                 isPasswordChanged: state.isPasswordChanged,
+                offlineSecret: state.offlineSecret,
               ),
             );
           }

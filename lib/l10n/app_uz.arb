@@ -168,5 +168,17 @@
   "onbFaceStart": "Skanerlashni boshlash",
   "onbDoneTitle": "Hammasi tayyor!",
   "onbDoneSubtitle": "Endi davomatingizni qayd etishingiz mumkin. Har kuni ishga kelganda «Ishga keldim» tugmasini suring.",
-  "onbDoneStart": "Ishni boshlash"
+  "onbDoneStart": "Ishni boshlash",
+
+  "offlineAttendanceQueued": "Internet yo‘q. Davomat saqlandi, ulanish tiklanganda yuboriladi.",
+  "offlineOutsideGeofence": "Siz ish joyida emassiz. Davomat saqlanmadi.",
+  "offlineFaceMismatch": "Yuz mos kelmadi. Davomat saqlanmadi.",
+  "offlineNoGeozone": "Ish joyi ma’lumoti yuklanmagan. Avval internetga ulaning.",
+  "offlineNoSecret": "Oflayn rejim sozlanmagan. Avval internetga ulaning.",
+  "offlinePendingCount": "{count} ta davomat yuborilmadi",
+  "@offlinePendingCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

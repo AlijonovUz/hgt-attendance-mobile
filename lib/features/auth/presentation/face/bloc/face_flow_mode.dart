@@ -17,9 +17,15 @@ class LoginFaceMode extends FaceFlowMode {
 }
 
 /// Davomat hodisasi: GPS olinadi, selfie `attendance`ga `event_type` + koordinata
-/// bilan yuboriladi (saqlangan token AuthInterceptor orqali).
+/// bilan yuboriladi (saqlangan token AuthInterceptor orqali). Offline holatda
+/// yuz/geofence tekshirilib lokal navbatga imzolangan vaqt bilan saqlanadi.
+///
+/// [swipeTime] — foydalanuvchi surish tugmasini bosgan moment; offline
+/// `created_at` (HMAC imzo manbasi) shu bo‘ladi (kelishuv: swipe vaqti).
 class AttendanceFaceMode extends FaceFlowMode {
-  const AttendanceFaceMode(this.eventType);
+  AttendanceFaceMode(this.eventType, {DateTime? swipeTime})
+      : swipeTime = swipeTime ?? DateTime.now();
 
   final AttendanceEventType eventType;
+  final DateTime swipeTime;
 }
