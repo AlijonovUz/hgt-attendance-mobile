@@ -219,6 +219,30 @@ abstract class AppLocalizations {
   /// **'Qayta urinish:'**
   String get loginBlockedRetryLabel;
 
+  /// No description provided for @faceVerifyTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuzni tasdiqlang'**
+  String get faceVerifyTitle;
+
+  /// No description provided for @faceVerifySubtitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Telefonni yuz balandligida ushlang va doira ichiga qarang. Tekshiruv avtomatik amalga oshadi.'**
+  String get faceVerifySubtitle;
+
+  /// No description provided for @faceHintGoodLight.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yorug‘ joyda turing'**
+  String get faceHintGoodLight;
+
+  /// No description provided for @faceHintFullFace.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yuzingizni to‘liq ko‘rsating'**
+  String get faceHintFullFace;
+
   /// No description provided for @faceHintDefault.
   ///
   /// In uz, this message translates to:

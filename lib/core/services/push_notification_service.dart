@@ -80,7 +80,6 @@ class PushNotificationService {
     _initialized = true;
 
     await _initLocalNotifications();
-    await _requestPermission();
 
     // iOS old planda ham banner ko‘rsatsin (lokal bildirishnomasiz).
     await _messaging.setForegroundNotificationPresentationOptions(
@@ -174,6 +173,19 @@ class PushNotificationService {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
+  }
+
+  /// Asosiy (home) sahifaga o‘tilganda chaqiriladi — bildirishnoma ruxsati
+  /// hali so‘ralmagan/aniqlanmagan bo‘lsagina tizim so‘rovini ko‘rsatadi.
+  /// App start’da (login/face-verify’dan oldin) so‘ramaymiz, faqat home’ga
+  /// kirgach va hali ruxsat berilmagan bo‘lsa.
+  Future<void> requestPermissionIfNeeded() async {
+    final settings = await _messaging.getNotificationSettings();
+    final alreadyGranted = settings.authorizationStatus ==
+            AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+    if (alreadyGranted) return;
+    await _requestPermission();
   }
 
   Future<void> _requestPermission() async {

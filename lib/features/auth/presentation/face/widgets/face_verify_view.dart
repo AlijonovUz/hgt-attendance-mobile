@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../app/bloc/session_bloc.dart';
-import '../../../../../app/bloc/theme/theme_bloc.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../core/extentions/text_extensions.dart';
 import '../../../../../core/extentions/toast_extension.dart';
@@ -119,10 +118,12 @@ class _FaceVerifyViewState extends State<FaceVerifyView>
                   nameSection: widget.nameSection,
                   imageSection: widget.imageSection,
                 ),
-                SizedBox(height: 20.h),
-                const _Controls(),
+                SizedBox(height: 24.h),
+                const _Heading(),
                 const Spacer(),
                 const _Stage(),
+                SizedBox(height: 24.h),
+                const _HintChips(),
                 const Spacer(flex: 2),
               ],
             ),
@@ -277,66 +278,103 @@ class FaceVerifyName extends StatelessWidget {
   }
 }
 
-/// Tema (quyosh) + yuz nishoni tugmalari.
-class _Controls extends StatelessWidget {
-  const _Controls();
+/// Sarlavha + izoh (Figma 116:408): «Yuzni tasdiqlang» + tekshiruv yo‘riqnomasi.
+class _Heading extends StatelessWidget {
+  const _Heading();
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        _CircleButton(
-          icon: Theme.of(context).brightness == Brightness.dark
-              ? Assets.icons.icHugeiconsMoon
-              : Assets.icons.icHugeiconsSun,
-          colors: colors,
-          onTap: () {
-            final bloc = context.read<ThemeBloc>();
-            final next = Theme.of(context).brightness == Brightness.dark
-                ? ThemeMode.light
-                : ThemeMode.dark;
-            bloc.add(ThemeModeSelected(next));
-          },
-        ),
-        SizedBox(width: 12.w),
-        _CircleButton(icon: Assets.icons.icLucideScanFace, colors: colors),
+        l10n.faceVerifyTitle
+            .s(24.sp)
+            .w(600)
+            .c(colors.textStrong)
+            .h(32 / 24)
+            .a(TextAlign.center)
+            .copyWith(maxLines: 2, overflow: TextOverflow.ellipsis),
+        SizedBox(height: 4.h),
+        l10n.faceVerifySubtitle
+            .s(14.sp)
+            .w(400)
+            .c(colors.textSub)
+            .h(20 / 14)
+            .a(TextAlign.center)
+            .copyWith(maxLines: 3, overflow: TextOverflow.ellipsis),
       ],
     );
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.icon, required this.colors, this.onTap});
-
-  final SvgGenImage icon;
-  final AppColors colors;
-  final VoidCallback? onTap;
+/// Pastdagi ko‘rsatma chiplari (Figma 115:492): «Yorug‘ joyda turing» (quyosh)
+/// + «Yuzingizni to‘liq ko‘rsating» (skan-yuz). Faqat ma’lumot — bosilmaydi.
+class _HintChips extends StatelessWidget {
+  const _HintChips();
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 44.r,
-        height: 44.r,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.backgroundElevation1Alt,
-            shape: BoxShape.circle,
-            border: Border.all(color: colors.strokeSoft),
+    final l10n = AppLocalizations.of(context);
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8.w,
+      runSpacing: 8.h,
+      children: [
+        _HintChip(
+          icon: Assets.icons.icHugeiconsSun,
+          label: l10n.faceHintGoodLight,
+        ),
+        _HintChip(
+          icon: Assets.icons.icLucideScanFace,
+          label: l10n.faceHintFullFace,
+        ),
+      ],
+    );
+  }
+}
+
+class _HintChip extends StatelessWidget {
+  const _HintChip({required this.icon, required this.label});
+
+  final SvgGenImage icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.backgroundElevation2,
+        borderRadius: BorderRadius.circular(100.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow,
+            offset: Offset(0, 1.h),
           ),
-          child: Center(
-            child: icon.svg(
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(8.r),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon.svg(
               width: 20.r,
               height: 20.r,
-              colorFilter:
-                  ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(colors.iconStrong, BlendMode.srcIn),
             ),
-          ),
+            SizedBox(width: 4.w),
+            label
+                .s(12.sp)
+                .w(500)
+                .c(colors.textStrong)
+                .h(16 / 12)
+                .copyWith(maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
         ),
       ),
     );

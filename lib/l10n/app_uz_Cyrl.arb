@@ -26,6 +26,10 @@
   "loginBlockedRetryIn": "Қайта уриниш: {time}",
   "loginBlockedRetryLabel": "Қайта уриниш:",
 
+  "faceVerifyTitle": "Юзни тасдиқланг",
+  "faceVerifySubtitle": "Телефонни юз баландлигида ушланг ва доира ичига қаранг. Текширув автоматик амалга ошади.",
+  "faceHintGoodLight": "Ёруғ жойда туринг",
+  "faceHintFullFace": "Юзингизни тўлиқ кўрсатинг",
   "faceHintDefault": "Юзингизни доира ичида жойлаштиринг",
   "faceHintScanning": "Юз текширилмоқда…",
   "faceHintSuccess": "Тасдиқланди",

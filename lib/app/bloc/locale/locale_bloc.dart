@@ -23,8 +23,12 @@ enum AppLanguage {
   /// Dropdown’da ko‘rsatiladigan nom (har doim o‘z tilida — tarjima qilinmaydi).
   final String label;
 
-  /// Toolbar’dagi qisqa kod (masalan `UZ`, `RU`).
-  String get shortCode => this == russian ? 'RU' : 'UZ';
+  /// Toolbar’dagi qisqa kod — har til alohida (lotin `UZ`, kiril `ЎЗ`, rus `RU`).
+  String get shortCode => switch (this) {
+        uzLatin => 'UZ',
+        uzCyrillic => 'ЎЗ',
+        russian => 'RU',
+      };
 
   static AppLanguage fromTag(String? tag) =>
       AppLanguage.values.firstWhere((l) => l.tag == tag, orElse: () => uzLatin);

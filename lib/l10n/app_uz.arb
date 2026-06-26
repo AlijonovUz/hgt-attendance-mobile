@@ -38,6 +38,10 @@
   },
   "loginBlockedRetryLabel": "Qayta urinish:",
 
+  "faceVerifyTitle": "Yuzni tasdiqlang",
+  "faceVerifySubtitle": "Telefonni yuz balandligida ushlang va doira ichiga qarang. Tekshiruv avtomatik amalga oshadi.",
+  "faceHintGoodLight": "Yorug‘ joyda turing",
+  "faceHintFullFace": "Yuzingizni to‘liq ko‘rsating",
   "faceHintDefault": "Yuzingizni doira ichida joylashtiring",
   "faceHintScanning": "Yuz tekshirilmoqda…",
   "faceHintSuccess": "Tasdiqlandi",

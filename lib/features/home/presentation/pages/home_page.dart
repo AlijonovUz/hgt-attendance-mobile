@@ -68,6 +68,9 @@ class _HomeShellState extends State<_HomeShell> {
   @override
   void initState() {
     super.initState();
+    // Asosiy sahifaga kirilganda — ruxsat hali berilmagan bo‘lsa so‘raymiz
+    // (app start’da emas, login/face-verify’dan keyin shu yerda).
+    unawaited(getIt<PushNotificationService>().requestPermissionIfNeeded());
     // Old planda push kelganda badge sonini yangilab qo‘yamiz.
     _pushSub = getIt<PushNotificationService>().messages.listen((_) {
       if (mounted) {
@@ -139,18 +142,18 @@ class _HomeShellState extends State<_HomeShell> {
       ),
       // Debug: yuz moslik diagnostika sahifasi (ikki rasm → cosine sim + log).
       // Faqat debug build’da ko‘rinadi; relizda yo‘q.
-      floatingActionButton: kDebugMode
-          ? FloatingActionButton.small(
-              heroTag: 'face_match_diag',
-              backgroundColor: colors.accentStrong,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const FaceMatchDiagnosticPage(),
-                ),
-              ),
-              child: Icon(Icons.face_retouching_natural, color: colors.iconWhite),
-            )
-          : null,
+      // floatingActionButton: kDebugMode
+      //     ? FloatingActionButton.small(
+      //         heroTag: 'face_match_diag',
+      //         backgroundColor: colors.accentStrong,
+      //         onPressed: () => Navigator.of(context).push(
+      //           MaterialPageRoute<void>(
+      //             builder: (_) => const FaceMatchDiagnosticPage(),
+      //           ),
+      //         ),
+      //         child: Icon(Icons.face_retouching_natural, color: colors.iconWhite),
+      //       )
+      //     : null,
       bottomNavigationBar: AppBottomNav(
         currentIndex: _index,
         onTap: _onTabChanged,

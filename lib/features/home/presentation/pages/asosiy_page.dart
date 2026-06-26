@@ -178,7 +178,7 @@ class _StatRow extends StatelessWidget {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
         final kpi = state.profile?.kpi;
-        final kpiValue = kpi == null ? '—' : '${kpi.monthlyKpi.toStringAsFixed(0)}%';
+        final kpiValue = kpi == null ? '—' : '${kpi.totalScore.toString()}%';
         final attendance = kpi?.monthlyAttendance ?? '—';
 
         return IntrinsicHeight(

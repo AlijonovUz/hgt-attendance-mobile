@@ -75,6 +75,19 @@ class AppLocalizationsUz extends AppLocalizations {
   String get loginBlockedRetryLabel => 'Qayta urinish:';
 
   @override
+  String get faceVerifyTitle => 'Yuzni tasdiqlang';
+
+  @override
+  String get faceVerifySubtitle =>
+      'Telefonni yuz balandligida ushlang va doira ichiga qarang. Tekshiruv avtomatik amalga oshadi.';
+
+  @override
+  String get faceHintGoodLight => 'Yorug‘ joyda turing';
+
+  @override
+  String get faceHintFullFace => 'Yuzingizni to‘liq ko‘rsating';
+
+  @override
   String get faceHintDefault => 'Yuzingizni doira ichida joylashtiring';
 
   @override
@@ -541,6 +554,19 @@ class AppLocalizationsUzCyrl extends AppLocalizationsUz {
 
   @override
   String get loginBlockedRetryLabel => 'Қайта уриниш:';
+
+  @override
+  String get faceVerifyTitle => 'Юзни тасдиқланг';
+
+  @override
+  String get faceVerifySubtitle =>
+      'Телефонни юз баландлигида ушланг ва доира ичига қаранг. Текширув автоматик амалга ошади.';
+
+  @override
+  String get faceHintGoodLight => 'Ёруғ жойда туринг';
+
+  @override
+  String get faceHintFullFace => 'Юзингизни тўлиқ кўрсатинг';
 
   @override
   String get faceHintDefault => 'Юзингизни доира ичида жойлаштиринг';

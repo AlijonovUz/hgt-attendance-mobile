@@ -82,9 +82,9 @@ class ProfileHeaderCard extends StatelessWidget {
   }
 
   String _kpiText(Profile? profile) {
-    final kpi = profile?.kpi?.monthlyKpi;
+    final kpi = profile?.kpi?.totalScore;
     if (kpi == null) return '—';
-    return '${kpi.toStringAsFixed(0)}%';
+    return '${kpi.toString()}%';
   }
 }
 

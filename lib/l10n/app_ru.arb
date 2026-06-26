@@ -26,6 +26,10 @@
   "loginBlockedRetryIn": "Повторить через: {time}",
   "loginBlockedRetryLabel": "Повторить через:",
 
+  "faceVerifyTitle": "Подтвердите лицо",
+  "faceVerifySubtitle": "Держите телефон на уровне лица и смотрите в круг. Проверка пройдёт автоматически.",
+  "faceHintGoodLight": "Находитесь при хорошем освещении",
+  "faceHintFullFace": "Покажите лицо полностью",
   "faceHintDefault": "Поместите лицо в круг",
   "faceHintScanning": "Проверка лица…",
   "faceHintSuccess": "Подтверждено",

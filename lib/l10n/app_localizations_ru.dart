@@ -75,6 +75,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginBlockedRetryLabel => 'Повторить через:';
 
   @override
+  String get faceVerifyTitle => 'Подтвердите лицо';
+
+  @override
+  String get faceVerifySubtitle =>
+      'Держите телефон на уровне лица и смотрите в круг. Проверка пройдёт автоматически.';
+
+  @override
+  String get faceHintGoodLight => 'Находитесь при хорошем освещении';
+
+  @override
+  String get faceHintFullFace => 'Покажите лицо полностью';
+
+  @override
   String get faceHintDefault => 'Поместите лицо в круг';
 
   @override
